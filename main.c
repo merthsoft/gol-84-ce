@@ -27,7 +27,20 @@
 #define CELL_HEIGHT		8
 
 #define BOARD_WIDTH		30 
+#define CYCLE_WIDTH (BOARD_WIDTH - 2)
 #define BOARD_HEIGHT	30
+#define CYCLE_HEIGHT (BOARD_HEIGHT - 2)
+#define MOD_CYCLE(n, c) (((n) + (c)) % (c))
+
+typedef enum {
+	Plane = 0,
+	Ring = 1,
+	Mobius = 2,
+	Torus = 3,
+	Sphere = 4,
+	Klein = 5,
+	Proj = 6
+} WrappingMode;
 
 typedef struct {
 	short live;
@@ -44,11 +57,14 @@ int selAliveColor = 15;
 int numRules = 6;
 rule* rules;
 
+WrappingMode wrapMode = Sphere;
+
 short live = 0x0C;
 short born = 0x08;
 
-int boardNumber = 0;
-uint8_t board[BOARD_WIDTH + 2][BOARD_HEIGHT + 2][2];
+uint8_t boardNumber = 0;
+typedef uint8_t Board[BOARD_WIDTH][BOARD_HEIGHT][2];
+Board board;
 
 int randMod = 4;
 
@@ -58,8 +74,8 @@ void DrawBoard();
 void SetupBoard();
 void ClearBoard();
 void Step();
+uint8_t WrapToBoard(Board board, int c, int r, uint8_t layer, WrappingMode wrapRule);
 void InitRules();
-
 
 /* Put all your code here */
 void main(void) {
@@ -168,9 +184,10 @@ void Step() {
 		for (j = 1; j < BOARD_HEIGHT - 1; j++) {
 			numN = 0;
 			// Count the 8 cells around it
-			numN += board[i - 1][j - 1][boardNumber] + board[i][j - 1][boardNumber] + board[i + 1][j - 1][boardNumber] +
-				board[i - 1][j][boardNumber] + board[i + 1][j][boardNumber] +
-				board[i - 1][j + 1][boardNumber] + board[i][j + 1][boardNumber] + board[i + 1][j + 1][boardNumber];
+			numN += WrapToBoard(board,i - 1, j - 1, boardNumber, wrapMode)
+			+ WrapToBoard(board,i,j - 1,boardNumber,wrapMode) + WrapToBoard(board,i + 1,j - 1,boardNumber,wrapMode) +
+				WrapToBoard(board,i - 1,j,boardNumber,wrapMode) + WrapToBoard(board,i + 1,j,boardNumber,wrapMode) +
+				WrapToBoard(board,i - 1,j + 1,boardNumber,wrapMode) + WrapToBoard(board,i,j + 1,boardNumber,wrapMode) + WrapToBoard(board,i + 1,j + 1,boardNumber,wrapMode);
 			// Rules:
 			if (!(live & (1 << numN))) {
 				board[i][j][!boardNumber] = 0;
@@ -185,6 +202,81 @@ void Step() {
 		}
 	}
 	boardNumber = !boardNumber; // Use the new board as the current board
+}
+
+uint8_t WrapToBoard(Board board, int c, int r, uint8_t layer, WrappingMode wrapRule){
+	int lC, lR;
+	bool lE = c == 0, rE = c > CYCLE_WIDTH,
+	tE = r == 0, bE = r > CYCLE_HEIGHT,
+	ovC = lE || rE,
+	ovR = tE || bE;
+	switch (wrapRule) {
+		case Plane:
+			lC = c; lR = r;
+			break;
+		case Ring:
+			lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+			lR = r;
+			break;
+		case Mobius:
+			lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+			lR = ovC ? (BOARD_HEIGHT - r) : r ;
+			break;
+		case Torus:
+			lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+			lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
+			break;
+		case Sphere:
+		{
+			/* This only makes sense if the board is square. Otherwise, all hell will break loose */
+			uint8_t mask = ((uint8_t)lE << 3)|((uint8_t)rE << 2)|((uint8_t)tE << 1)|((uint8_t)bE);
+			switch (mask) {
+				case 0xA:
+				case 0x5:
+					return 0;
+				case 0x9:
+					lC = CYCLE_WIDTH;
+					lR = 1;
+					break;
+				case 0x8:
+					lC = r;
+					lR = 1;
+					break;
+				case 0x6:
+					lC = 1;
+					lR = CYCLE_HEIGHT;
+					break;
+				case 0x4:
+					lC = r;
+					lR = CYCLE_HEIGHT;
+					break;
+				case 0x2:
+					lC = 1;
+					lR = c;
+					break;
+				case 0x1:
+					lC = CYCLE_WIDTH;
+					lR = c;
+					break;
+				default:
+					lC = c;
+					lR = r;
+			}
+			break;
+		}
+		case Klein:
+			lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+			lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
+			lR = ovC ? (BOARD_HEIGHT - lR) : lR;
+			break;
+		case Proj:
+			lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+			lC = ovR ? (BOARD_WIDTH - lC) : lC;
+			lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
+			lR = ovC ? (BOARD_HEIGHT - lR) : lR;
+			break;
+	}
+	return board[lC][lR][layer];
 }
 
 void SetupBoard() {
