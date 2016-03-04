@@ -49,13 +49,13 @@ typedef struct {
 	char* name;
 } rule;
 
-int gridColor = 0;
-int deadColor = 255;
-int aliveColor = 18;
-int selDeadColor = 224;
-int selAliveColor = 15;
+uint8_t gridColor = 0;
+uint8_t deadColor = 255;
+uint8_t aliveColor = 18;
+uint8_t selDeadColor = 224;
+uint8_t selAliveColor = 15;
 
-int numRules = 6;
+uint8_t numRules = 6;
 rule* rules;
 
 WrappingMode wrapMode = Plane;
@@ -79,38 +79,38 @@ void Step();
 uint8_t WrapToBoard(Board board, int c, int r, uint8_t layer, WrappingMode wrapRule);
 void InitRules();
 
-void Debug_Print(char * format, ...) {
-	va_list argptr;
-	va_start(argptr, format);
-	dbg_printf(dbgout, format, argptr);
-	va_end(argptr);
-}
-
-void Debug_PrintLine(char * format, ...) {
-	va_list argptr;
-	va_start(argptr, format);
-	dbg_printf(dbgout, format, argptr);
-	va_end(argptr);
-	dbg_printf(dbgout, "\n");
-}
+//void Debug_Print(char * format, ...) {
+//	va_list argptr;
+//	va_start(argptr, format);
+//	dbg_printf(dbgout, format, argptr);
+//	va_end(argptr);
+//}
+//
+//void Debug_PrintLine(char * format, ...) {
+//	va_list argptr;
+//	va_start(argptr, format);
+//	dbg_printf(dbgout, format, argptr);
+//	va_end(argptr);
+//	dbg_printf(dbgout, "\n");
+//}
 
 /* Put all your code here */
 void main(void) {
-	int x = 1;
-	int y = 1;
-	int old_x = x;
-	int old_y = y;
-	int i;
+	uint8_t x = 1;
+	uint8_t y = 1;
+	uint8_t old_x = x;
+	uint8_t old_y = y;
+	uint8_t i;
 
 	bool toggled = false;
 	bool running = false;
 	
-	Debug_PrintLine("Initializing board.");
+	//Debug_PrintLine("Initializing board.");
     ClearBoard();
 	SetupBoard();
     InitRules();
 	
-    Debug_PrintLine("Initial drawing.");
+    //Debug_PrintLine("Initial drawing.");
 	gc_InitGraph();
 	gc_FillScrn(255);
 	DrawGrid();
@@ -118,7 +118,7 @@ void main(void) {
     
     kb_Scan();
     
-    Debug_PrintLine("Entering main loop.");
+    //Debug_PrintLine("Entering main loop.");
 	while (!Key_IsDown(Key_Mode)) {
 		if (running) {
 			Step();
@@ -155,7 +155,7 @@ void main(void) {
 			}
 
 			if (old_x != x || old_y != y || toggled) {
-				Debug_PrintLine("Key pressed, redrawing cursor.");
+				//Debug_PrintLine("Key pressed, redrawing cursor.");
 				gc_SetColorIndex(board[old_x][old_y][boardNumber] ? aliveColor : deadColor);
 				gc_NoClipRectangle(old_x*CELL_WIDTH + 1, old_y * CELL_HEIGHT + 1, CELL_WIDTH - 1, CELL_HEIGHT - 1);
 			}
@@ -201,9 +201,9 @@ void InitRules() {
 }
 
 void Step() {
-	int numN; // The number of neighbors
-	int i;
-	int j;
+	uint8_t numN; // The number of neighbors
+	uint8_t i;
+	uint8_t j;
 
 	for (i = 1; i < BOARD_WIDTH - 1; i++) {
 		for (j = 1; j < BOARD_HEIGHT - 1; j++) {
@@ -305,7 +305,7 @@ uint8_t WrapToBoard(Board board, int c, int r, uint8_t layer, WrappingMode wrapR
 }
 
 void SetupBoard() {
-	int i, j;
+	uint8_t i, j;
     srand(*(unsigned long*)0xF30044);
 
 	for (i = 1; i < BOARD_WIDTH - 1; i++) {
@@ -317,7 +317,7 @@ void SetupBoard() {
 }
 
 void ClearBoard() {
-	int i, j;
+	uint8_t i, j;
 	for (i = 0; i < BOARD_WIDTH + 1; i++) {
 		for (j = 0; j < BOARD_HEIGHT + 1; j++) {
 			board[i][j][boardNumber] = 0;
@@ -327,9 +327,9 @@ void ClearBoard() {
 }
 
 void DrawBoard(bool redraw) {
-	int i, j;
+	uint8_t i, j;
 	
-	Debug_PrintLine("Drawing board.");
+	//Debug_PrintLine("Drawing board.");
 	for (i = 1; i < BOARD_WIDTH - 1; i++) {
 		for (j = 1; j < BOARD_HEIGHT - 1; j++) {
 			if (board[i][j][boardNumber] != board[i][j][!boardNumber] || redraw) {
@@ -338,12 +338,12 @@ void DrawBoard(bool redraw) {
 			}
 		}
 	}
-    Debug_PrintLine("Board drawn.");
+    //Debug_PrintLine("Board drawn.");
 
 }
 
 void DrawGrid() {
-	int i;
+	uint8_t i;
 	gc_SetColorIndex(gridColor);
 
 	for (i = 1; i < BOARD_WIDTH; i++) {
