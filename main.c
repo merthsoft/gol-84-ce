@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <debug.h>
 
 #include <graphc.h>
 #include <keypadc.h>
@@ -57,7 +58,7 @@ int selAliveColor = 15;
 int numRules = 6;
 rule* rules;
 
-WrappingMode wrapMode = Sphere;
+WrappingMode wrapMode = Plane;
 
 short live = 0x0C;
 short born = 0x08;
@@ -70,12 +71,28 @@ int randMod = 4;
 
 void SetTextColor(uint8_t foreground, uint8_t background);
 
-void DrawBoard();
+void DrawBoard(bool);
+void DrawGrid();
 void SetupBoard();
 void ClearBoard();
 void Step();
 uint8_t WrapToBoard(Board board, int c, int r, uint8_t layer, WrappingMode wrapRule);
 void InitRules();
+
+void Debug_Print(char * format, ...) {
+	va_list argptr;
+	va_start(argptr, format);
+	dbg_printf(dbgout, format, argptr);
+	va_end(argptr);
+}
+
+void Debug_PrintLine(char * format, ...) {
+	va_list argptr;
+	va_start(argptr, format);
+	dbg_printf(dbgout, format, argptr);
+	va_end(argptr);
+	dbg_printf(dbgout, "\n");
+}
 
 /* Put all your code here */
 void main(void) {
@@ -88,20 +105,24 @@ void main(void) {
 	bool toggled = false;
 	bool running = false;
 	
+	Debug_PrintLine("Initializing board.");
     ClearBoard();
 	SetupBoard();
     InitRules();
 	
+    Debug_PrintLine("Initial drawing.");
 	gc_InitGraph();
 	gc_FillScrn(255);
-	DrawBoard();
-
+	DrawGrid();
+	DrawBoard(true);
+    
     kb_Scan();
-
+    
+    Debug_PrintLine("Entering main loop.");
 	while (!Key_IsDown(Key_Mode)) {
 		if (running) {
 			Step();
-			DrawBoard();
+			DrawBoard(false);
             
 			kb_Scan();
 			if (Key_IsDown(Key_Enter)) { running = false; }
@@ -121,7 +142,7 @@ void main(void) {
 			else if (Key_IsDown(Key_Enter)) { running = true; }
 			else if (Key_IsDown(Key_Clear)) { 
 				ClearBoard();
-				DrawBoard();
+				DrawBoard(true);
 			}
 
 			if (Key_IsDown(Key_2nd)) {
@@ -133,7 +154,11 @@ void main(void) {
 				toggled = false;
 			}
 
-			if (old_x != x || old_y != y) { DrawBoard(); }
+			if (old_x != x || old_y != y || toggled) {
+				Debug_PrintLine("Key pressed, redrawing cursor.");
+				gc_SetColorIndex(board[old_x][old_y][boardNumber] ? aliveColor : deadColor);
+				gc_NoClipRectangle(old_x*CELL_WIDTH + 1, old_y * CELL_HEIGHT + 1, CELL_WIDTH - 1, CELL_HEIGHT - 1);
+			}
 		}
 
         kb_Scan();
@@ -301,19 +326,31 @@ void ClearBoard() {
 	}
 }
 
-void DrawBoard() {
+void DrawBoard(bool redraw) {
 	int i, j;
+	
+	Debug_PrintLine("Drawing board.");
 	for (i = 1; i < BOARD_WIDTH - 1; i++) {
 		for (j = 1; j < BOARD_HEIGHT - 1; j++) {
-			gc_SetColorIndex(board[i][j][boardNumber] ? aliveColor : deadColor);
-			gc_NoClipRectangle(i*CELL_WIDTH, j * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
-
-			gc_SetColorIndex(gridColor);
-			gc_NoClipHorizLine(i*CELL_WIDTH, j * CELL_HEIGHT, CELL_WIDTH);
-			gc_NoClipVertLine(i*CELL_WIDTH, j * CELL_HEIGHT, CELL_HEIGHT);
+			if (board[i][j][boardNumber] != board[i][j][!boardNumber] || redraw) {
+				gc_SetColorIndex(board[i][j][boardNumber] ? aliveColor : deadColor);
+				gc_NoClipRectangle(i*CELL_WIDTH + 1, j * CELL_HEIGHT + 1, CELL_WIDTH - 1, CELL_HEIGHT - 1);
+			}
 		}
 	}
+    Debug_PrintLine("Board drawn.");
 
-	gc_NoClipHorizLine(CELL_HEIGHT, (BOARD_HEIGHT - 1) * CELL_HEIGHT, (BOARD_WIDTH - 2) * CELL_WIDTH);
-	gc_NoClipVertLine((BOARD_WIDTH - 1) * CELL_WIDTH, CELL_WIDTH, (BOARD_HEIGHT - 2) * CELL_HEIGHT);
+}
+
+void DrawGrid() {
+	int i;
+	gc_SetColorIndex(gridColor);
+
+	for (i = 1; i < BOARD_WIDTH; i++) {
+		gc_NoClipVertLine(i*CELL_WIDTH, CELL_HEIGHT, (BOARD_HEIGHT - 2) * CELL_HEIGHT);
+	}
+
+	for (i = 1; i < BOARD_HEIGHT; i++) {
+		gc_NoClipHorizLine(CELL_HEIGHT, i * CELL_HEIGHT, (BOARD_WIDTH - 2) * CELL_WIDTH);
+	}
 }
