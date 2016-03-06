@@ -96,9 +96,9 @@ void main(void) {
 
         kb_Scan();
 	}
-	   
+	
+	kb_Reset();
 	gc_CloseGraph();
-    kb_Reset();
 	pgrm_CleanUp();
 }
 
