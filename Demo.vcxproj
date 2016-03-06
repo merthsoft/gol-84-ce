@@ -84,8 +84,11 @@
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="board.c" />
+    <ClCompile Include="draw.c" />
     <ClCompile Include="key_helper.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="rules.c" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="iconc.png" />
@@ -95,7 +98,10 @@
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="board.h" />
+    <ClInclude Include="draw.h" />
     <ClInclude Include="key_helper.h" />
+    <ClInclude Include="rules.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
