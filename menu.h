@@ -6,7 +6,7 @@
 
 #define BACK_FUNCTION (void*)0
 
-typedef struct {
+typedef struct MenuItem {
 	char* Name;
 	void* Function;
 } MenuItem;

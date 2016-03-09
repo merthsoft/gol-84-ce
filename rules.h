@@ -4,16 +4,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-typedef struct {
-	short live;
-	short born;
-	char* name;
-} rule;
+typedef struct Rule {
+	short Live;
+	short Born;
+	char* Name;
+} Rule;
 
 uint8_t numRules = 6;
-rule* rules;
-short live = 0x0C;
-short born = 0x08;
+Rule* rules;
+Rule currentRule;
 
 void InitRules();
 

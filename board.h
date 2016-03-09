@@ -17,7 +17,7 @@ typedef enum {
 	Proj = 6
 } WrappingMode;
 
-typedef struct {
+typedef struct Board {
 	uint8_t BoardWidth;
 	uint8_t BoardHeight;
 	uint8_t** Cells[2];

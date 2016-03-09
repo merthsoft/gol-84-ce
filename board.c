@@ -27,14 +27,14 @@ void Step(Board* board) {
 					+ WrapToBoard(board, i + 1, j + 1);
 			
 			// Rules:
-			if (!(live & (1 << numN))) {
+			if (!(currentRule.Live & (1 << numN))) {
 				board->Cells[!boardNum][i][j] = 0;
 			}
 			else {
 				board->Cells[!boardNum][i][j] = board->Cells[boardNum][i][j];
 			}
 
-			if ((born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
+			if ((currentRule.Born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
 				board->Cells[!boardNum][i][j] = 1;
 			}
 		}
