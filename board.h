@@ -5,9 +5,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "rules.h"
-#include "draw.h"
-
 #define MOD_CYCLE(n, c) (((n) + (c)) % (c))
 
 typedef enum {
@@ -19,8 +16,6 @@ typedef enum {
 	Klein = 5,
 	Proj = 6
 } WrappingMode;
-
-int randMod = 4;
 
 typedef struct {
 	uint8_t BoardWidth;
@@ -35,6 +30,7 @@ typedef struct {
 	uint8_t CellHeight;
 	uint8_t CursorAliveColor;
 	uint8_t CursorDeadColor;
+	uint8_t RandomMod;
 } Board;
 
 Board* CreateBoard(uint8_t, uint8_t);

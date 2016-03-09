@@ -54,6 +54,7 @@ void main(void) {
 	mainBoard->CellWidth = CELL_WIDTH;
 	mainBoard->CursorDeadColor = 224;
 	mainBoard->CursorAliveColor = 15;
+	mainBoard->RandomMod = 4;
 
 	sampleBoard = CreateBoard(5, 5);
 	sampleBoard->CellHeight = mainBoard->CellHeight;

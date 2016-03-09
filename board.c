@@ -1,4 +1,11 @@
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <tice.h>
+
 #include "board.h"
+#include "rules.h"
+#include "draw.h"
 
 void Step(Board* board) {
 	uint8_t numN; // The number of neighbors
@@ -129,11 +136,11 @@ void DrawCursor(Board* board, uint8_t x, uint8_t y) {
 
 void SetupBoard(Board* board) {
 	uint8_t i, j;
-	srand(*(unsigned long*)0xF30044);
+	srand(rtc_Time());
 
 	for (i = 0; i <= board->BoardWidth; i++) {
 		for (j = 0; j <= board->BoardHeight; j++) {
-			board->Cells[0][i][j] = !(rand() % randMod);
+			board->Cells[0][i][j] = !(rand() % board->RandomMod);
 			board->Cells[1][i][j] = 0;
 		}
 	}
