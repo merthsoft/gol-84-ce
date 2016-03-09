@@ -1,41 +1,50 @@
 #include "board.h"
 
-void Step() {
+void Step(Board* board) {
 	uint8_t numN; // The number of neighbors
 	uint8_t i;
 	uint8_t j;
+	uint8_t boardNum = board->BoardNumber;
 
-	for (i = 1; i < BOARD_WIDTH - 1; i++) {
-		for (j = 1; j < BOARD_HEIGHT - 1; j++) {
+	for (i = 1; i < board->BoardWidth; i++) {
+		for (j = 1; j < board->BoardHeight; j++) {
 			numN = 0;
 			// Count the 8 cells around it
-			numN += WrapToBoard(board, i - 1, j - 1, boardNumber, wrapMode)
-				+ WrapToBoard(board, i, j - 1, boardNumber, wrapMode) + WrapToBoard(board, i + 1, j - 1, boardNumber, wrapMode) +
-				WrapToBoard(board, i - 1, j, boardNumber, wrapMode) + WrapToBoard(board, i + 1, j, boardNumber, wrapMode) +
-				WrapToBoard(board, i - 1, j + 1, boardNumber, wrapMode) + WrapToBoard(board, i, j + 1, boardNumber, wrapMode) + WrapToBoard(board, i + 1, j + 1, boardNumber, wrapMode);
+			numN += WrapToBoard(board, i - 1, j - 1)
+					+ WrapToBoard(board, i, j - 1) 
+					+ WrapToBoard(board, i + 1, j - 1) 
+					+ WrapToBoard(board, i - 1, j) 
+					+ WrapToBoard(board, i + 1, j) 
+					+ WrapToBoard(board, i - 1, j + 1) 
+					+ WrapToBoard(board, i, j + 1) 
+					+ WrapToBoard(board, i + 1, j + 1);
+			
 			// Rules:
 			if (!(live & (1 << numN))) {
-				board[i][j][!boardNumber] = 0;
+				board->Cells[!boardNum][i][j] = 0;
 			}
 			else {
-				board[i][j][!boardNumber] = board[i][j][boardNumber];
+				board->Cells[!boardNum][i][j] = board->Cells[boardNum][i][j];
 			}
 
-			if ((born & (1 << numN)) && board[i][j][boardNumber] == 0) {
-				board[i][j][!boardNumber] = 1;
+			if ((born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
+				board->Cells[!boardNum][i][j] = 1;
 			}
 		}
 	}
-	boardNumber = !boardNumber; // Use the new board as the current board
+	board->BoardNumber = !boardNum; // Use the new board as the current board
 }
 
-uint8_t WrapToBoard(Board board, uint8_t c, uint8_t r, uint8_t layer, WrappingMode wrapRule) {
+uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
+	uint8_t CYCLE_WIDTH = board->BoardWidth - 2;
+	uint8_t CYCLE_HEIGHT = board->BoardHeight - 2;
+
 	uint8_t lC, lR;
 	bool lE = c == 0, rE = c > CYCLE_WIDTH,
 		tE = r == 0, bE = r > CYCLE_HEIGHT,
 		ovC = lE || rE,
 		ovR = tE || bE;
-	switch (wrapRule) {
+	switch (board->WrappingMode) {
 	case Plane:
 		lC = c; lR = r;
 		break;
@@ -45,7 +54,7 @@ uint8_t WrapToBoard(Board board, uint8_t c, uint8_t r, uint8_t layer, WrappingMo
 		break;
 	case Mobius:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-		lR = ovC ? (BOARD_HEIGHT - r) : r;
+		lR = ovC ? (board->BoardHeight + 2 - r) : r;
 		break;
 	case Torus:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
@@ -92,64 +101,103 @@ uint8_t WrapToBoard(Board board, uint8_t c, uint8_t r, uint8_t layer, WrappingMo
 	case Klein:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
 		lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-		lR = ovC ? (BOARD_HEIGHT - lR) : lR;
+		lR = ovC ? (board->BoardHeight + 2 - lR) : lR;
 		break;
 	case Proj:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-		lC = ovR ? (BOARD_WIDTH - lC) : lC;
+		lC = ovR ? (board->BoardWidth + 2 - lC) : lC;
 		lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-		lR = ovC ? (BOARD_HEIGHT - lR) : lR;
+		lR = ovC ? (board->BoardHeight + 2 - lR) : lR;
 		break;
 	}
-	return board[lC][lR][layer];
+	return board->Cells[board->BoardNumber][lC][lR];
 }
 
-void SetupBoard() {
+void DrawCell(Board* board, uint8_t x, uint8_t y) {
+	uint8_t cellWidth = board->CellWidth;
+	uint8_t cellHeight = board->CellHeight;
+
+	DrawRectFill(x*cellWidth + 1, y * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
+}
+
+void DrawCursor(Board* board, uint8_t x, uint8_t y) {
+	uint8_t cellWidth = board->CellWidth;
+	uint8_t cellHeight = board->CellHeight;
+
+	DrawRectFill(x*cellWidth + 1, y * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
+}
+
+void SetupBoard(Board* board) {
 	uint8_t i, j;
 	srand(*(unsigned long*)0xF30044);
 
-	for (i = 1; i < BOARD_WIDTH - 1; i++) {
-		for (j = 1; j < BOARD_HEIGHT - 1; j++) {
-			board[i][j][boardNumber] = !(rand() % randMod);
-			board[i][j][!boardNumber] = 0;
+	for (i = 0; i < board->BoardWidth + 1; i++) {
+		for (j = 0; j < board->BoardHeight + 1; j++) {
+			board->Cells[0][i][j] = !(rand() % randMod);
+			board->Cells[1][i][j] = 0;
 		}
 	}
+
+	board->BoardNumber = 0;
 }
 
-void ClearBoard() {
+void ClearBoard(Board* board) {
 	uint8_t i, j;
-	for (i = 0; i < BOARD_WIDTH + 1; i++) {
-		for (j = 0; j < BOARD_HEIGHT + 1; j++) {
-			board[i][j][boardNumber] = 0;
-			board[i][j][!boardNumber] = 0;
+	for (i = 0; i < board->BoardWidth + 1; i++) {
+		for (j = 0; j < board->BoardHeight + 1; j++) {
+			board->Cells[0][i][j] = 0;
+			board->Cells[1][i][j] = 0;
 		}
 	}
+
+	board->BoardNumber = 0;
 }
 
-void DrawBoard(bool redraw) {
-	uint8_t i, j;
+Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
+	int i;
+	int j;
+	Board* b = malloc(sizeof(Board));
+	b->BoardWidth = boardWidth;
+	b->BoardHeight = boardHeight;
 
-	//Debug_PrintLine("Drawing board.");
-	for (i = 1; i < BOARD_WIDTH - 1; i++) {
-		for (j = 1; j < BOARD_HEIGHT - 1; j++) {
-			if (board[i][j][boardNumber] != board[i][j][!boardNumber] || redraw) {
-				DrawRectFill(i*CELL_WIDTH + 1, j * CELL_HEIGHT + 1, CELL_WIDTH - 1, CELL_HEIGHT - 1, board[i][j][boardNumber] ? aliveColor : deadColor);
+	for (i = 0; i < 2; i++) {
+		b->Cells[i] = malloc(8 * (boardWidth+2));
+		for (j = 0; j < boardWidth+2; j++) {
+			b->Cells[i][j] = malloc(8 * (boardHeight+2));
+		}
+	}
+
+	b->BoardNumber = 0;
+	return b;
+}
+
+void DrawBoard(Board* board, bool redraw) {
+	uint8_t i, j;
+	uint8_t boardNumber = board->BoardNumber;
+	uint8_t cellWidth = board->CellWidth;
+	uint8_t cellHeight = board->CellHeight;
+
+	for (i = 1; i < board->BoardWidth; i++) {
+		for (j = 1; j < board->BoardHeight; j++) {
+			if (board->Cells[boardNumber][i][j] != board->Cells[!boardNumber][i][j] || redraw) {
+				DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
 			}
 		}
 	}
-	//Debug_PrintLine("Board drawn.");
-
 }
 
-void DrawGrid() {
+void DrawGrid(Board* board) {
 	uint8_t i;
-	gc_SetColorIndex(gridColor);
+	uint8_t cellWidth = board->CellWidth;
+	uint8_t cellHeight = board->CellHeight;
 
-	for (i = 1; i < BOARD_WIDTH; i++) {
-		gc_NoClipVertLine(i*CELL_WIDTH, CELL_HEIGHT, (BOARD_HEIGHT - 2) * CELL_HEIGHT + 1);
+	gc_SetColorIndex(board->GridColor);
+
+	for (i = 1; i < board->BoardWidth + 1; i++) {
+		gc_NoClipVertLine(i*cellWidth, cellHeight, (board->BoardHeight - 1) * cellHeight + 1);
 	}
 
-	for (i = 1; i < BOARD_HEIGHT; i++) {
-		gc_NoClipHorizLine(CELL_HEIGHT, i * CELL_HEIGHT, (BOARD_WIDTH - 2) * CELL_WIDTH + 1);
+	for (i = 1; i < board->BoardHeight + 1; i++) {
+		gc_NoClipHorizLine(cellWidth, i * cellHeight, (board->BoardWidth - 1) * cellWidth + 1);
 	}
 }

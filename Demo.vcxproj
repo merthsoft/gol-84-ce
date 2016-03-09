@@ -96,11 +96,13 @@
   <ItemGroup>
     <None Include="Linkcmd" />
     <None Include="Makefile" />
+    <None Include="menu.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="board.h" />
     <ClInclude Include="draw.h" />
     <ClInclude Include="key_helper.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="rules.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

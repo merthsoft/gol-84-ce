@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <tice.h>
+//#include <stdio.h>
+//#include <debug.h>
 
 /* Standard headers - it's recommended to leave them included */
 #include <math.h>
@@ -16,8 +18,32 @@
 #include "key_helper.h"
 #include "board.h"
 #include "draw.h"
+#include "menu.h"
 
-int Settings();
+#define BOARD_WIDTH		28
+#define BOARD_HEIGHT	BOARD_WIDTH
+
+void Settings();
+void ColorSettings();
+
+uint8_t newValues[5];
+void DrawSampleBoard();
+Board* mainBoard;
+
+//void Debug_Print(char * format, ...) {
+//    va_list argptr;
+//    va_start(argptr, format);
+//    dbg_printf(dbgout, format, argptr);
+//    va_end(argptr);
+//}
+//
+//void Debug_PrintLine(char * format, ...) {
+//	va_list argptr;
+//	va_start(argptr, format);
+//	dbg_printf(dbgout, format, argptr);
+//	va_end(argptr);
+//	dbg_printf(dbgout, "\n");
+//}
 
 void main(void) {
 	uint8_t x = 1;
@@ -26,40 +52,56 @@ void main(void) {
 	uint8_t old_y = y;
 	uint8_t i;
 
+	bool redraw = true;
 	bool toggled = false;
 	bool running = false;
 	
-	//Debug_PrintLine("Initializing board.");
-    ClearBoard();
-	SetupBoard();
-    InitRules();
-	
-    //Debug_PrintLine("Initial drawing.");
 	gc_InitGraph();
-	gc_FillScrn(255);
-	DrawGrid();
-	DrawBoard(true);
+	gc_FillScrn(0);
+
+	//Debug_PrintLine("Creating board.");
+	mainBoard = CreateBoard(BOARD_WIDTH, BOARD_HEIGHT);
+	//Debug_PrintLine("Board created.");
+	mainBoard->AliveColor = 18;
+	mainBoard->DeadColor = 255;
+	mainBoard->GridColor = 0;
+	mainBoard->WrappingMode = Plane;
+	mainBoard->CellHeight = CELL_HEIGHT;
+	mainBoard->CellWidth = CELL_WIDTH;
+	mainBoard->CursorDeadColor = 224;
+	mainBoard->CursorAliveColor = 15;
+
+	//Debug_PrintLine("Initializing board.");
+    ClearBoard(mainBoard);
+	SetupBoard(mainBoard);
+    InitRules(mainBoard);
     
     kb_Scan();
-    
-	gc_PrintStringXY("2nd-Toggle", 235, 8);
-	gc_PrintStringXY("Mode-Quit", 235, 17);
-	gc_PrintStringXY("Clear-Clear", 235, 26);
-	gc_PrintStringXY("Vars-Rand", 235, 35);
-	gc_PrintStringXY("Enter-Run", 235, 44);
-	gc_PrintStringXY("+-Step", 235, 53);
-	gc_PrintStringXY("Del-Setup", 235, 62);
-
     //Debug_PrintLine("Entering main loop.");
-	while (!Key_IsDown(Key_Mode)) {
+	while (!Key_IsDown(Key_Del)) {
+		if (redraw) {
+			gc_FillScrn(255);
+			gc_PrintStringXY("2nd-Toggle", 235, 8);
+			gc_PrintStringXY("Del-Quit", 235, 17);
+			gc_PrintStringXY("Clear-Clear", 235, 26);
+			gc_PrintStringXY("Vars-Rand", 235, 35);
+			gc_PrintStringXY("Enter-Run", 235, 44);
+			gc_PrintStringXY("+-Step", 235, 53);
+			gc_PrintStringXY("Mode-Setup", 235, 62);
+			DrawGrid(mainBoard);
+			DrawBoard(mainBoard, true);
+
+			redraw = false;
+		}
+
 		if (running) {
-			Step();
-			DrawBoard(false);
+			Step(mainBoard);
+			DrawBoard(mainBoard, false);
             
 			kb_Scan();
 			if (Key_IsDown(Key_Enter)) { running = false; }
 		} else {
-			DrawRectFill(x*CELL_WIDTH + 1, y * CELL_HEIGHT + 1, CELL_WIDTH - 1, CELL_HEIGHT - 1, board[x][y][boardNumber] ? selAliveColor : selDeadColor);
+			DrawCursor(mainBoard, x, y);
 
 			for (i = 0; i < 100; i++) { kb_Scan(); }
 
@@ -72,16 +114,19 @@ void main(void) {
 			else if (Key_IsDown(Key_Right)) { x = x == BOARD_WIDTH - 2 ? 1 : x + 1; }
 			else if (Key_IsDown(Key_Enter)) { running = true; }
 			else if (Key_IsDown(Key_Clear)) { 
-				ClearBoard();
-				DrawBoard(true);
-			} else if (Key_IsDown(Key_Alpha)) {
+				ClearBoard(mainBoard);
+				DrawBoard(mainBoard, true);
+			} else if (Key_IsDown(Key_Mode)) {
 				Settings();
-				DrawBoard(true);
+				redraw = true;
+			} else if (Key_IsDown(Key_Add)) {
+				Step(mainBoard);
+				DrawBoard(mainBoard, false);
 			}
 
 			if (Key_IsDown(Key_2nd)) {
 				if (!toggled) {
-					board[x][y][boardNumber] = !board[x][y][boardNumber];
+					mainBoard->Cells[mainBoard->BoardNumber][x][y] = !mainBoard->Cells[mainBoard->BoardNumber][x][y];
 					toggled = true;
 				}
 			} else {
@@ -90,7 +135,7 @@ void main(void) {
 
 			if (old_x != x || old_y != y || running) {
 				//Debug_PrintLine("Key pressed, redrawing cursor.");
-				DrawRectFill(old_x*CELL_WIDTH + 1, old_y * CELL_HEIGHT + 1, CELL_WIDTH - 1, CELL_HEIGHT - 1, board[old_x][old_y][boardNumber] ? aliveColor : deadColor);
+				DrawCell(mainBoard, old_x, old_y);
 			}
 		}
 
@@ -102,93 +147,38 @@ void main(void) {
 	pgrm_CleanUp();
 }
 
-int Settings() {
-	uint8_t i;
-	uint8_t y = 1;
-	uint8_t old_y = 1;
-	unsigned char out[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+void Settings() {
+	menuItem items[4];
+	items[0].name = "Colors";
+	items[0].function = ColorSettings;
+	items[1].name = "Rules";
+	items[2].name = "Topologies";
+	items[3].name = "Back";
+	items[3].function = BACK_FUNCTION;
 
-	uint8_t newValues[5];
-	newValues[0] = gridColor;
-	newValues[1] = deadColor;
-	newValues[2] = aliveColor;
-	newValues[3] = selDeadColor; 
-	newValues[4] = selAliveColor;
+	Menu("Settings:", items, 4, NULL);
+}
 
-	gc_FillScrn(255);
-	while (1) {
-		gc_PrintStringXY("Settings:", 0, 0);
-		//IntToHex(newValues[0], out);
-		gc_PrintStringXY("Grid:", 9, 9);
-		DrawRectFill(270, 48, 24, 26, newValues[0]);
-		
-		//IntToHex(newValues[1], out);
-		gc_PrintStringXY("Dead:", 9, 18);
-		DrawRectFill(270, 72, 24, 26, newValues[1]);
-		
-		//IntToHex(newValues[2], out);
-		gc_PrintStringXY("Alive:", 9, 27);
-		DrawRectFill(270, 96, 24, 26, newValues[2]);
-		
-		//IntToHex(newValues[3], out);
-		gc_PrintStringXY("SelDead:", 9, 36);
-		DrawRectFill(270, 120, 24, 26, newValues[3]);
-		
-		//IntToHex(newValues[4], out);
-		gc_PrintStringXY("SelAlive:", 9, 45);
-		DrawRectFill(270, 144, 24, 26, newValues[4]);
+void ColorSettings() {
+	menuItem items[6];
+	items[0].name = "Grid";
+	items[1].name = "Dead";
+	items[2].name = "Alive";
+	items[3].name = "Selected (Dead)";
+	items[4].name = "Selected (Alive)";
+	items[5].name = "Save";
+	items[6].name = "Back";
+	items[6].function = BACK_FUNCTION;
 
-		gc_PrintStringXY(">", 0, 9 * y);
-		
-		for (i = 0; i < 100; i++) { kb_Scan(); }
+	newValues[0] = mainBoard->GridColor;
+	newValues[1] = mainBoard->DeadColor;
+	newValues[2] = mainBoard->AliveColor;
+	newValues[3] = mainBoard->CursorDeadColor;
+	newValues[4] = mainBoard->CursorAliveColor;
 
-		old_y = y;
-		
-		if (Key_IsDown(Key_Up)) { y = y == 1 ? 5 : y - 1;	}
-		else if (Key_IsDown(Key_Down)) { y = y == 5 ? 1 : y + 1; }
-		else if (Key_IsDown(Key_Left)) { newValues[y - 1] -= 0x0001; }
-		else if (Key_IsDown(Key_Right)) { newValues[y - 1] += 0x0001; }
-		else if (Key_IsDown(Key_Add)) { newValues[y - 1] -= 0x0010; }
-		else if (Key_IsDown(Key_Sub)) { newValues[y - 1] += 0x0010; }
-		else if (Key_IsDown(Key_Mul)) { newValues[y - 1] -= 0x0100; }
-		else if (Key_IsDown(Key_Div)) { newValues[y - 1] += 0x0100; }
-		
-		if (Key_IsDown(Key_Mode)) { return 0; }
+	Menu("Colors:", items, 6, DrawSampleBoard);
+}
 
-		if (old_y != y) {
-			DrawRectFill(0, 9 * old_y, 8, 8, 255);
-		}
-/*
-		case KEY_CTRL_DEL:
-			newValues[y - 1] -= 0x1000;
-			break;
-		case KEY_CTRL_AC:
-			newValues[y - 1] += 0x1000;
-			break;
-		case KEY_CTRL_F5:
-			return KEY_PRGM_F5;
-			break;
-		case KEY_CTRL_F2:
-			newValues[0] = 0x0000;
-			newValues[1] = 0x0000;
-			newValues[2] = 0xF010;
-			newValues[3] = 0xFD00;
-			newValues[4] = 0x7890;
-			break;
-		case KEY_CTRL_F6:
-			gridColor = newValues[0];
-			deadColor = newValues[1];
-			aliveColor = newValues[2];
-			selDeadColor = newValues[3];
-			selAliveColor = newValues[4];
-			return KEY_PRGM_F6;
-			break;
-		case KEY_CTRL_F3:
-			Rules();
-			break;
-		case KEY_CTRL_F4:
-			About();
-			break;
-		}*/
-	}
+void DrawSampleBoard() {
+
 }
