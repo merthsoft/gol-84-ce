@@ -20,12 +20,13 @@ int Menu(const char* title, MenuItem items[], uint8_t numItems, void* extraFunct
 		for (i = 0; i < numItems; i++) {
 			gc_PrintStringXY(items[i].Name, 9, 9 + 9 * i);
 		}
+
 		if (extraFunction != NULL) {
 			void(*func)() = extraFunction;
 			func();
 		}
 
-		gc_PrintStringXY(">", 0, 9 * y);
+		gc_PrintStringXY(">", 2, 9 * y);
 		for (i = 0; i < 100; i++) { kb_Scan(); }
 		old_y = y;
 
