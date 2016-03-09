@@ -59,11 +59,11 @@ void main(void) {
 	sampleBoard->CellHeight = mainBoard->CellHeight;
 	sampleBoard->CellWidth = mainBoard->CellWidth;
 
-	sampleBoard->Cells[0][2][1] = 1;
 	sampleBoard->Cells[0][3][2] = 1;
-	sampleBoard->Cells[0][1][3] = 1;
-	sampleBoard->Cells[0][2][3] = 1;
-	sampleBoard->Cells[0][3][3] = 1;
+	sampleBoard->Cells[0][4][3] = 1;
+	sampleBoard->Cells[0][2][4] = 1;
+	sampleBoard->Cells[0][3][4] = 1;
+	sampleBoard->Cells[0][4][4] = 1;
 
     ClearBoard(mainBoard);
 	SetupBoard(mainBoard);
