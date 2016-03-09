@@ -6,8 +6,8 @@ void Step(Board* board) {
 	uint8_t j;
 	uint8_t boardNum = board->BoardNumber;
 
-	for (i = 1; i < board->BoardWidth; i++) {
-		for (j = 1; j < board->BoardHeight; j++) {
+	for (i = 1; i <= board->BoardWidth; i++) {
+		for (j = 1; j <= board->BoardHeight; j++) {
 			numN = 0;
 			// Count the 8 cells around it
 			numN += WrapToBoard(board, i - 1, j - 1)
@@ -36,8 +36,8 @@ void Step(Board* board) {
 }
 
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
-	uint8_t CYCLE_WIDTH = board->BoardWidth - 2;
-	uint8_t CYCLE_HEIGHT = board->BoardHeight - 2;
+	uint8_t CYCLE_WIDTH = board->BoardWidth - 1;
+	uint8_t CYCLE_HEIGHT = board->BoardHeight - 1;
 
 	uint8_t lC, lR;
 	bool lE = c == 0, rE = c > CYCLE_WIDTH,
@@ -54,7 +54,7 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
 		break;
 	case Mobius:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-		lR = ovC ? (board->BoardHeight + 2 - r) : r;
+		lR = ovC ? (board->BoardHeight - r) : r;
 		break;
 	case Torus:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
@@ -101,13 +101,13 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
 	case Klein:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
 		lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-		lR = ovC ? (board->BoardHeight + 2 - lR) : lR;
+		lR = ovC ? (board->BoardHeight - lR) : lR;
 		break;
 	case Proj:
 		lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
 		lC = ovR ? (board->BoardWidth + 2 - lC) : lC;
 		lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-		lR = ovC ? (board->BoardHeight + 2 - lR) : lR;
+		lR = ovC ? (board->BoardHeight - lR) : lR;
 		break;
 	}
 	return board->Cells[board->BoardNumber][lC][lR];
@@ -131,8 +131,8 @@ void SetupBoard(Board* board) {
 	uint8_t i, j;
 	srand(*(unsigned long*)0xF30044);
 
-	for (i = 0; i < board->BoardWidth + 1; i++) {
-		for (j = 0; j < board->BoardHeight + 1; j++) {
+	for (i = 0; i <= board->BoardWidth; i++) {
+		for (j = 0; j <= board->BoardHeight; j++) {
 			board->Cells[0][i][j] = !(rand() % randMod);
 			board->Cells[1][i][j] = 0;
 		}
@@ -143,8 +143,8 @@ void SetupBoard(Board* board) {
 
 void ClearBoard(Board* board) {
 	uint8_t i, j;
-	for (i = 0; i < board->BoardWidth + 1; i++) {
-		for (j = 0; j < board->BoardHeight + 1; j++) {
+	for (i = 0; i < board->BoardWidth + 2; i++) {
+		for (j = 0; j < board->BoardHeight + 2; j++) {
 			board->Cells[0][i][j] = 0;
 			board->Cells[1][i][j] = 0;
 		}
@@ -171,33 +171,33 @@ Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
 	return b;
 }
 
-void DrawBoard(Board* board, bool redraw) {
+void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety) {
 	uint8_t i, j;
 	uint8_t boardNumber = board->BoardNumber;
 	uint8_t cellWidth = board->CellWidth;
 	uint8_t cellHeight = board->CellHeight;
 
-	for (i = 1; i < board->BoardWidth; i++) {
-		for (j = 1; j < board->BoardHeight; j++) {
+	for (i = 1; i <= board->BoardWidth; i++) {
+		for (j = 1; j <= board->BoardHeight; j++) {
 			if (board->Cells[boardNumber][i][j] != board->Cells[!boardNumber][i][j] || redraw) {
-				DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
+				DrawRectFill(i*cellWidth + 1 + offsetx, j * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
 			}
 		}
 	}
 }
 
-void DrawGrid(Board* board) {
+void DrawGrid(Board* board, uint8_t offsetx, uint8_t offsety) {
 	uint8_t i;
 	uint8_t cellWidth = board->CellWidth;
 	uint8_t cellHeight = board->CellHeight;
 
 	gc_SetColorIndex(board->GridColor);
 
-	for (i = 1; i < board->BoardWidth + 1; i++) {
-		gc_NoClipVertLine(i*cellWidth, cellHeight, (board->BoardHeight - 1) * cellHeight + 1);
+	for (i = 1; i <= board->BoardWidth + 1; i++) {
+		gc_NoClipVertLine(i*cellWidth + offsetx, cellHeight + offsety, (board->BoardHeight) * cellHeight + 1);
 	}
 
-	for (i = 1; i < board->BoardHeight + 1; i++) {
-		gc_NoClipHorizLine(cellWidth, i * cellHeight, (board->BoardWidth - 1) * cellWidth + 1);
+	for (i = 1; i <= board->BoardHeight + 1; i++) {
+		gc_NoClipHorizLine(cellWidth + offsetx, i * cellHeight + offsety, (board->BoardWidth) * cellWidth + 1);
 	}
 }

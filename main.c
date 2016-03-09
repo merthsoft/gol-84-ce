@@ -3,8 +3,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <tice.h>
-//#include <stdio.h>
-//#include <debug.h>
 
 /* Standard headers - it's recommended to leave them included */
 #include <math.h>
@@ -23,27 +21,15 @@
 #define BOARD_WIDTH		28
 #define BOARD_HEIGHT	BOARD_WIDTH
 
+#define CELL_WIDTH		8
+#define CELL_HEIGHT		8
+
 void Settings();
 void ColorSettings();
 
-uint8_t newValues[5];
 void DrawSampleBoard();
 Board* mainBoard;
-
-//void Debug_Print(char * format, ...) {
-//    va_list argptr;
-//    va_start(argptr, format);
-//    dbg_printf(dbgout, format, argptr);
-//    va_end(argptr);
-//}
-//
-//void Debug_PrintLine(char * format, ...) {
-//	va_list argptr;
-//	va_start(argptr, format);
-//	dbg_printf(dbgout, format, argptr);
-//	va_end(argptr);
-//	dbg_printf(dbgout, "\n");
-//}
+Board* sampleBoard;
 
 void main(void) {
 	uint8_t x = 1;
@@ -59,9 +45,7 @@ void main(void) {
 	gc_InitGraph();
 	gc_FillScrn(0);
 
-	//Debug_PrintLine("Creating board.");
 	mainBoard = CreateBoard(BOARD_WIDTH, BOARD_HEIGHT);
-	//Debug_PrintLine("Board created.");
 	mainBoard->AliveColor = 18;
 	mainBoard->DeadColor = 255;
 	mainBoard->GridColor = 0;
@@ -71,13 +55,22 @@ void main(void) {
 	mainBoard->CursorDeadColor = 224;
 	mainBoard->CursorAliveColor = 15;
 
-	//Debug_PrintLine("Initializing board.");
+	sampleBoard = CreateBoard(5, 5);
+	sampleBoard->CellHeight = mainBoard->CellHeight;
+	sampleBoard->CellWidth = mainBoard->CellWidth;
+
+	sampleBoard->Cells[0][2][1] = 1;
+	sampleBoard->Cells[0][3][2] = 1;
+	sampleBoard->Cells[0][1][3] = 1;
+	sampleBoard->Cells[0][2][3] = 1;
+	sampleBoard->Cells[0][3][3] = 1;
+
     ClearBoard(mainBoard);
 	SetupBoard(mainBoard);
     InitRules(mainBoard);
     
     kb_Scan();
-    //Debug_PrintLine("Entering main loop.");
+    
 	while (!Key_IsDown(Key_Del)) {
 		if (redraw) {
 			gc_FillScrn(255);
@@ -88,15 +81,15 @@ void main(void) {
 			gc_PrintStringXY("Enter-Run", 235, 44);
 			gc_PrintStringXY("+-Step", 235, 53);
 			gc_PrintStringXY("Mode-Setup", 235, 62);
-			DrawGrid(mainBoard);
-			DrawBoard(mainBoard, true);
+			DrawGrid(mainBoard, 0, 0);
+			DrawBoard(mainBoard, true, 0, 0);
 
 			redraw = false;
 		}
 
 		if (running) {
 			Step(mainBoard);
-			DrawBoard(mainBoard, false);
+			DrawBoard(mainBoard, false, 0, 0);
             
 			kb_Scan();
 			if (Key_IsDown(Key_Enter)) { running = false; }
@@ -108,20 +101,20 @@ void main(void) {
 			old_x = x;
 			old_y = y;
 
-			if (Key_IsDown(Key_Up)) { y = y == 1 ? BOARD_HEIGHT - 2 : y - 1; }
-			else if (Key_IsDown(Key_Down)) { y = y == BOARD_HEIGHT - 2 ? 1 : y + 1; }
-			else if (Key_IsDown(Key_Left)) { x = x == 1 ? BOARD_WIDTH - 2 : x - 1; }
-			else if (Key_IsDown(Key_Right)) { x = x == BOARD_WIDTH - 2 ? 1 : x + 1; }
+			if (Key_IsDown(Key_Up)) { y = y == 1 ? mainBoard->BoardHeight : y - 1; }
+			else if (Key_IsDown(Key_Down)) { y = y == mainBoard->BoardHeight ? 1 : y + 1; }
+			else if (Key_IsDown(Key_Left)) { x = x == 1 ? mainBoard->BoardWidth : x - 1; }
+			else if (Key_IsDown(Key_Right)) { x = x == mainBoard->BoardWidth ? 1 : x + 1; }
 			else if (Key_IsDown(Key_Enter)) { running = true; }
 			else if (Key_IsDown(Key_Clear)) { 
 				ClearBoard(mainBoard);
-				DrawBoard(mainBoard, true);
+				DrawBoard(mainBoard, true, 0, 0);
 			} else if (Key_IsDown(Key_Mode)) {
 				Settings();
 				redraw = true;
 			} else if (Key_IsDown(Key_Add)) {
 				Step(mainBoard);
-				DrawBoard(mainBoard, false);
+				DrawBoard(mainBoard, false, 0, 0);
 			}
 
 			if (Key_IsDown(Key_2nd)) {
@@ -134,7 +127,6 @@ void main(void) {
 			}
 
 			if (old_x != x || old_y != y || running) {
-				//Debug_PrintLine("Key pressed, redrawing cursor.");
 				DrawCell(mainBoard, old_x, old_y);
 			}
 		}
@@ -148,37 +140,39 @@ void main(void) {
 }
 
 void Settings() {
-	menuItem items[4];
-	items[0].name = "Colors";
-	items[0].function = ColorSettings;
-	items[1].name = "Rules";
-	items[2].name = "Topologies";
-	items[3].name = "Back";
-	items[3].function = BACK_FUNCTION;
+	MenuItem items[4];
+	items[0].Name = "Colors";
+	items[0].Function = ColorSettings;
+	items[1].Name = "Rules";
+	items[2].Name = "Topologies";
+	items[3].Name = "Back";
+	items[3].Function = BACK_FUNCTION;
 
 	Menu("Settings:", items, 4, NULL);
 }
 
 void ColorSettings() {
-	menuItem items[6];
-	items[0].name = "Grid";
-	items[1].name = "Dead";
-	items[2].name = "Alive";
-	items[3].name = "Selected (Dead)";
-	items[4].name = "Selected (Alive)";
-	items[5].name = "Save";
-	items[6].name = "Back";
-	items[6].function = BACK_FUNCTION;
+	MenuItem items[7];
+	items[0].Name = "Grid";
+	items[1].Name = "Dead";
+	items[2].Name = "Alive";
+	items[3].Name = "Selected (Dead)";
+	items[4].Name = "Selected (Alive)";
+	items[5].Name = "Save";
+	items[6].Name = "Back";
+	items[6].Function = BACK_FUNCTION;
 
-	newValues[0] = mainBoard->GridColor;
-	newValues[1] = mainBoard->DeadColor;
-	newValues[2] = mainBoard->AliveColor;
-	newValues[3] = mainBoard->CursorDeadColor;
-	newValues[4] = mainBoard->CursorAliveColor;
+	sampleBoard->GridColor = mainBoard->GridColor;
+	sampleBoard->DeadColor = mainBoard->DeadColor;
+	sampleBoard->AliveColor = mainBoard->AliveColor;
+	sampleBoard->CursorDeadColor = mainBoard->CursorDeadColor;
+	sampleBoard->CursorAliveColor = mainBoard->CursorAliveColor;
 
-	Menu("Colors:", items, 6, DrawSampleBoard);
+	Menu("Colors:", items, 7, DrawSampleBoard);
 }
 
 void DrawSampleBoard() {
-
+	gc_PrintStringXY("Sample:", 150, 0);
+	DrawGrid(sampleBoard, 150, 9);
+	DrawBoard(sampleBoard, true, 150, 9);
 }

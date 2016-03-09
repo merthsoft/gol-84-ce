@@ -8,12 +8,6 @@
 #include "rules.h"
 #include "draw.h"
 
-#define SCREEN_WIDTH	320
-#define SCREEN_HEIGHT	240
-
-#define CELL_WIDTH		8
-#define CELL_HEIGHT		8
-
 #define MOD_CYCLE(n, c) (((n) + (c)) % (c))
 
 typedef enum {
@@ -44,8 +38,8 @@ typedef struct {
 } Board;
 
 Board* CreateBoard(uint8_t, uint8_t);
-void DrawBoard(Board*, bool);
-void DrawGrid(Board*);
+void DrawBoard(Board*, bool, uint8_t, uint8_t);
+void DrawGrid(Board*, uint8_t, uint8_t);
 void SetupBoard(Board*);
 void ClearBoard(Board*);
 void Step(Board*);
