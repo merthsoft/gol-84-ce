@@ -1,4 +1,5 @@
 TARGET ?= GOL
+DEBUG = NDEBUG
 
 #Change ICONC to "ICON" to include a custom icon, and "NICON" to not use an icon
 ICONC ?= ICON
@@ -73,7 +74,7 @@ ASM_FLAGS := \
 	-pagelen:250 -pagewidth:132 -quiet -sdiopt -warn -NOdebug -NOigcase -cpu:EZ80F91
 
 CFLAGS :=  \
-	-quiet -define:DEBUG -define:_EZ80F91 -define:_EZ80 -define:$(ICONC) -define:_SIMULATE -NOlistinc -NOmodsect -cpu:EZ80F91 -keepasm \
+	-quiet -define:$(DEBUG) -define:_EZ80F91 -define:_EZ80 -define:$(ICONC) -define:_SIMULATE -NOlistinc -NOmodsect -cpu:EZ80F91 -keepasm \
 	-optspeed -NOreduceopt -NOgenprintf -stdinc:"$(HEADERS)" -usrinc:"." -NOdebug \
 	-asmsw:"$(ASM_FLAGS)" -asm $(ASMSOURCES)
 

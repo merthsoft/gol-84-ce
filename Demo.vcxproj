@@ -67,7 +67,8 @@
     </NMakeOutput>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine>makece SHELL=cmd.exe</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>makece SHELL=cmd.exe clean;makece SHELL=cmd.exe</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>makece SHELL=cmd.exe clean
+makece SHELL=cmd.exe</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>makece SHELL=cmd.exe clean</NMakeCleanCommandLine>
     <IncludePath>C:\dev\lib\ce;C:\dev\include\std;C:\dev\include\ce\pal;C:\dev\include\ce\asm\;C:\dev\include\ce;C:\dev\include\ce\c;C:\dev\include\ce\asm;C:\dev\include;$(IncludePath)</IncludePath>
     <ReferencePath />

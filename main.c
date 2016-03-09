@@ -17,6 +17,7 @@
 #include "board.h"
 #include "draw.h"
 #include "menu.h"
+#include "rules.h"
 
 #define BOARD_WIDTH		28
 #define BOARD_HEIGHT	BOARD_WIDTH

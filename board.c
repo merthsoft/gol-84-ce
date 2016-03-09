@@ -46,7 +46,9 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
 	uint8_t CYCLE_WIDTH = board->BoardWidth - 1;
 	uint8_t CYCLE_HEIGHT = board->BoardHeight - 1;
 
-	uint8_t lC, lR;
+	uint8_t lC = 0;
+	uint8_t lR = 0;
+
 	bool lE = c == 0, rE = c > CYCLE_WIDTH,
 		tE = r == 0, bE = r > CYCLE_HEIGHT,
 		ovC = lE || rE,
