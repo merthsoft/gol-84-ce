@@ -33,14 +33,14 @@ typedef struct Board {
 	uint8_t RandomMod;
 } Board;
 
-Board* CreateBoard(uint8_t, uint8_t);
-void DrawBoard(Board*, bool, uint8_t, uint8_t);
-void DrawGrid(Board*, uint8_t, uint8_t);
-void SetupBoard(Board*);
-void ClearBoard(Board*);
-void Step(Board*);
+Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
+void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety);
+void DrawGrid(Board* board, uint8_t offsetx, uint8_t offsety);
+void SetupBoard(Board* board);
+void ClearBoard(Board* board);
+void Step(Board* board);
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
-void DrawCell(Board*, uint8_t, uint8_t);
-void DrawCursor(Board*, uint8_t, uint8_t);
+void DrawCell(Board* board, uint8_t x, uint8_t y);
+void DrawCursor(Board* board, uint8_t x, uint8_t y);
 
 #endif BOARD_H

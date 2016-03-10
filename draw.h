@@ -5,6 +5,6 @@
 #include <graphc.h>
 
 void DrawRectFill(int x, int y, int w, int h, uint8_t color_index);
-void SetTextColor(uint8_t, uint8_t);
+void SetTextColor(uint8_t foreground, uint8_t background);
 
 #endif

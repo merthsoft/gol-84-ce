@@ -26,10 +26,10 @@
 #define CELL_HEIGHT		8
 
 void Settings();
-void ColorSettings();
-void TopologySettings();
+void ColorSettings(Menu* parentMenu, int parentIndex);
+void TopologySettings(Menu* parentMenu, int parentIndex);
+void DrawSampleBoard(Menu* parentMenu, int parentIndex);
 
-void DrawSampleBoard();
 Board* mainBoard;
 Board* sampleBoard;
 
@@ -160,7 +160,7 @@ void Settings() {
     DeleteMenu(menu);
 }
 
-void ColorSettings() {
+void ColorSettings(Menu* parentMenu, int parentIndex) {
     Menu* menu = CreateMenu(7, "Colors");
     menu->ExtraFunction = DrawSampleBoard;
 
@@ -183,13 +183,13 @@ void ColorSettings() {
     DeleteMenu(menu);
 }
 
-void DrawSampleBoard() {
+void DrawSampleBoard(Menu* parentMenu, int parentIndex) {
 	gc_PrintStringXY("Sample:", 150, 0);
 	DrawGrid(sampleBoard, 150, 9);
 	DrawBoard(sampleBoard, true, 150, 9);
 }
 
-void TopologySettings() {
+void TopologySettings(Menu* parentMenu, int parentIndex) {
     Menu* menu = CreateMenu(8, "Topologies:");
     menu->SelectionType = Single;
 
@@ -199,7 +199,7 @@ void TopologySettings() {
     menu->Items[3].Name = "Torus";
     menu->Items[4].Name = "Sphere";
     menu->Items[5].Name = "Klein";
-    menu->Items[6].Name = "Proj";
+    menu->Items[6].Name = "Projection";
     menu->Items[7].Name = "Back";
 	menu->Items[7].Function = FUNCTION_BACK;
 

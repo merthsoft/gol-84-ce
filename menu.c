@@ -73,8 +73,8 @@ int DisplayMenu(Menu* menu) {
 		}
 
 		if (menu->ExtraFunction != FUNCTION_NONE) {
-			void(*func)() = menu->ExtraFunction;
-			func();
+			void(*func)(Menu*, int) = menu->ExtraFunction;
+			func(menu, y-1);
 		}
 
 		gc_PrintStringXY(">", 2, linePadding * y);
@@ -85,7 +85,7 @@ int DisplayMenu(Menu* menu) {
 		else if (Key_IsDown(Key_Down)) { y = y == menu->NumItems ? 1 : y + 1; }
 		else if (Key_IsDown(Key_2nd) || Key_IsDown(Key_Enter)) {
             uint8_t index = y - 1;
-            void(*func)() = menu->Items[index].Function;
+            void(*func)(Menu*, int) = menu->Items[index].Function;
 
             if (menu->SelectionType != None && menu->Items[y - 1].Function != FUNCTION_BACK) {
                 switch (menu->SelectionType) {
@@ -102,7 +102,7 @@ int DisplayMenu(Menu* menu) {
             }
 			
 			if (func == FUNCTION_BACK) { return index; }
-			else if (func != FUNCTION_NONE) { func(); }
+			else if (func != FUNCTION_NONE) { func(menu, index); }
 			gc_FillScrn(255);
 		}
 

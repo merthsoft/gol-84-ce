@@ -27,8 +27,8 @@ typedef struct Menu {
     MenuSelectionType SelectionType;
 } Menu;
 
-Menu* CreateMenu(uint8_t numItems, const char*);
-void DeleteMenu(Menu*);
-int DisplayMenu(Menu*);
+Menu* CreateMenu(uint8_t numItems, const char* title);
+void DeleteMenu(Menu* menu);
+int DisplayMenu(Menu* menu);
 
 #endif MENU_H
