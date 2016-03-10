@@ -7,40 +7,82 @@
 #include "draw.h"
 #include "key_helper.h"
 #include "menu.h"
+#include "menu_sprites.h"
 
-int Menu(const char* title, MenuItem items[], uint8_t numItems, void* extraFunction) {
+Menu* CreateMenu(uint8_t numItems, const char* title) {
+    uint8_t i;
+
+    Menu* menu = malloc(numItems * sizeof(Menu));
+    menu->Items = malloc(numItems * sizeof(MenuItem));
+    for (i = 0; i < numItems; i++) {
+        menu->Items[i].Function = FUNCTION_NONE;
+        menu->Items[i].Name = "";
+        menu->Items[i].Selected = false;
+    }
+    menu->NumItems = numItems;
+
+    menu->Title = title;
+    menu->ExtraFunction = FUNCTION_NONE;
+
+    return menu;
+}
+
+void DeleteMenu(Menu* menu) {
+    free(menu->Items);
+    free(menu);
+}
+
+int DisplayMenu(Menu* menu) {
 	uint8_t i;
 	uint8_t y = 1;
 	uint8_t old_y = 1;
+    uint8_t linePadding = 10;
+    uint8_t textPadding = 10;
+    uint8_t extraTextPadding = 0;
+
+    if (menu->SelectionType != None) {
+        extraTextPadding = linePadding;
+    }
 
 	gc_FillScrn(255);
 	while (true) {
-		gc_PrintStringXY(title, 1, 1);
+		gc_PrintStringXY(menu->Title, 1, 1);
 
-		for (i = 0; i < numItems; i++) {
-			gc_PrintStringXY(items[i].Name, 9, 9 + 9 * i);
+		for (i = 0; i < menu->NumItems; i++) {
+			gc_PrintStringXY(menu->Items[i].Name, textPadding + extraTextPadding, linePadding + linePadding * i);
+
+            if (menu->SelectionType != None && menu->Items[i].Function != FUNCTION_BACK) {
+                switch (menu->SelectionType) {
+                    case Single:
+                        gc_NoClipDrawSprite(menu->Items[i].Selected ? radiobutton_filled : radiobutton_empty, textPadding, linePadding + linePadding * i - 1, 9, 9);
+                        break;
+                    case Multiple:
+                        gc_NoClipDrawSprite(menu->Items[i].Selected ? checkbox_checked : checkbox_empty, textPadding, linePadding + linePadding * i - 1, 9, 9);
+                        break;
+                }
+            }
 		}
 
-		if (extraFunction != NULL) {
-			void(*func)() = extraFunction;
+		if (menu->ExtraFunction != FUNCTION_NONE) {
+			void(*func)() = menu->ExtraFunction;
 			func();
 		}
 
-		gc_PrintStringXY(">", 2, 9 * y);
+		gc_PrintStringXY(">", 2, linePadding * y);
 		for (i = 0; i < 100; i++) { kb_Scan(); }
 		old_y = y;
 
-		if (Key_IsDown(Key_Up)) { y = y == 1 ? numItems : y - 1; }
-		else if (Key_IsDown(Key_Down)) { y = y == numItems ? 1 : y + 1; }
+		if (Key_IsDown(Key_Up)) { y = y == 1 ? menu->NumItems : y - 1; }
+		else if (Key_IsDown(Key_Down)) { y = y == menu->NumItems ? 1 : y + 1; }
 		else if (Key_IsDown(Key_2nd) || Key_IsDown(Key_Enter)) {
-			void (*func)() = items[y - 1].Function;
-			if (func == BACK_FUNCTION) { return y; }
-			else { func(); }
+			void (*func)() = menu->Items[y - 1].Function;
+			if (func == FUNCTION_BACK) { return y; }
+			else if (func != FUNCTION_NONE) { func(); }
 			gc_FillScrn(255);
 		}
 
 		if (old_y != y) {
-			DrawRectFill(0, 9 * old_y, 8, 8, 255);
+			DrawRectFill(0, linePadding * old_y, 8, 8, 255);
 		}
 	}
 

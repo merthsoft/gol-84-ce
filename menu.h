@@ -4,13 +4,31 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define BACK_FUNCTION (void*)0
+#define FUNCTION_BACK (void*)1
+#define FUNCTION_NONE (void*)0
 
 typedef struct MenuItem {
 	char* Name;
 	void* Function;
+	bool Selected;
 } MenuItem;
 
-int Menu(const char* title, MenuItem items[], uint8_t numItems, void* extraFunction);
+typedef enum MenuSelectionType {
+    None,
+    Single,
+    Multiple
+} MenuSelectionType;
+
+typedef struct Menu {
+    char* Title;
+    MenuItem* Items;
+    uint8_t NumItems;
+    void* ExtraFunction;
+    MenuSelectionType SelectionType;
+} Menu;
+
+Menu* CreateMenu(uint8_t numItems, const char*);
+void DeleteMenu(Menu*);
+int DisplayMenu(Menu*);
 
 #endif MENU_H

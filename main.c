@@ -27,6 +27,7 @@
 
 void Settings();
 void ColorSettings();
+void TopologySettings();
 
 void DrawSampleBoard();
 Board* mainBoard;
@@ -72,7 +73,7 @@ void main(void) {
     InitRules(mainBoard);
     
     kb_Scan();
-    
+
 	while (!Key_IsDown(Key_Del)) {
 		if (redraw) {
 			gc_FillScrn(255);
@@ -142,27 +143,35 @@ void main(void) {
 }
 
 void Settings() {
-	MenuItem items[4];
-	items[0].Name = "Colors";
-	items[0].Function = ColorSettings;
-	items[1].Name = "Rules";
-	items[2].Name = "Topologies";
-	items[3].Name = "Back";
-	items[3].Function = BACK_FUNCTION;
+    Menu* menu = CreateMenu(4, "Settings");
 
-	Menu("Settings:", items, 4, NULL);
+	menu->Items[0].Name = "Colors";
+    menu->Items[0].Function = ColorSettings;
+	
+    menu->Items[1].Name = "Rules";
+
+    menu->Items[2].Name = "Topologies";
+    menu->Items[2].Function = TopologySettings;
+    
+    menu->Items[3].Name = "Back";
+    menu->Items[3].Function = FUNCTION_BACK;
+
+    DisplayMenu(menu);
+    DeleteMenu(menu);
 }
 
 void ColorSettings() {
-	MenuItem items[7];
-	items[0].Name = "Grid";
-	items[1].Name = "Dead";
-	items[2].Name = "Alive";
-	items[3].Name = "Selected (Dead)";
-	items[4].Name = "Selected (Alive)";
-	items[5].Name = "Save";
-	items[6].Name = "Back";
-	items[6].Function = BACK_FUNCTION;
+    Menu* menu = CreateMenu(7, "Colors");
+    menu->ExtraFunction = DrawSampleBoard;
+
+	menu->Items[0].Name = "Grid";
+	menu->Items[1].Name = "Dead";
+	menu->Items[2].Name = "Alive";
+	menu->Items[3].Name = "Selected (Dead)";
+	menu->Items[4].Name = "Selected (Alive)";
+	menu->Items[5].Name = "Save";
+	menu->Items[6].Name = "Back";
+	menu->Items[6].Function = FUNCTION_BACK;
 
 	sampleBoard->GridColor = mainBoard->GridColor;
 	sampleBoard->DeadColor = mainBoard->DeadColor;
@@ -170,11 +179,32 @@ void ColorSettings() {
 	sampleBoard->CursorDeadColor = mainBoard->CursorDeadColor;
 	sampleBoard->CursorAliveColor = mainBoard->CursorAliveColor;
 
-	Menu("Colors:", items, 7, DrawSampleBoard);
+    DisplayMenu(menu);
+    DeleteMenu(menu);
 }
 
 void DrawSampleBoard() {
 	gc_PrintStringXY("Sample:", 150, 0);
 	DrawGrid(sampleBoard, 150, 9);
 	DrawBoard(sampleBoard, true, 150, 9);
+}
+
+void TopologySettings() {
+    Menu* menu = CreateMenu(8, "Topologies:");
+    menu->SelectionType = Single;
+
+    menu->Items[0].Name = "Plane";
+    menu->Items[1].Name = "Ring";
+    menu->Items[2].Name = "Mobius";
+    menu->Items[3].Name = "Torus";
+    menu->Items[4].Name = "Sphere";
+    menu->Items[5].Name = "Klein";
+    menu->Items[6].Name = "Proj";
+    menu->Items[7].Name = "Back";
+	menu->Items[7].Function = FUNCTION_BACK;
+
+    menu->Items[mainBoard->WrappingMode].Selected = true;
+
+    DisplayMenu(menu);
+    DeleteMenu(menu);
 }

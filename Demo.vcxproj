@@ -104,6 +104,7 @@ makece SHELL=cmd.exe</NMakeReBuildCommandLine>
     <ClInclude Include="draw.h" />
     <ClInclude Include="key_helper.h" />
     <ClInclude Include="menu.h" />
+    <ClInclude Include="menu_sprites.h" />
     <ClInclude Include="rules.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
