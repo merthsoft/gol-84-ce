@@ -4,7 +4,7 @@
 #include <tice.h>
 
 #include "board.h"
-#include "rules.h"
+#include "rule.h"
 #include "draw.h"
 
 void Step(Board* board) {
@@ -177,7 +177,17 @@ Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
 	}
 
 	b->BoardNumber = 0;
+    b->Rule = malloc(sizeof(Rule));
+    b->Rule->Live = 0;
+    b->Rule->Born = 0;
+    b->Rule->Name = NULL;
 	return b;
+}
+
+void SetRule(Board* b, Rule* rule) {
+    b->Rule->Live = rule->Live;
+    b->Rule->Born = rule->Born;
+    b->Rule->Name = rule->Name;
 }
 
 void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety) {

@@ -1,5 +1,5 @@
 TARGET ?= GOL
-DEBUG = NDEBUG
+DEBUG = DEBUG
 
 #Change ICONC to "ICON" to include a custom icon, and "NICON" to not use an icon
 ICONC ?= ICON

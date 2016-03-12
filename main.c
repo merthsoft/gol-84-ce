@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <debug.h>
 
 #include <graphc.h>
 #include <keypadc.h>
@@ -17,22 +18,26 @@
 #include "board.h"
 #include "draw.h"
 #include "menu.h"
-#include "rules.h"
+#include "rule.h"
 
-#define BOARD_WIDTH		28
-#define BOARD_HEIGHT	BOARD_WIDTH
+uint8_t boardWidth     = 28;
+uint8_t boardHeight    = 28;
 
-#define CELL_WIDTH		8
-#define CELL_HEIGHT		8
+uint8_t cellWidth  = 8;
+uint8_t cellHeight = 8;
+
+uint8_t numRules = 6;
 
 void Settings();
 void ColorSettings(Menu* parentMenu, int parentIndex);
 void TopologySettings(Menu* parentMenu, int parentIndex);
 void DrawSampleBoard(Menu* parentMenu, int parentIndex);
 void ColorPicker(Menu* parentMenu, int parentIndex);
+void InitRules();
 
 Board* mainBoard;
 Board* sampleBoard;
+Rule* rulesList;
 
 void main(void) {
 	uint8_t x = 1;
@@ -48,13 +53,13 @@ void main(void) {
 	gc_InitGraph();
 	gc_FillScrn(0);
 
-	mainBoard = CreateBoard(BOARD_WIDTH, BOARD_HEIGHT);
+	mainBoard = CreateBoard(boardWidth, boardHeight);
 	mainBoard->AliveColor = 18;
 	mainBoard->DeadColor = 255;
 	mainBoard->GridColor = 0;
 	mainBoard->WrappingMode = Plane;
-	mainBoard->CellHeight = CELL_HEIGHT;
-	mainBoard->CellWidth = CELL_WIDTH;
+	mainBoard->CellHeight = cellWidth;
+	mainBoard->CellWidth = cellHeight;
 	mainBoard->CursorDeadColor = 224;
 	mainBoard->CursorAliveColor = 15;
 	mainBoard->RandomMod = 4;
@@ -73,9 +78,8 @@ void main(void) {
     sampleBoard->Cells[1][2][1] = 1;
     
     ClearBoard(mainBoard);
-	SetupBoard(mainBoard);
+    SetupBoard(mainBoard);
     InitRules();
-    mainBoard->Rule = &rules[0];
     
     kb_Scan();
 
@@ -90,7 +94,7 @@ void main(void) {
 			gc_PrintStringXY("+-Step", 235, 53);
 			gc_PrintStringXY("Mode-Setup", 235, 62);
 			DrawGrid(mainBoard, 0, 0);
-			DrawBoard(mainBoard, true, 0, 0);
+			DrawBoard(mainBoard, true, 0, 0);     
 
 			redraw = false;
 		}
@@ -145,6 +149,37 @@ void main(void) {
 	kb_Reset();
 	gc_CloseGraph();
 	pgrm_CleanUp();
+}
+
+void InitRules() {
+    rulesList = malloc(numRules * sizeof(Rule));
+
+    // Life: 23/3
+    rulesList[0].Live = 0x0C;
+    rulesList[0].Born = 0x08;
+    rulesList[0].Name = "Life:      23/3";
+    // HighLife: 23/36
+    rulesList[1].Live = 0x0C;
+    rulesList[1].Born = 0x48;
+    rulesList[1].Name = "HighLife:  23/36";
+    // Replicator: 1357/1357
+    rulesList[2].Live = 0xAA;
+    rulesList[2].Born = 0xAA;
+    rulesList[2].Name = "Replicate: 1357/1357";
+    // Maze: 12345/3
+    rulesList[3].Live = 0x3E;
+    rulesList[3].Born = 0x08;
+    rulesList[3].Name = "Maze:      12345/3";
+    // 34 Life: 34/34
+    rulesList[4].Live = 0x18;
+    rulesList[4].Born = 0x18;
+    rulesList[4].Name = "34 Life:   34/34";
+    // 2x2: 125/36
+    rulesList[5].Live = 0x26;
+    rulesList[5].Born = 0x09;
+    rulesList[5].Name = "2x2:       125/36";
+
+    SetRule(mainBoard, &rulesList[0]);
 }
 
 void Settings() {

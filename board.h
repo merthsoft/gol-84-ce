@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "rules.h"
+#include "rule.h"
 
 #define MOD_CYCLE(n, c) (((n) + (c)) % (c))
 
@@ -45,5 +45,6 @@ void Step(Board* board);
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
 void DrawCell(Board* board, uint8_t x, uint8_t y);
 void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety);
+void SetRule(Board* b, Rule* rule);
 
 #endif BOARD_H

@@ -30,9 +30,6 @@
     <ClCompile Include="board.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rules.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="iconc.png">
@@ -56,13 +53,13 @@
     <ClInclude Include="draw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rules.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="menu_sprites.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
