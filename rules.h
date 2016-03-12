@@ -12,7 +12,6 @@ typedef struct Rule {
 
 uint8_t numRules = 6;
 Rule* rules;
-Rule currentRule;
 
 void InitRules();
 

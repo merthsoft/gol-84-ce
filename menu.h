@@ -25,6 +25,7 @@ typedef struct Menu {
     uint8_t NumItems;
     void* ExtraFunction;
     MenuSelectionType SelectionType;
+    key_t BackKey;
 } Menu;
 
 Menu* CreateMenu(uint8_t numItems, const char* title);

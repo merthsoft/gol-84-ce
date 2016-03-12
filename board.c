@@ -12,6 +12,7 @@ void Step(Board* board) {
 	uint8_t i;
 	uint8_t j;
 	uint8_t boardNum = board->BoardNumber;
+    Rule* currentRule = board->Rule;
 
 	for (i = 1; i <= board->BoardWidth; i++) {
 		for (j = 1; j <= board->BoardHeight; j++) {
@@ -27,14 +28,13 @@ void Step(Board* board) {
 					+ WrapToBoard(board, i + 1, j + 1);
 			
 			// Rules:
-			if (!(currentRule.Live & (1 << numN))) {
+			if (!(currentRule->Live & (1 << numN))) {
 				board->Cells[!boardNum][i][j] = 0;
-			}
-			else {
+			} else {
 				board->Cells[!boardNum][i][j] = board->Cells[boardNum][i][j];
 			}
 
-			if ((currentRule.Born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
+			if ((currentRule->Born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
 				board->Cells[!boardNum][i][j] = 1;
 			}
 		}
@@ -129,11 +129,11 @@ void DrawCell(Board* board, uint8_t x, uint8_t y) {
 	DrawRectFill(x*cellWidth + 1, y * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
 }
 
-void DrawCursor(Board* board, uint8_t x, uint8_t y) {
+void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety) {
 	uint8_t cellWidth = board->CellWidth;
 	uint8_t cellHeight = board->CellHeight;
 
-	DrawRectFill(x*cellWidth + 1, y * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
+	DrawRectFill(x*cellWidth + 1 + offsetx, y * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
 }
 
 void SetupBoard(Board* board) {

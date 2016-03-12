@@ -1,9 +1,6 @@
 #include "rules.h"
 
 void InitRules() {
-	currentRule.Live = 0x0C;
-	currentRule.Born = 0x08;
-
 	rules = (Rule*)malloc(numRules*sizeof(Rule));
 	// Life: 23/3
 	rules[0].Live = 0x0C;

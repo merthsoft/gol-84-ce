@@ -29,6 +29,7 @@ void Settings();
 void ColorSettings(Menu* parentMenu, int parentIndex);
 void TopologySettings(Menu* parentMenu, int parentIndex);
 void DrawSampleBoard(Menu* parentMenu, int parentIndex);
+void ColorPicker(Menu* parentMenu, int parentIndex);
 
 Board* mainBoard;
 Board* sampleBoard;
@@ -67,10 +68,14 @@ void main(void) {
 	sampleBoard->Cells[0][2][4] = 1;
 	sampleBoard->Cells[0][3][4] = 1;
 	sampleBoard->Cells[0][4][4] = 1;
-
+    sampleBoard->Cells[0][2][1] = 1;
+    sampleBoard->Cells[1][4][4] = 1;
+    sampleBoard->Cells[1][2][1] = 1;
+    
     ClearBoard(mainBoard);
 	SetupBoard(mainBoard);
-    InitRules(mainBoard);
+    InitRules();
+    mainBoard->Rule = &rules[0];
     
     kb_Scan();
 
@@ -97,7 +102,7 @@ void main(void) {
 			kb_Scan();
 			if (Key_IsDown(Key_Enter)) { running = false; }
 		} else {
-			DrawCursor(mainBoard, x, y);
+			DrawCursor(mainBoard, x, y, 0, 0);
 
 			for (i = 0; i < 100; i++) { kb_Scan(); }
 
@@ -161,17 +166,23 @@ void Settings() {
 }
 
 void ColorSettings(Menu* parentMenu, int parentIndex) {
+    uint8_t i;
+
     Menu* menu = CreateMenu(7, "Colors");
     menu->ExtraFunction = DrawSampleBoard;
 
 	menu->Items[0].Name = "Grid";
 	menu->Items[1].Name = "Dead";
 	menu->Items[2].Name = "Alive";
-	menu->Items[3].Name = "Selected (Dead)";
-	menu->Items[4].Name = "Selected (Alive)";
+	menu->Items[3].Name = "Cursor (Dead)";
+	menu->Items[4].Name = "Cursor (Alive)";
 	menu->Items[5].Name = "Save";
 	menu->Items[6].Name = "Back";
 	menu->Items[6].Function = FUNCTION_BACK;
+
+    for (i = 0; i < 5; i++) {
+        menu->Items[i].Function = ColorPicker;
+    }
 
 	sampleBoard->GridColor = mainBoard->GridColor;
 	sampleBoard->DeadColor = mainBoard->DeadColor;
@@ -187,6 +198,46 @@ void DrawSampleBoard(Menu* parentMenu, int parentIndex) {
 	gc_PrintStringXY("Sample:", 150, 0);
 	DrawGrid(sampleBoard, 150, 9);
 	DrawBoard(sampleBoard, true, 150, 9);
+    DrawCursor(sampleBoard, 1, 1, 150, 9);
+    DrawCursor(sampleBoard, 2, 1, 150, 9);
+}
+
+void ColorPicker(Menu* parentMenu, int parentIndex) {
+    uint8_t i, j, c = 0;
+    
+    gc_SetColorIndex(0);
+    gc_ClipHorizLine(0, 85, 320);
+    for (j = 0; j < 8; j++) {
+        for (i = 0; i < 32; i++) {
+            DrawRectFill(10 * i + 1, 10 * j + 100, 8, 8, c++);
+        }
+    }
+    SetTextColor(0, 255);
+    gc_PrintStringXY("Select color for: ", 1, 87);
+    gc_PrintStringXY(parentMenu->Items[parentIndex].Name, 120, 87);
+
+    switch (parentIndex) {
+        case 0:
+            c = mainBoard->GridColor;
+        case 1:
+            c = mainBoard->DeadColor;
+        case 2:
+            c = mainBoard->AliveColor;
+        case 3:
+            c = mainBoard->CursorDeadColor;
+        case 4:
+            c = mainBoard->CursorAliveColor;
+    }
+    
+    i = c % 32;
+    j = c / 32;
+
+    while (!Key_IsDown(Key_Del)) {
+        kb_Scan();
+
+        gc_SetColorIndex(0);
+        gc_NoClipRectangleOutline(10 * i + 1, 10 * j + 100, 8, 8);
+    }
 }
 
 void TopologySettings(Menu* parentMenu, int parentIndex) {

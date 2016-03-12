@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "rules.h"
+
 #define MOD_CYCLE(n, c) (((n) + (c)) % (c))
 
 typedef enum {
@@ -31,6 +33,7 @@ typedef struct Board {
 	uint8_t CursorAliveColor;
 	uint8_t CursorDeadColor;
 	uint8_t RandomMod;
+    Rule* Rule;
 } Board;
 
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
@@ -41,6 +44,6 @@ void ClearBoard(Board* board);
 void Step(Board* board);
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
 void DrawCell(Board* board, uint8_t x, uint8_t y);
-void DrawCursor(Board* board, uint8_t x, uint8_t y);
+void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety);
 
 #endif BOARD_H

@@ -23,6 +23,7 @@ Menu* CreateMenu(uint8_t numItems, const char* title) {
 
     menu->Title = title;
     menu->ExtraFunction = FUNCTION_NONE;
+    menu->BackKey = 0;
 
     return menu;
 }
@@ -47,7 +48,7 @@ int DisplayMenu(Menu* menu) {
     }
 
 	gc_FillScrn(255);
-	while (true) {
+	while (1) {
 		gc_PrintStringXY(menu->Title, 1, 1);
 
 		for (i = 0; i < menu->NumItems; i++) {
@@ -99,6 +100,8 @@ int DisplayMenu(Menu* menu) {
                         menu->Items[index].Selected = !menu->Items[index].Selected;
                         break;
                 }
+            } else if (Key_IsDown(menu->BackKey)) {
+                return -1;
             }
 			
 			if (func == FUNCTION_BACK) { return index; }
