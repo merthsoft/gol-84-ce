@@ -40,7 +40,7 @@ void main(void) {
 	mainBoard->AliveColor = 18;
 	mainBoard->DeadColor = 255;
 	mainBoard->GridColor = 0;
-	mainBoard->WrappingMode = Plane;
+	mainBoard->WrappingMode = Torus;
 	mainBoard->CellHeight = cellWidth;
 	mainBoard->CellWidth = cellHeight;
 	mainBoard->CursorDeadColor = 224;
@@ -80,7 +80,7 @@ void main(void) {
 
 			redraw = false;
 		}
-
+        
 		if (running) {
 			Step(mainBoard);
 			DrawBoard(mainBoard, false, 0, 0);
@@ -341,6 +341,14 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
 
     menu->BackKey = Key_Del;
     DisplayMenu(menu);
+
+    for (i = 0; i < 6; i++) {
+        if (menu->Items[i].Selected) {
+            mainBoard->WrappingMode = i;
+            break;
+        }
+    }
+
     DeleteMenu(menu);
 }
 
