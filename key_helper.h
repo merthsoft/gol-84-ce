@@ -84,7 +84,12 @@ typedef uint16_t key_t;
 #define Key_Left	(key_t)(7 << 8 | 1<<1)
 #define Key_Right	(key_t)(7 << 8 | 1<<2)
 #define Key_Up		(key_t)(7 << 8 | 1<<3)
-							
+
+void Key_Init();
 bool Key_IsDown(key_t key);
+bool Key_WasDown(key_t key);
+bool Key_JustPressed(key_t key);
+void Key_ScanKeys(bool debounce);
+void Key_Reset();
 
 #endif // !KEY_H

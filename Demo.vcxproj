@@ -102,6 +102,7 @@ makece SHELL=cmd.exe</NMakeReBuildCommandLine>
     <ClInclude Include="board.h" />
     <ClInclude Include="draw.h" />
     <ClInclude Include="key_helper.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="menu_sprites.h" />
     <ClInclude Include="rule.h" />

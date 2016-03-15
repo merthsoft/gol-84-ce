@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include <graphc.h>
-#include <keypadc.h>
 
 #include "draw.h"
 #include "key_helper.h"
@@ -42,13 +41,18 @@ int DisplayMenu(Menu* menu) {
     uint8_t extraTextPadding = 0;
     uint8_t previouslySelectedIndex = 0;
     bool selected = false;
+    uint32_t frameNumber = 0;
+    MenuEventArgs* eventArgs;
+    bool back = false;
 
     if (menu->SelectionType != None) {
         extraTextPadding = linePadding;
     }
 
+    eventArgs = malloc(sizeof(MenuEventArgs));
+
 	gc_FillScrn(255);
-	while (1) {
+	while (!back) {
 		gc_PrintStringXY(menu->Title, 1, 1);
 
 		for (i = 0; i < menu->NumItems; i++) {
@@ -73,20 +77,29 @@ int DisplayMenu(Menu* menu) {
             }
 		}
 
-		if (menu->ExtraFunction != FUNCTION_NONE) {
-			void(*func)(Menu*, int) = menu->ExtraFunction;
-			func(menu, y-1);
-		}
-
 		gc_PrintStringXY(">", 2, linePadding * y);
-		for (i = 0; i < 100; i++) { kb_Scan(); }
+		Key_ScanKeys(false);
 		old_y = y;
 
-		if (Key_IsDown(Key_Up)) { y = y == 1 ? menu->NumItems : y - 1; }
-		else if (Key_IsDown(Key_Down)) { y = y == menu->NumItems ? 1 : y + 1; }
-		else if (Key_IsDown(Key_2nd) || Key_IsDown(Key_Enter)) {
+        if (menu->ExtraFunction != FUNCTION_NONE) {
+            void(*func)(MenuEventArgs*) = menu->ExtraFunction;
+            eventArgs->FrameNumber = frameNumber;
+            eventArgs->Menu = menu;
+            eventArgs->Index = y - 1;
+            eventArgs->Back = false;
+
+            func(eventArgs);
+            y = eventArgs->Index + 1;
+            frameNumber = eventArgs->FrameNumber;
+            menu = eventArgs->Menu;
+            back = eventArgs->Back;
+        }
+
+		if (Key_JustPressed(Key_Up)) { y = y == 1 ? menu->NumItems : y - 1; }
+		else if (Key_JustPressed(Key_Down)) { y = y == menu->NumItems ? 1 : y + 1; }
+		else if (Key_JustPressed(Key_2nd) || Key_JustPressed(Key_Enter)) {
             uint8_t index = y - 1;
-            void(*func)(Menu*, int) = menu->Items[index].Function;
+            void(*func)(MenuEventArgs*) = menu->Items[index].Function;
 
             if (menu->SelectionType != None && menu->Items[y - 1].Function != FUNCTION_BACK) {
                 switch (menu->SelectionType) {
@@ -100,19 +113,33 @@ int DisplayMenu(Menu* menu) {
                         menu->Items[index].Selected = !menu->Items[index].Selected;
                         break;
                 }
-            } else if (Key_IsDown(menu->BackKey)) {
-                return -1;
-            }
+            } 
 			
-			if (func == FUNCTION_BACK) { return index; }
-			else if (func != FUNCTION_NONE) { func(menu, index); }
+            if (func == FUNCTION_BACK) { back = true; }
+			else if (func != FUNCTION_NONE) { 
+                eventArgs->FrameNumber = frameNumber;
+                eventArgs->Menu = menu;
+                eventArgs->Index = index;
+                eventArgs->Back = false;
+
+                func(eventArgs);
+                y = eventArgs->Index + 1;
+                frameNumber = eventArgs->FrameNumber;
+                menu = eventArgs->Menu;
+                back = eventArgs->Back;
+            }
 			gc_FillScrn(255);
-		}
+		} else if (Key_JustPressed(menu->BackKey)) {
+            y = 0;
+            back = true;
+        }
 
 		if (old_y != y) {
 			DrawRectFill(0, linePadding * old_y, 8, 8, 255);
 		}
+
+        frameNumber++;
 	}
 
-	return -1;
+	return y-1;
 }

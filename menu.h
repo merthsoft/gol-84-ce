@@ -28,6 +28,13 @@ typedef struct Menu {
     key_t BackKey;
 } Menu;
 
+typedef struct MenuEventArgs {
+    Menu* Menu;
+    uint8_t Index;
+    uint32_t FrameNumber;
+    bool Back;
+} MenuEventArgs;
+
 Menu* CreateMenu(uint8_t numItems, const char* title);
 void DeleteMenu(Menu* menu);
 int DisplayMenu(Menu* menu);

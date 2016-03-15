@@ -12,32 +12,13 @@
 #include <debug.h>
 
 #include <graphc.h>
-#include <keypadc.h>
 
 #include "key_helper.h"
 #include "board.h"
 #include "draw.h"
 #include "menu.h"
 #include "rule.h"
-
-uint8_t boardWidth     = 28;
-uint8_t boardHeight    = 28;
-
-uint8_t cellWidth  = 8;
-uint8_t cellHeight = 8;
-
-uint8_t numRules = 6;
-
-void Settings();
-void ColorSettings(Menu* parentMenu, int parentIndex);
-void TopologySettings(Menu* parentMenu, int parentIndex);
-void DrawSampleBoard(Menu* parentMenu, int parentIndex);
-void ColorPicker(Menu* parentMenu, int parentIndex);
-void InitRules();
-
-Board* mainBoard;
-Board* sampleBoard;
-Rule* rulesList;
+#include "main.h"
 
 void main(void) {
 	uint8_t x = 1;
@@ -45,10 +26,11 @@ void main(void) {
 	uint8_t old_x = x;
 	uint8_t old_y = y;
 	uint8_t i;
-
+    
 	bool redraw = true;
 	bool toggled = false;
 	bool running = false;
+    bool quit = false;
 	
 	gc_InitGraph();
 	gc_FillScrn(0);
@@ -80,10 +62,9 @@ void main(void) {
     ClearBoard(mainBoard);
     SetupBoard(mainBoard);
     InitRules();
-    
-    kb_Scan();
+    Key_Init();
 
-	while (!Key_IsDown(Key_Del)) {
+	while (!quit) {
 		if (redraw) {
 			gc_FillScrn(255);
 			gc_PrintStringXY("2nd-Toggle", 235, 8);
@@ -103,12 +84,13 @@ void main(void) {
 			Step(mainBoard);
 			DrawBoard(mainBoard, false, 0, 0);
             
-			kb_Scan();
-			if (Key_IsDown(Key_Enter)) { running = false; }
+            Key_ScanKeys(false);
+			if (Key_JustPressed(Key_Enter)) { running = false; }
+            else if (Key_JustPressed(Key_Del)) { quit = true; }
 		} else {
 			DrawCursor(mainBoard, x, y, 0, 0);
 
-			for (i = 0; i < 100; i++) { kb_Scan(); }
+			Key_ScanKeys(true);
 
 			old_x = x;
 			old_y = y;
@@ -117,7 +99,7 @@ void main(void) {
 			else if (Key_IsDown(Key_Down)) { y = y == mainBoard->BoardHeight ? 1 : y + 1; }
 			else if (Key_IsDown(Key_Left)) { x = x == 1 ? mainBoard->BoardWidth : x - 1; }
 			else if (Key_IsDown(Key_Right)) { x = x == mainBoard->BoardWidth ? 1 : x + 1; }
-			else if (Key_IsDown(Key_Enter)) { running = true; }
+			else if (Key_JustPressed(Key_Enter)) { running = true; }
 			else if (Key_IsDown(Key_Clear)) { 
 				ClearBoard(mainBoard);
 				DrawBoard(mainBoard, true, 0, 0);
@@ -127,26 +109,20 @@ void main(void) {
 			} else if (Key_IsDown(Key_Add)) {
 				Step(mainBoard);
 				DrawBoard(mainBoard, false, 0, 0);
-			}
+			}  else if (Key_IsDown(Key_Del)) { quit = true; }
 
-			if (Key_IsDown(Key_2nd)) {
-				if (!toggled) {
-					mainBoard->Cells[mainBoard->BoardNumber][x][y] = !mainBoard->Cells[mainBoard->BoardNumber][x][y];
-					toggled = true;
-				}
-			} else {
-				toggled = false;
+			if (Key_JustPressed(Key_2nd)) {
+				mainBoard->Cells[mainBoard->BoardNumber][x][y] = !mainBoard->Cells[mainBoard->BoardNumber][x][y];
+				toggled = true;
 			}
 
 			if (old_x != x || old_y != y || running) {
 				DrawCell(mainBoard, old_x, old_y);
 			}
 		}
-
-        kb_Scan();
 	}
 	
-	kb_Reset();
+    Key_Reset();
 	gc_CloseGraph();
 	pgrm_CleanUp();
 }
@@ -196,11 +172,12 @@ void Settings() {
     menu->Items[3].Name = "Back";
     menu->Items[3].Function = FUNCTION_BACK;
 
+    menu->BackKey = Key_Del;
     DisplayMenu(menu);
     DeleteMenu(menu);
 }
 
-void ColorSettings(Menu* parentMenu, int parentIndex) {
+void ColorSettings(MenuEventArgs* menuEventArgs) {
     uint8_t i;
 
     Menu* menu = CreateMenu(7, "Colors");
@@ -212,6 +189,7 @@ void ColorSettings(Menu* parentMenu, int parentIndex) {
 	menu->Items[3].Name = "Cursor (Dead)";
 	menu->Items[4].Name = "Cursor (Alive)";
 	menu->Items[5].Name = "Save";
+    menu->Items[5].Function = SaveColors;
 	menu->Items[6].Name = "Back";
 	menu->Items[6].Function = FUNCTION_BACK;
 
@@ -225,20 +203,25 @@ void ColorSettings(Menu* parentMenu, int parentIndex) {
 	sampleBoard->CursorDeadColor = mainBoard->CursorDeadColor;
 	sampleBoard->CursorAliveColor = mainBoard->CursorAliveColor;
 
+    menu->BackKey = Key_Del;
     DisplayMenu(menu);
     DeleteMenu(menu);
 }
 
-void DrawSampleBoard(Menu* parentMenu, int parentIndex) {
-	gc_PrintStringXY("Sample:", 150, 0);
-	DrawGrid(sampleBoard, 150, 9);
-	DrawBoard(sampleBoard, true, 150, 9);
-    DrawCursor(sampleBoard, 1, 1, 150, 9);
-    DrawCursor(sampleBoard, 2, 1, 150, 9);
+void DrawSampleBoard(MenuEventArgs* menuEventArgs) {
+    if (menuEventArgs->FrameNumber == 0) {
+        gc_PrintStringXY("Sample:", 150, 0);
+        DrawGrid(sampleBoard, 150, 9);
+        DrawBoard(sampleBoard, true, 150, 9);
+        DrawCursor(sampleBoard, 1, 1, 150, 9);
+        DrawCursor(sampleBoard, 2, 1, 150, 9);
+    }
 }
 
-void ColorPicker(Menu* parentMenu, int parentIndex) {
+void ColorPicker(MenuEventArgs* menuEventArgs) {
+    uint8_t a = 0;
     uint8_t i, j, c = 0;
+    uint8_t old_i, old_j;
     
     gc_SetColorIndex(0);
     gc_ClipHorizLine(0, 85, 320);
@@ -249,33 +232,90 @@ void ColorPicker(Menu* parentMenu, int parentIndex) {
     }
     SetTextColor(0, 255);
     gc_PrintStringXY("Select color for: ", 1, 87);
-    gc_PrintStringXY(parentMenu->Items[parentIndex].Name, 120, 87);
+    gc_PrintStringXY(menuEventArgs->Menu->Items[menuEventArgs->Index].Name, 120, 87);
 
-    switch (parentIndex) {
+    switch (menuEventArgs->Index) {
         case 0:
             c = mainBoard->GridColor;
+            break;
         case 1:
             c = mainBoard->DeadColor;
+            break;
         case 2:
             c = mainBoard->AliveColor;
+            break;
         case 3:
             c = mainBoard->CursorDeadColor;
+            break;
         case 4:
             c = mainBoard->CursorAliveColor;
+            break;
     }
     
     i = c % 32;
     j = c / 32;
 
-    while (!Key_IsDown(Key_Del)) {
-        kb_Scan();
-
+    while (true) {
         gc_SetColorIndex(0);
-        gc_NoClipRectangleOutline(10 * i + 1, 10 * j + 100, 8, 8);
+        gc_NoClipRectangleOutline(10 * i, 10 * j + 99, 10, 10);
+
+        Key_ScanKeys(true);
+
+        old_i = i;
+        old_j = j;
+
+        if (Key_IsDown(Key_Up)) { j = j == 0 ? 7 : j - 1; }
+        else if (Key_IsDown(Key_Down)) { j = j == 7 ? 0 : j + 1; }
+        else if (Key_IsDown(Key_Left)) { i = i == 0 ? 31 : i - 1; }
+        else if (Key_IsDown(Key_Right)) { i = i == 31 ? 0 : i + 1; }
+        else if (Key_JustPressed(Key_2nd) || Key_JustPressed(Key_Enter)) {
+            MenuEventArgs m;
+            c = i % 32 + j * 32;
+
+            switch (menuEventArgs->Index) {
+                case 0:
+                    sampleBoard->GridColor = c;
+                    break;
+                case 1:
+                    sampleBoard->DeadColor = c;
+                    break;
+                case 2:
+                    sampleBoard->AliveColor = c;
+                    break;
+                case 3:
+                    sampleBoard->CursorDeadColor = c;
+                    break;
+                case 4:
+                    sampleBoard->CursorAliveColor = c;
+                    break;
+            }
+
+            m.FrameNumber = 0;
+            m.Index = 0;
+            m.Menu = NULL;
+            DrawSampleBoard(&m);
+        } else if (Key_JustPressed(Key_Del)) { 
+            menuEventArgs->FrameNumber = -1; // Force a re-draw of the sample board
+            return; 
+        }
+        
+        if (i != old_i || j != old_j) {
+            gc_SetColorIndex(255);
+            gc_NoClipRectangleOutline(10 * old_i, 10 * old_j + 99, 10, 10);
+        }
     }
 }
 
-void TopologySettings(Menu* parentMenu, int parentIndex) {
+void SaveColors(MenuEventArgs* menuEventArgs) {
+    mainBoard->GridColor = sampleBoard->GridColor;
+    mainBoard->DeadColor = sampleBoard->DeadColor;
+    mainBoard->AliveColor = sampleBoard->AliveColor;
+    mainBoard->CursorDeadColor = sampleBoard->CursorDeadColor;
+    mainBoard->CursorAliveColor = sampleBoard->CursorAliveColor;
+    menuEventArgs->Back = true;
+}
+
+void TopologySettings(MenuEventArgs* menuEventArgs) {
     Menu* menu = CreateMenu(8, "Topologies:");
     menu->SelectionType = Single;
 
@@ -291,6 +331,7 @@ void TopologySettings(Menu* parentMenu, int parentIndex) {
 
     menu->Items[mainBoard->WrappingMode].Selected = true;
 
+    menu->BackKey = Key_Del;
     DisplayMenu(menu);
     DeleteMenu(menu);
 }

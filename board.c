@@ -6,6 +6,7 @@
 #include "board.h"
 #include "rule.h"
 #include "draw.h"
+#include "key_helper.h"
 
 void Step(Board* board) {
 	uint8_t numN; // The number of neighbors
