@@ -37,6 +37,7 @@ void DrawSampleBoard(MenuEventArgs* menuEventArgs);
 void ColorPicker(MenuEventArgs* menuEventArgs);
 void InitRules();
 void SaveColors(MenuEventArgs* menuEventArgs);
+void DrawTopoSprite(MenuEventArgs* menuEventArgs);
 
 Board* mainBoard;
 Board* sampleBoard;

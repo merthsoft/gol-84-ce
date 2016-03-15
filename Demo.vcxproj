@@ -116,6 +116,7 @@ makece SHELL=cmd.exe</NMakeReBuildCommandLine>
     <ClInclude Include="menu.h" />
     <ClInclude Include="menu_sprites.h" />
     <ClInclude Include="rule.h" />
+    <ClInclude Include="topo_sprites.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

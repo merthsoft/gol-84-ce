@@ -19,6 +19,7 @@
 #include "menu.h"
 #include "rule.h"
 #include "main.h"
+#include "topo_sprites.h"
 
 void main(void) {
 	uint8_t x = 1;
@@ -316,8 +317,11 @@ void SaveColors(MenuEventArgs* menuEventArgs) {
 }
 
 void TopologySettings(MenuEventArgs* menuEventArgs) {
+    int i;
+    MenuEventArgs m;
     Menu* menu = CreateMenu(8, "Topologies:");
     menu->SelectionType = Single;
+    menu->ExtraFunction = DrawTopoSprite;
 
     menu->Items[0].Name = "Plane";
     menu->Items[1].Name = "Ring";
@@ -331,7 +335,44 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
 
     menu->Items[mainBoard->WrappingMode].Selected = true;
 
+    for (i = 0; i < 6; i++) {
+        menu->Items[i].Function = DrawTopoSprite;
+    }
+
     menu->BackKey = Key_Del;
     DisplayMenu(menu);
     DeleteMenu(menu);
+}
+
+void DrawTopoSprite(MenuEventArgs* menuEventArgs) {
+    uint8_t* sprite = NULL;
+
+    switch (menuEventArgs->Index) {
+        case 0:
+            sprite = topo_plane;
+            break;
+        case 1:
+            sprite = topo_ring;
+            break;
+        case 2:
+            sprite = topo_mobius;
+            break;
+        case 3:
+            sprite = topo_torus;
+            break;
+        case 4:
+            sprite = topo_sphere;
+            break;
+        case 5:
+            sprite = topo_klein;
+            break;
+        case 6:
+            sprite = topo_proj;
+            break;
+        default:
+            sprite = topo_plane;
+            break;
+    }
+
+    gc_NoClipDrawScaledSprite(sprite, 150, 9, 16, 16, 9, 9);
 }
