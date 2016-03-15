@@ -91,7 +91,17 @@ makece SHELL=cmd.exe</NMakeReBuildCommandLine>
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="checkbox_checked.png" />
+    <Image Include="checkbox_empty.png" />
     <Image Include="iconc.png" />
+    <Image Include="radiobutton_empty.png" />
+    <Image Include="radiobutton_filled.png" />
+    <Image Include="topo_klein.png" />
+    <Image Include="topo_mobius.png" />
+    <Image Include="topo_proj.png" />
+    <Image Include="topo_ring.png" />
+    <Image Include="topo_sphere.png" />
+    <Image Include="topo_torus.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Linkcmd" />

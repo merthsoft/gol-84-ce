@@ -35,6 +35,36 @@
     <Image Include="iconc.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="checkbox_checked.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="checkbox_empty.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="radiobutton_empty.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="radiobutton_filled.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="topo_klein.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="topo_mobius.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="topo_proj.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="topo_ring.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="topo_sphere.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="topo_torus.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="Linkcmd" />
