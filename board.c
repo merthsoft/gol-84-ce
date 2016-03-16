@@ -44,8 +44,8 @@ void Step(Board* board) {
 }
 
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
-    uint8_t CYCLE_WIDTH = board->BoardWidth - 1;
-    uint8_t CYCLE_HEIGHT = board->BoardHeight - 1;
+    uint8_t CYCLE_WIDTH = board->BoardWidth;
+    uint8_t CYCLE_HEIGHT = board->BoardHeight;
 
     uint8_t lC = 0;
     uint8_t lR = 0;
@@ -55,69 +55,70 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
         ovC = lE || rE,
         ovR = tE || bE;
     switch (board->WrappingMode) {
-    case Plane:
-        lC = c; lR = r;
-        break;
-    case Ring:
-        lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-        lR = r;
-        break;
-    case Mobius:
-        lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-        lR = ovC ? (board->BoardHeight - r) : r;
-        break;
-    case Torus:
-        lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-        lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-        break;
-    case Sphere:
-    {
-        /* This only makes sense if the board is square. Otherwise, all hell will break loose */
-        uint8_t mask = ((uint8_t)lE << 3) | ((uint8_t)rE << 2) | ((uint8_t)tE << 1) | ((uint8_t)bE);
-        switch (mask) {
-        case 0xA:
-        case 0x5:
-            return 0;
-        case 0x9:
-            lC = CYCLE_WIDTH;
-            lR = 1;
+        case Plane:
+            lC = c; lR = r;
             break;
-        case 0x8:
-            lC = r;
-            lR = 1;
-            break;
-        case 0x6:
-            lC = 1;
-            lR = CYCLE_HEIGHT;
-            break;
-        case 0x4:
-            lC = r;
-            lR = CYCLE_HEIGHT;
-            break;
-        case 0x2:
-            lC = 1;
-            lR = c;
-            break;
-        case 0x1:
-            lC = CYCLE_WIDTH;
-            lR = c;
-            break;
-        default:
-            lC = c;
+        case Ring:
+            lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
             lR = r;
-        }
-        break;
+            break;
+        case Mobius:
+            lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+            lR = ovC ? (CYCLE_HEIGHT - r + 2) : r;
+            break;
+        case Torus:
+            lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+            lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
+            break;
+        case Sphere:
+        {
+            /* This only makes sense if the board is square. Otherwise, all hell will break loose */
+            uint8_t mask = ((uint8_t)lE << 3) | ((uint8_t)rE << 2) | ((uint8_t)tE << 1) | ((uint8_t)bE);
+            switch (mask) {
+                case 0xA:
+                case 0x5:
+                    return 0;
+                case 0x9:
+                    lC = CYCLE_WIDTH;
+                    lR = 1;
+                    break;
+                case 0x8:
+                    lC = r;
+                    lR = 1;
+                    break;
+                case 0x6:
+                    lC = 1;
+                    lR = CYCLE_HEIGHT;
+                    break;
+                case 0x4:
+                    lC = r;
+                    lR = CYCLE_HEIGHT;
+                    break;
+                case 0x2:
+                    lC = 1;
+                    lR = c;
+                    break;
+                case 0x1:
+                    lC = CYCLE_WIDTH;
+                    lR = c;
+                    break;
+                default:
+                    lC = c;
+                    lR = r;
+                    break;
+            }
+            break;
     }
     case Klein:
         lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
         lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-        lR = ovC ? (board->BoardHeight - lR) : lR;
+        lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
         break;
     case Proj:
         lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-        lC = ovR ? (board->BoardWidth + 2 - lC) : lC;
+        lC = ovR ? (CYCLE_WIDTH - lC + 2) : lC;
         lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-        lR = ovC ? (board->BoardHeight - lR) : lR;
+        lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
         break;
     }
     return board->Cells[board->BoardNumber][lC][lR];
