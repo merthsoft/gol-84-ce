@@ -33,9 +33,9 @@ void DeleteMenu(Menu* menu) {
 }
 
 int DisplayMenu(Menu* menu) {
-	uint8_t i;
-	uint8_t y = 1;
-	uint8_t old_y = 1;
+    uint8_t i;
+    uint8_t y = 1;
+    uint8_t old_y = 1;
     uint8_t linePadding = 10;
     uint8_t textPadding = 10;
     uint8_t extraTextPadding = 0;
@@ -51,12 +51,12 @@ int DisplayMenu(Menu* menu) {
 
     eventArgs = malloc(sizeof(MenuEventArgs));
 
-	gc_FillScrn(255);
-	while (!back) {
-		gc_PrintStringXY(menu->Title, 1, 1);
+    gc_FillScrn(255);
+    while (!back) {
+        gc_PrintStringXY(menu->Title, 1, 1);
 
-		for (i = 0; i < menu->NumItems; i++) {
-			gc_PrintStringXY(menu->Items[i].Name, textPadding + extraTextPadding, linePadding + linePadding * i);
+        for (i = 0; i < menu->NumItems; i++) {
+            gc_PrintStringXY(menu->Items[i].Name, textPadding + extraTextPadding, linePadding + linePadding * i);
 
             if (menu->SelectionType != None && menu->Items[i].Function != FUNCTION_BACK) {
                 if (menu->Items[i].Selected) {
@@ -75,11 +75,11 @@ int DisplayMenu(Menu* menu) {
                         break;
                 }
             }
-		}
+        }
 
-		gc_PrintStringXY(">", 2, linePadding * y);
-		Key_ScanKeys(false);
-		old_y = y;
+        gc_PrintStringXY(">", 2, linePadding * y);
+        Key_ScanKeys(false);
+        old_y = y;
 
         if (menu->ExtraFunction != FUNCTION_NONE) {
             void(*func)(MenuEventArgs*) = menu->ExtraFunction;
@@ -95,9 +95,9 @@ int DisplayMenu(Menu* menu) {
             back = eventArgs->Back;
         }
 
-		if (Key_JustPressed(Key_Up)) { y = y == 1 ? menu->NumItems : y - 1; }
-		else if (Key_JustPressed(Key_Down)) { y = y == menu->NumItems ? 1 : y + 1; }
-		else if (Key_JustPressed(Key_2nd) || Key_JustPressed(Key_Enter)) {
+        if (Key_JustPressed(Key_Up)) { y = y == 1 ? menu->NumItems : y - 1; }
+        else if (Key_JustPressed(Key_Down)) { y = y == menu->NumItems ? 1 : y + 1; }
+        else if (Key_JustPressed(Key_2nd) || Key_JustPressed(Key_Enter)) {
             uint8_t index = y - 1;
             void(*func)(MenuEventArgs*) = menu->Items[index].Function;
 
@@ -114,9 +114,9 @@ int DisplayMenu(Menu* menu) {
                         break;
                 }
             } 
-			
+            
             if (func == FUNCTION_BACK) { back = true; }
-			else if (func != FUNCTION_NONE) { 
+            else if (func != FUNCTION_NONE) { 
                 eventArgs->FrameNumber = frameNumber;
                 eventArgs->Menu = menu;
                 eventArgs->Index = index;
@@ -128,18 +128,18 @@ int DisplayMenu(Menu* menu) {
                 menu = eventArgs->Menu;
                 back = eventArgs->Back;
             }
-			gc_FillScrn(255);
-		} else if (Key_JustPressed(menu->BackKey)) {
+            gc_FillScrn(255);
+        } else if (Key_JustPressed(menu->BackKey)) {
             y = 0;
             back = true;
         }
 
-		if (old_y != y) {
-			DrawRectFill(0, linePadding * old_y, 8, 8, 255);
-		}
+        if (old_y != y) {
+            DrawRectFill(0, linePadding * old_y, 8, 8, 255);
+        }
 
         frameNumber++;
-	}
+    }
 
-	return y-1;
+    return y-1;
 }

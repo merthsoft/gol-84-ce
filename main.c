@@ -22,40 +22,40 @@
 #include "topo_sprites.h"
 
 void main(void) {
-	uint8_t x = 1;
-	uint8_t y = 1;
-	uint8_t old_x = x;
-	uint8_t old_y = y;
-	uint8_t i;
+    uint8_t x = 1;
+    uint8_t y = 1;
+    uint8_t old_x = x;
+    uint8_t old_y = y;
+    uint8_t i;
     
-	bool redraw = true;
-	bool toggled = false;
-	bool running = false;
+    bool redraw = true;
+    bool toggled = false;
+    bool running = false;
     bool quit = false;
-	
-	gc_InitGraph();
-	gc_FillScrn(0);
+    
+    gc_InitGraph();
+    gc_FillScrn(0);
 
-	mainBoard = CreateBoard(boardWidth, boardHeight);
-	mainBoard->AliveColor = 18;
-	mainBoard->DeadColor = 255;
-	mainBoard->GridColor = 0;
-	mainBoard->WrappingMode = Torus;
-	mainBoard->CellHeight = cellWidth;
-	mainBoard->CellWidth = cellHeight;
-	mainBoard->CursorDeadColor = 224;
-	mainBoard->CursorAliveColor = 15;
-	mainBoard->RandomMod = 4;
+    mainBoard = CreateBoard(boardWidth, boardHeight);
+    mainBoard->AliveColor = 18;
+    mainBoard->DeadColor = 255;
+    mainBoard->GridColor = 0;
+    mainBoard->WrappingMode = Torus;
+    mainBoard->CellHeight = cellWidth;
+    mainBoard->CellWidth = cellHeight;
+    mainBoard->CursorDeadColor = 224;
+    mainBoard->CursorAliveColor = 15;
+    mainBoard->RandomMod = 4;
 
-	sampleBoard = CreateBoard(5, 5);
-	sampleBoard->CellHeight = mainBoard->CellHeight;
-	sampleBoard->CellWidth = mainBoard->CellWidth;
+    sampleBoard = CreateBoard(5, 5);
+    sampleBoard->CellHeight = mainBoard->CellHeight;
+    sampleBoard->CellWidth = mainBoard->CellWidth;
 
-	sampleBoard->Cells[0][3][2] = 1;
-	sampleBoard->Cells[0][4][3] = 1;
-	sampleBoard->Cells[0][2][4] = 1;
-	sampleBoard->Cells[0][3][4] = 1;
-	sampleBoard->Cells[0][4][4] = 1;
+    sampleBoard->Cells[0][3][2] = 1;
+    sampleBoard->Cells[0][4][3] = 1;
+    sampleBoard->Cells[0][2][4] = 1;
+    sampleBoard->Cells[0][3][4] = 1;
+    sampleBoard->Cells[0][4][4] = 1;
     sampleBoard->Cells[0][2][1] = 1;
     sampleBoard->Cells[1][4][4] = 1;
     sampleBoard->Cells[1][2][1] = 1;
@@ -65,67 +65,71 @@ void main(void) {
     InitRules();
     Key_Init();
 
-	while (!quit) {
-		if (redraw) {
-			gc_FillScrn(255);
-			gc_PrintStringXY("2nd-Toggle", 235, 8);
-			gc_PrintStringXY("Del-Quit", 235, 17);
-			gc_PrintStringXY("Clear-Clear", 235, 26);
-			gc_PrintStringXY("Vars-Rand", 235, 35);
-			gc_PrintStringXY("Enter-Run", 235, 44);
-			gc_PrintStringXY("+-Step", 235, 53);
-			gc_PrintStringXY("Mode-Setup", 235, 62);
-			DrawGrid(mainBoard, 0, 0);
-			DrawBoard(mainBoard, true, 0, 0);     
+    while (!quit) {
+        if (redraw) {
+            gc_FillScrn(255);
+            gc_PrintStringXY("2nd-Toggle", 235, 8);
+            gc_PrintStringXY("Del-Quit", 235, 17);
+            gc_PrintStringXY("Clear-Clear", 235, 26);
+            gc_PrintStringXY("Vars-Rand", 235, 35);
+            gc_PrintStringXY("Enter-Run", 235, 44);
+            gc_PrintStringXY("+-Step", 235, 53);
+            gc_PrintStringXY("Mode-Setup", 235, 62);
+            DrawGrid(mainBoard, 0, 0);
+            DrawBoard(mainBoard, true, 0, 0);     
 
-			redraw = false;
-		}
+            redraw = false;
+        }
         
-		if (running) {
-			Step(mainBoard);
-			DrawBoard(mainBoard, false, 0, 0);
+        if (running) {
+            Step(mainBoard);
+            DrawBoard(mainBoard, false, 0, 0);
             
             Key_ScanKeys(false);
-			if (Key_JustPressed(Key_Enter)) { running = false; }
+            if (Key_JustPressed(Key_Enter)) { running = false; }
             else if (Key_JustPressed(Key_Del)) { quit = true; }
-		} else {
-			DrawCursor(mainBoard, x, y, 0, 0);
+        } else {
+            DrawCursor(mainBoard, x, y, 0, 0);
 
-			Key_ScanKeys(true);
+            Key_ScanKeys(true);
 
-			old_x = x;
-			old_y = y;
+            old_x = x;
+            old_y = y;
 
-			if (Key_IsDown(Key_Up)) { y = y == 1 ? mainBoard->BoardHeight : y - 1; }
-			else if (Key_IsDown(Key_Down)) { y = y == mainBoard->BoardHeight ? 1 : y + 1; }
-			else if (Key_IsDown(Key_Left)) { x = x == 1 ? mainBoard->BoardWidth : x - 1; }
-			else if (Key_IsDown(Key_Right)) { x = x == mainBoard->BoardWidth ? 1 : x + 1; }
-			else if (Key_JustPressed(Key_Enter)) { running = true; }
-			else if (Key_IsDown(Key_Clear)) { 
-				ClearBoard(mainBoard);
-				DrawBoard(mainBoard, true, 0, 0);
-			} else if (Key_IsDown(Key_Mode)) {
-				Settings();
-				redraw = true;
-			} else if (Key_IsDown(Key_Add)) {
-				Step(mainBoard);
-				DrawBoard(mainBoard, false, 0, 0);
-			}  else if (Key_IsDown(Key_Del)) { quit = true; }
+            if (Key_IsDown(Key_Up)) { y = y == 1 ? mainBoard->BoardHeight : y - 1; }
+            else if (Key_IsDown(Key_Down)) { y = y == mainBoard->BoardHeight ? 1 : y + 1; }
+            else if (Key_IsDown(Key_Left)) { x = x == 1 ? mainBoard->BoardWidth : x - 1; }
+            else if (Key_IsDown(Key_Right)) { x = x == mainBoard->BoardWidth ? 1 : x + 1; }
+            else if (Key_JustPressed(Key_Enter)) { running = true; }
+            else if (Key_IsDown(Key_Clear)) { 
+                ClearBoard(mainBoard);
+                DrawBoard(mainBoard, true, 0, 0);
+            } else if (Key_IsDown(Key_Mode)) {
+                Settings();
+                redraw = true;
+            } else if (Key_IsDown(Key_Add)) {
+                Step(mainBoard);
+                DrawBoard(mainBoard, false, 0, 0);
+            } else if (Key_IsDown(Key_Del)) { quit = true; } 
+            else if (Key_IsDown(Key_Vars)) {
+                SetupBoard(mainBoard);
+                redraw = true;
+            }
 
-			if (Key_JustPressed(Key_2nd)) {
-				mainBoard->Cells[mainBoard->BoardNumber][x][y] = !mainBoard->Cells[mainBoard->BoardNumber][x][y];
-				toggled = true;
-			}
+            if (Key_JustPressed(Key_2nd)) {
+                mainBoard->Cells[mainBoard->BoardNumber][x][y] = !mainBoard->Cells[mainBoard->BoardNumber][x][y];
+                toggled = true;
+            }
 
-			if (old_x != x || old_y != y || running) {
-				DrawCell(mainBoard, old_x, old_y);
-			}
-		}
-	}
-	
+            if (old_x != x || old_y != y || running) {
+                DrawCell(mainBoard, old_x, old_y);
+            }
+        }
+    }
+    
     Key_Reset();
-	gc_CloseGraph();
-	pgrm_CleanUp();
+    gc_CloseGraph();
+    pgrm_CleanUp();
 }
 
 void InitRules() {
@@ -162,9 +166,9 @@ void InitRules() {
 void Settings() {
     Menu* menu = CreateMenu(4, "Settings");
 
-	menu->Items[0].Name = "Colors";
+    menu->Items[0].Name = "Colors";
     menu->Items[0].Function = ColorSettings;
-	
+    
     menu->Items[1].Name = "Rules";
 
     menu->Items[2].Name = "Topologies";
@@ -184,25 +188,25 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
     Menu* menu = CreateMenu(7, "Colors");
     menu->ExtraFunction = DrawSampleBoard;
 
-	menu->Items[0].Name = "Grid";
-	menu->Items[1].Name = "Dead";
-	menu->Items[2].Name = "Alive";
-	menu->Items[3].Name = "Cursor (Dead)";
-	menu->Items[4].Name = "Cursor (Alive)";
-	menu->Items[5].Name = "Save";
+    menu->Items[0].Name = "Grid";
+    menu->Items[1].Name = "Dead";
+    menu->Items[2].Name = "Alive";
+    menu->Items[3].Name = "Cursor (Dead)";
+    menu->Items[4].Name = "Cursor (Alive)";
+    menu->Items[5].Name = "Save";
     menu->Items[5].Function = SaveColors;
-	menu->Items[6].Name = "Back";
-	menu->Items[6].Function = FUNCTION_BACK;
+    menu->Items[6].Name = "Back";
+    menu->Items[6].Function = FUNCTION_BACK;
 
     for (i = 0; i < 5; i++) {
         menu->Items[i].Function = ColorPicker;
     }
 
-	sampleBoard->GridColor = mainBoard->GridColor;
-	sampleBoard->DeadColor = mainBoard->DeadColor;
-	sampleBoard->AliveColor = mainBoard->AliveColor;
-	sampleBoard->CursorDeadColor = mainBoard->CursorDeadColor;
-	sampleBoard->CursorAliveColor = mainBoard->CursorAliveColor;
+    sampleBoard->GridColor = mainBoard->GridColor;
+    sampleBoard->DeadColor = mainBoard->DeadColor;
+    sampleBoard->AliveColor = mainBoard->AliveColor;
+    sampleBoard->CursorDeadColor = mainBoard->CursorDeadColor;
+    sampleBoard->CursorAliveColor = mainBoard->CursorAliveColor;
 
     menu->BackKey = Key_Del;
     DisplayMenu(menu);
@@ -331,7 +335,7 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
     menu->Items[5].Name = "Klein";
     menu->Items[6].Name = "Projection";
     menu->Items[7].Name = "Back";
-	menu->Items[7].Function = FUNCTION_BACK;
+    menu->Items[7].Function = FUNCTION_BACK;
 
     menu->Items[mainBoard->WrappingMode].Selected = true;
 

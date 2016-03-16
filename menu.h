@@ -8,9 +8,9 @@
 #define FUNCTION_NONE (void*)0
 
 typedef struct MenuItem {
-	char* Name;
-	void* Function;
-	bool Selected;
+    char* Name;
+    void* Function;
+    bool Selected;
 } MenuItem;
 
 typedef enum MenuSelectionType {

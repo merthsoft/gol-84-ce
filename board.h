@@ -10,29 +10,29 @@
 #define MOD_CYCLE(n, c) (((n) + (c)) % (c))
 
 typedef enum {
-	Plane   = 0,
-	Ring    = 1,
-	Mobius  = 2,
-	Torus   = 3,
-	Sphere  = 4,
-	Klein   = 5,
-	Proj    = 6
+    Plane   = 0,
+    Ring    = 1,
+    Mobius  = 2,
+    Torus   = 3,
+    Sphere  = 4,
+    Klein   = 5,
+    Proj    = 6
 } WrappingMode;
 
 typedef struct Board {
-	uint8_t BoardWidth;
-	uint8_t BoardHeight;
-	uint8_t** Cells[2];
-	uint8_t BoardNumber;
-	WrappingMode WrappingMode;
-	uint8_t GridColor;
-	uint8_t DeadColor;
-	uint8_t AliveColor;
-	uint8_t CellWidth;
-	uint8_t CellHeight;
-	uint8_t CursorAliveColor;
-	uint8_t CursorDeadColor;
-	uint8_t RandomMod;
+    uint8_t BoardWidth;
+    uint8_t BoardHeight;
+    uint8_t** Cells[2];
+    uint8_t BoardNumber;
+    WrappingMode WrappingMode;
+    uint8_t GridColor;
+    uint8_t DeadColor;
+    uint8_t AliveColor;
+    uint8_t CellWidth;
+    uint8_t CellHeight;
+    uint8_t CursorAliveColor;
+    uint8_t CursorDeadColor;
+    uint8_t RandomMod;
     Rule* Rule;
 } Board;
 

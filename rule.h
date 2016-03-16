@@ -7,7 +7,7 @@
 typedef struct Rule {
     uint8_t Live;
     uint8_t Born;
-	char* Name;
+    char* Name;
 } Rule;
 
 #endif
