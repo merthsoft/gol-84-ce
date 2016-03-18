@@ -45,7 +45,7 @@ void main(void) {
     mainBoard->CellWidth = cellHeight;
     mainBoard->CursorDeadColor = 224;
     mainBoard->CursorAliveColor = 15;
-    mainBoard->RandomMod = 4;
+    mainBoard->RandomMod = 2;
 
     sampleBoard = CreateBoard(5, 5);
     sampleBoard->CellHeight = mainBoard->CellHeight;
@@ -133,7 +133,7 @@ void main(void) {
 }
 
 void InitRules() {
-    numRules = 12;
+    numRules = 19;
     rulesList = malloc(numRules * sizeof(Rule));
 
     rulesList[0].Name = "Life (B3/S3)";
@@ -183,6 +183,35 @@ void InitRules() {
     rulesList[11].Name = "Anneal (B4678/S35678)";
     rulesList[11].Live = 0x1E8;
     rulesList[11].Born = 0x1D0;
+
+    rulesList[12].Name = "Gnarl (B1/S1)";
+    rulesList[12].Live = 0x02;
+    rulesList[12].Born = 0x02;
+
+    rulesList[13].Name = "Assimilation (S345/B4567)";
+    rulesList[13].Live = 0x38;
+    rulesList[13].Born = 0xF0;
+
+    rulesList[14].Name = "Maze (S12345/B3)";
+    rulesList[14].Live = 0x3E;
+    rulesList[14].Born = 0x08;
+
+    rulesList[15].Name = "Serviettes (S/B234)";
+    rulesList[15].Live = 0x00;
+    rulesList[15].Born = 0x1C;
+
+    rulesList[16].Name = "Coagulations (S378/B235678)";
+    rulesList[16].Live = 0x188;
+    rulesList[16].Born = 0x1EC;
+
+    rulesList[17].Name = "Coral (S45678/B3)";
+    rulesList[17].Live = 0x1F0;
+    rulesList[17].Born = 0x08;
+
+    rulesList[18].Name = "Walled Cities (S2345/B456789)";
+    rulesList[18].Live = 0x3C;
+    rulesList[18].Born = 0x3F0;
+
 
     SetRule(mainBoard, &rulesList[0]);
 }

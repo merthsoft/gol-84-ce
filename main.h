@@ -22,11 +22,11 @@
 #include "menu.h"
 #include "rule.h"
 
-uint8_t boardWidth = 28;
-uint8_t boardHeight = 28;
+uint8_t boardWidth = 32;
+uint8_t boardHeight = 32;
 
-uint8_t cellWidth = 8;
-uint8_t cellHeight = 8;
+uint8_t cellWidth = 7;
+uint8_t cellHeight = 7;
 
 uint8_t numRules = 6;
 
