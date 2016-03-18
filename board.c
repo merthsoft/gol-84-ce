@@ -145,7 +145,7 @@ void SetupBoard(Board* board) {
     for (i = 0; i <= board->BoardWidth; i++) {
         for (j = 0; j <= board->BoardHeight; j++) {
             board->Cells[0][i][j] = !(rand() % board->RandomMod);
-            board->Cells[1][i][j] = 0;
+            board->Cells[1][i][j] = !(board->Cells[0][i][j]);
         }
     }
 

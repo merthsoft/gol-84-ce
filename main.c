@@ -133,32 +133,56 @@ void main(void) {
 }
 
 void InitRules() {
+    numRules = 12;
     rulesList = malloc(numRules * sizeof(Rule));
 
-    // Life: 23/3
+    rulesList[0].Name = "Life (B3/S3)";
     rulesList[0].Live = 0x0C;
     rulesList[0].Born = 0x08;
-    rulesList[0].Name = "Life:      23/3";
-    // HighLife: 23/36
+
+    rulesList[1].Name = "HighLife (B36/S23)";
     rulesList[1].Live = 0x0C;
     rulesList[1].Born = 0x48;
-    rulesList[1].Name = "HighLife:  23/36";
-    // Replicator: 1357/1357
+
+    rulesList[2].Name = "Replicator (B1357/S1357)";
     rulesList[2].Live = 0xAA;
     rulesList[2].Born = 0xAA;
-    rulesList[2].Name = "Replicate: 1357/1357";
-    // Maze: 12345/3
+
+    rulesList[3].Name = "Maze (B3/S12345)";
     rulesList[3].Live = 0x3E;
     rulesList[3].Born = 0x08;
-    rulesList[3].Name = "Maze:      12345/3";
-    // 34 Life: 34/34
+
+    rulesList[4].Name = "34 Life (B34/S34)";
     rulesList[4].Live = 0x18;
     rulesList[4].Born = 0x18;
-    rulesList[4].Name = "34 Life:   34/34";
-    // 2x2: 125/36
+
+    rulesList[5].Name = "2x2 (B36/S125)";
     rulesList[5].Live = 0x26;
     rulesList[5].Born = 0x09;
-    rulesList[5].Name = "2x2:       125/36";
+
+    rulesList[6].Name = "Life without Death";
+    rulesList[6].Live = 0xFF;
+    rulesList[6].Born = 0x08;
+
+    rulesList[7].Name = "Seeds (B2/S)";
+    rulesList[7].Live = 0x00;
+    rulesList[7].Born = 0x04;
+
+    rulesList[8].Name = "Diamoeba (B35678/S5678)";
+    rulesList[8].Live = 0x1E0;
+    rulesList[8].Born = 0x1E8;
+
+    rulesList[9].Name = "Day & Night (B3678/S34678)";
+    rulesList[9].Live = 0x1D8;
+    rulesList[9].Born = 0x1C8;
+
+    rulesList[10].Name = "Morley (B368/S245)";
+    rulesList[10].Live = 0x34;
+    rulesList[10].Born = 0x148;
+
+    rulesList[11].Name = "Anneal (B4678/S35678)";
+    rulesList[11].Live = 0x1E8;
+    rulesList[11].Born = 0x1D0;
 
     SetRule(mainBoard, &rulesList[0]);
 }
@@ -166,12 +190,13 @@ void InitRules() {
 void Settings() {
     Menu* menu = CreateMenu(4, "Settings");
 
-    menu->Items[0].Name = "Colors";
+    menu->Items[0].Name = "Colors...";
     menu->Items[0].Function = ColorSettings;
     
-    menu->Items[1].Name = "Rules";
+    menu->Items[1].Name = "Rules...";
+    menu->Items[1].Function = RuleSettings;
 
-    menu->Items[2].Name = "Topologies";
+    menu->Items[2].Name = "Topologies...";
     menu->Items[2].Function = TopologySettings;
     
     menu->Items[3].Name = "Back";
@@ -182,17 +207,47 @@ void Settings() {
     DeleteMenu(menu);
 }
 
+void RuleSettings(MenuEventArgs* menuEventArgs) {
+    int i;
+    bool foundRule = false;
+
+    Menu* menu = CreateMenu(numRules + 2, "Rules");
+    menu->SelectionType = Single;
+
+    for (i = 0; i < numRules; i++) {
+        menu->Items[i].Name = rulesList[i].Name;
+        menu->Items[i].Function = SetRuleMenuEvent;
+        if (rulesList[i].Born == mainBoard->Rule->Born && rulesList[i].Live == mainBoard->Rule->Live) {
+            menu->Items[i].Selected = true;
+            foundRule = true;
+        }
+    }
+
+    menu->Items[numRules].Name = "Custom...";
+
+    menu->Items[numRules + 1].Name = "Back";
+    menu->Items[numRules + 1].Function = FUNCTION_BACK;
+
+    menu->BackKey = Key_Del;
+    DisplayMenu(menu);
+    DeleteMenu(menu);
+}
+
+void SetRuleMenuEvent(MenuEventArgs* menuEventArgs) {
+    SetRule(mainBoard, &rulesList[menuEventArgs->Index]);
+}
+
 void ColorSettings(MenuEventArgs* menuEventArgs) {
     uint8_t i;
 
     Menu* menu = CreateMenu(7, "Colors");
     menu->ExtraFunction = DrawSampleBoard;
 
-    menu->Items[0].Name = "Grid";
-    menu->Items[1].Name = "Dead";
-    menu->Items[2].Name = "Alive";
-    menu->Items[3].Name = "Cursor (Dead)";
-    menu->Items[4].Name = "Cursor (Alive)";
+    menu->Items[0].Name = "Grid...";
+    menu->Items[1].Name = "Dead...";
+    menu->Items[2].Name = "Alive...";
+    menu->Items[3].Name = "Cursor (Dead)...";
+    menu->Items[4].Name = "Cursor (Alive)...";
     menu->Items[5].Name = "Save";
     menu->Items[5].Function = SaveColors;
     menu->Items[6].Name = "Back";
@@ -322,8 +377,8 @@ void SaveColors(MenuEventArgs* menuEventArgs) {
 
 void TopologySettings(MenuEventArgs* menuEventArgs) {
     int i;
-    MenuEventArgs m;
-    Menu* menu = CreateMenu(8, "Topologies:");
+
+    Menu* menu = CreateMenu(8, "Topologies");
     menu->SelectionType = Single;
     menu->ExtraFunction = DrawTopoSprite;
 

@@ -1,5 +1,8 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <graphc.h>
 
@@ -53,10 +56,12 @@ int DisplayMenu(Menu* menu) {
 
     gc_FillScrn(255);
     while (!back) {
-        gc_PrintStringXY(menu->Title, 1, 1);
+        gc_PrintStringXY(menu->Title, 2, 1);
+        gc_SetColorIndex(0);
+        gc_NoClipHorizLine(0, 10, gc_StringWidth(menu->Title) + 5);
 
         for (i = 0; i < menu->NumItems; i++) {
-            gc_PrintStringXY(menu->Items[i].Name, textPadding + extraTextPadding, linePadding + linePadding * i);
+            gc_PrintStringXY(menu->Items[i].Name, textPadding + extraTextPadding, 3 + linePadding + linePadding * i);
 
             if (menu->SelectionType != None && menu->Items[i].Function != FUNCTION_BACK) {
                 if (menu->Items[i].Selected) {
@@ -68,16 +73,16 @@ int DisplayMenu(Menu* menu) {
 
                 switch (menu->SelectionType) {
                     case Single:
-                        gc_NoClipDrawSprite(selected ? radiobutton_filled : radiobutton_empty, textPadding, linePadding + linePadding * i - 1, 9, 9);
+                        gc_NoClipDrawSprite(selected ? radiobutton_filled : radiobutton_empty, textPadding, 3 + linePadding + linePadding * i - 1, 9, 9);
                         break;
                     case Multiple:
-                        gc_NoClipDrawSprite(selected ? checkbox_checked : checkbox_empty, textPadding, linePadding + linePadding * i - 1, 9, 9);
+                        gc_NoClipDrawSprite(selected ? checkbox_checked : checkbox_empty, textPadding, 5 + linePadding + linePadding * i - 1, 9, 9);
                         break;
                 }
             }
         }
 
-        gc_PrintStringXY(">", 2, linePadding * y);
+        gc_PrintStringXY(">", 2, 3 + linePadding * y);
         Key_ScanKeys(false);
         old_y = y;
 
@@ -135,7 +140,7 @@ int DisplayMenu(Menu* menu) {
         }
 
         if (old_y != y) {
-            DrawRectFill(0, linePadding * old_y, 8, 8, 255);
+            DrawRectFill(0, 3 + linePadding * old_y, 8, 8, 255);
         }
 
         frameNumber++;

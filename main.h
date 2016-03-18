@@ -38,6 +38,8 @@ void ColorPicker(MenuEventArgs* menuEventArgs);
 void InitRules();
 void SaveColors(MenuEventArgs* menuEventArgs);
 void DrawTopoSprite(MenuEventArgs* menuEventArgs);
+void RuleSettings(MenuEventArgs* menuEventArgs);
+void SetRuleMenuEvent(MenuEventArgs* menuEventArgs);
 
 Board* mainBoard;
 Board* sampleBoard;
