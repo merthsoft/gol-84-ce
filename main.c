@@ -43,6 +43,7 @@ void main(void) {
     
     gc_InitGraph();
     gc_FillScrn(0);
+    numRules = InitRules(&rulesList);
 
     mainBoard = NULL;
     LoadSettings();
@@ -75,7 +76,6 @@ void main(void) {
     sampleBoard->Cells[1][2][1] = 1;
     
     ClearBoard(mainBoard);
-    numRules = InitRules(&rulesList);
     SetRule(mainBoard, rulesList);
     Key_Init();
 
@@ -98,7 +98,7 @@ void main(void) {
             DrawBoard(mainBoard, true, 0, 0);     
             DrawPlayPauseIcon(running);
 
-            DrawRectFill(237, 72, 80, 2, 0);
+            DrawRectFill(239, 72, 80, 2, 0);
 
             gc_PrintStringXY("Topology:", 240, 77);
             gc_PrintStringXY(WrappingModeNames[mainBoard->WrappingMode], 245, 86);
@@ -176,8 +176,8 @@ void main(void) {
         }
     }
     
-    //DeleteBoard(sampleBoard);
-    //SaveSettings();
+    DeleteBoard(sampleBoard);
+    SaveSettings();
     //DeleteBoard(mainBoard);
 
     Key_Reset();
@@ -191,10 +191,12 @@ void SaveSettings() {
 
     file = ti_Open(appVarName, "w");
     if (!file) { return; }
-    //ti_SetArchiveStatus(false, file);
-    //file = ti_Open(appVarName, "w");
+    if (ti_IsArchived(file)) {
+        ti_SetArchiveStatus(false, file);
+        file = ti_Open(appVarName, "w");
+    }
 
-    //FreeCells(mainBoard);
+    FreeCells(mainBoard);
     ti_Write("SETTINGS:", 9, 1, file);
     ti_Write(mainBoard, sizeof(Board), 1, file);
     ti_Write(mainBoard->Rule, sizeof(Rule), 1, file);
@@ -208,10 +210,15 @@ void LoadSettings() {
 
     file = ti_Open(appVarName, "r");
     if (!file) { return; }
+    if (ti_IsArchived(file)) {
+        ti_SetArchiveStatus(false, file);
+        file = ti_Open(appVarName, "r");
+    }
 
     mainBoard = malloc(sizeof(Board));
+    mainBoard->Rule = malloc(sizeof(Rule));
 
-    ti_Seek(23, SEEK_SET, file);
+    ti_Seek(9, SEEK_SET, file);
     if (!(ti_Read(mainBoard, sizeof(Board), 1, file) &&
         ti_Read(mainBoard->Rule, sizeof(Rule), 1, file))) {
         free(mainBoard);
@@ -315,7 +322,7 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
     for (i = 0; i < menu->NumItems - 1; i++) {
         if (menu->Items[i].Selected && i != previous) {
             int newSize = 224 / (i + 1);
-            if (newSize > 60) { newSize = 60; }
+            if (newSize > 80) { newSize = 80; }
 
             ResizeBoard(mainBoard, newSize, newSize);
             

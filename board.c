@@ -173,6 +173,17 @@ void ClearBoard(Board* board) {
     board->BoardNumber = 0;
 }
 
+void __allocCells(Board* b) {
+    uint8_t i, j;
+
+    for (i = 0; i < 2; i++) {
+        b->Cells[i] = malloc(sizeof(uint8_t*) * (b->BoardWidth + 2));
+        for (j = 0; j < b->BoardWidth + 2; j++) {
+            b->Cells[i][j] = malloc(sizeof(uint8_t*) * (b->BoardHeight + 2));
+        }
+    }
+}
+
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
     int i;
     int j;
@@ -180,12 +191,7 @@ Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
     b->BoardWidth = boardWidth;
     b->BoardHeight = boardHeight;
 
-    for (i = 0; i < 2; i++) {
-        b->Cells[i] = malloc(8 * (boardWidth + 2));
-        for (j = 0; j < boardWidth + 2; j++) {
-            b->Cells[i][j] = malloc(8 * (boardHeight + 2));
-        }
-    }
+    __allocCells(b);
 
     b->BoardNumber = 0;
     b->Rule = malloc(sizeof(Rule));
@@ -196,7 +202,7 @@ Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
 }
 
 void DeleteBoard(Board* b) {
-    //FreeCells(b);
+    FreeCells(b);
 
     free(b->Rule);
     free(b);
@@ -211,12 +217,7 @@ void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight) {
     b->BoardWidth = boardWidth;
     b->BoardHeight = boardHeight;
 
-    for (i = 0; i < 2; i++) {
-        b->Cells[i] = malloc(8 * (boardWidth + 2));
-        for (j = 0; j < boardWidth + 2; j++) {
-            b->Cells[i][j] = malloc(8 * (boardHeight + 2));
-        }
-    }
+    __allocCells(b);
 
     ClearBoard(b);
 }
@@ -229,10 +230,10 @@ void FreeCells(Board* b) {
         for (i = 0; i < 2; i++) {
             for (j = 0; j < b->BoardWidth + 2; j++) {
                 free(b->Cells[i][j]);
-                //b->Cells[i][j] = NULL;
+                b->Cells[i][j] = NULL;
             }
             free(b->Cells[i]);
-            //b->Cells[i] = NULL;
+            b->Cells[i] = NULL;
         }
     }
 }
