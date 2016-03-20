@@ -19,6 +19,18 @@ typedef enum {
     Proj    = 6
 } WrappingMode;
 
+#define NUM_WRAPPING_MODES (Proj+1)
+
+char* WrappingModeNames[NUM_WRAPPING_MODES] = {
+    "Plane",
+    "Ring",
+    "Mobius",
+    "Torus",
+    "Sphere",
+    "Klein",
+    "Proj"
+};
+
 typedef struct Board {
     uint8_t BoardWidth;
     uint8_t BoardHeight;
@@ -37,9 +49,11 @@ typedef struct Board {
 } Board;
 
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
+void DeleteBoard(Board* board);
+void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight);
 void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety);
 void DrawGrid(Board* board, uint8_t offsetx, uint8_t offsety);
-void SetupBoard(Board* board);
+void RandomBoard(Board* board);
 void ClearBoard(Board* board);
 void Step(Board* board);
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);

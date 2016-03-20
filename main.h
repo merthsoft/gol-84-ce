@@ -28,8 +28,10 @@ uint8_t boardHeight = 32;
 uint8_t cellWidth = 7;
 uint8_t cellHeight = 7;
 
-uint8_t numRules = 6;
+uint8_t numRules;
 
+void NumToRuleString(uint16_t num, char* rulesString, uint8_t* index);
+void DrawPlayPauseIcon(bool running);
 void Settings();
 void ColorSettings(MenuEventArgs* menuEventArgs);
 void TopologySettings(MenuEventArgs* menuEventArgs);
@@ -40,6 +42,8 @@ void SaveColors(MenuEventArgs* menuEventArgs);
 void DrawTopoSprite(MenuEventArgs* menuEventArgs);
 void RuleSettings(MenuEventArgs* menuEventArgs);
 void SetRuleMenuEvent(MenuEventArgs* menuEventArgs);
+void CellSizeSettings(MenuEventArgs* menuEventArgs);
+void RandomPercentageSettings(MenuEventArgs* menuEventArgs);
 
 Board* mainBoard;
 Board* sampleBoard;

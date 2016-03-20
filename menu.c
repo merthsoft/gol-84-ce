@@ -26,6 +26,7 @@ Menu* CreateMenu(uint8_t numItems, const char* title) {
     menu->Title = title;
     menu->ExtraFunction = FUNCTION_NONE;
     menu->BackKey = 0;
+    menu->CursorChar = 0x10;
 
     return menu;
 }
@@ -58,7 +59,7 @@ int DisplayMenu(Menu* menu) {
     while (!back) {
         gc_PrintStringXY(menu->Title, 2, 1);
         gc_SetColorIndex(0);
-        gc_NoClipHorizLine(0, 10, gc_StringWidth(menu->Title) + 5);
+        gc_NoClipHorizLine(1, 10, gc_StringWidth(menu->Title) + 5);
 
         for (i = 0; i < menu->NumItems; i++) {
             gc_PrintStringXY(menu->Items[i].Name, textPadding + extraTextPadding, 3 + linePadding + linePadding * i);
@@ -82,8 +83,9 @@ int DisplayMenu(Menu* menu) {
             }
         }
 
-        gc_PrintStringXY(">", 2, 3 + linePadding * y);
-        Key_ScanKeys(false);
+        gc_SetTextXY(2, 3 + linePadding * y);
+        gc_PrintChar(menu->CursorChar);
+        Key_ScanKeys(0);
         old_y = y;
 
         if (menu->ExtraFunction != FUNCTION_NONE) {
@@ -140,11 +142,12 @@ int DisplayMenu(Menu* menu) {
         }
 
         if (old_y != y) {
-            DrawRectFill(0, 3 + linePadding * old_y, 8, 8, 255);
+            DrawRectFill(0, 3 + linePadding * old_y, 10, 8, 255);
         }
 
         frameNumber++;
     }
 
+    free(eventArgs);
     return y-1;
 }

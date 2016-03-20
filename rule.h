@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 typedef struct Rule {
-    uint8_t Live;
-    uint8_t Born;
+    int Live;
+    int Born;
     char* Name;
 } Rule;
 

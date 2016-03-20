@@ -37,12 +37,13 @@ void main(void) {
     gc_FillScrn(0);
 
     mainBoard = CreateBoard(boardWidth, boardHeight);
+    mainBoard->CellHeight = cellWidth;
+    mainBoard->CellWidth = cellHeight;
+
     mainBoard->AliveColor = 18;
     mainBoard->DeadColor = 255;
     mainBoard->GridColor = 0;
     mainBoard->WrappingMode = Torus;
-    mainBoard->CellHeight = cellWidth;
-    mainBoard->CellWidth = cellHeight;
     mainBoard->CursorDeadColor = 224;
     mainBoard->CursorAliveColor = 15;
     mainBoard->RandomMod = 2;
@@ -61,37 +62,67 @@ void main(void) {
     sampleBoard->Cells[1][2][1] = 1;
     
     ClearBoard(mainBoard);
-    SetupBoard(mainBoard);
     InitRules();
     Key_Init();
 
     while (!quit) {
         if (redraw) {
+            uint8_t i = 0;
+            char* rulesString = malloc(sizeof(char) * 11);
+            memset(rulesString, 0, 11);
+
             gc_FillScrn(255);
-            gc_PrintStringXY("2nd-Toggle", 235, 8);
-            gc_PrintStringXY("Del-Quit", 235, 17);
-            gc_PrintStringXY("Clear-Clear", 235, 26);
-            gc_PrintStringXY("Vars-Rand", 235, 35);
-            gc_PrintStringXY("Enter-Run", 235, 44);
-            gc_PrintStringXY("+-Step", 235, 53);
-            gc_PrintStringXY("Mode-Setup", 235, 62);
+            gc_PrintStringXY("2nd-Toggle", 240, 8);
+            gc_PrintStringXY("Del-Quit", 240, 17);
+            gc_PrintStringXY("Clear-Clear", 240, 26);
+            gc_PrintStringXY("Vars-Rand", 240, 35);
+            gc_PrintStringXY("+-Step", 240, 44);
+            gc_PrintStringXY("Mode-Setup", 240, 53);
+            gc_PrintStringXY("Enter-", 240, 62);
             DrawGrid(mainBoard, 0, 0);
             DrawBoard(mainBoard, true, 0, 0);     
+            DrawPlayPauseIcon(running);
 
+            DrawRectFill(237, 72, 80, 2, 0);
+
+            gc_PrintStringXY("Topology:", 240, 77);
+            gc_PrintStringXY(WrappingModeNames[mainBoard->WrappingMode], 245, 86);
+            gc_PrintStringXY("Rules:", 240, 95);
+            
+            rulesString[0] = 'B';
+            i = 1;
+            NumToRuleString(mainBoard->Rule->Born, rulesString, &i);
+            gc_PrintStringXY(rulesString, 245, 104);
+
+            memset(rulesString, 0, 11);
+            rulesString[0] = 'S';
+            i = 1;
+            NumToRuleString(mainBoard->Rule->Live, rulesString, &i);
+            gc_PrintStringXY(rulesString, 245, 113);
+
+            gc_PrintStringXY("Cell Size:", 240, 122);
+            gc_SetTextXY(245, 131);
+            gc_PrintInt(mainBoard->CellHeight, log10(mainBoard->CellHeight) + 1);
+
+            free(rulesString);
             redraw = false;
         }
         
         if (running) {
             Step(mainBoard);
+
             DrawBoard(mainBoard, false, 0, 0);
             
-            Key_ScanKeys(false);
-            if (Key_JustPressed(Key_Enter)) { running = false; }
+            Key_ScanKeys(0);
+            if (Key_JustPressed(Key_Enter)) {
+                running = false;
+                DrawPlayPauseIcon(running);
+            }
             else if (Key_JustPressed(Key_Del)) { quit = true; }
         } else {
             DrawCursor(mainBoard, x, y, 0, 0);
 
-            Key_ScanKeys(true);
+            Key_ScanKeys(125);
 
             old_x = x;
             old_y = y;
@@ -100,7 +131,10 @@ void main(void) {
             else if (Key_IsDown(Key_Down)) { y = y == mainBoard->BoardHeight ? 1 : y + 1; }
             else if (Key_IsDown(Key_Left)) { x = x == 1 ? mainBoard->BoardWidth : x - 1; }
             else if (Key_IsDown(Key_Right)) { x = x == mainBoard->BoardWidth ? 1 : x + 1; }
-            else if (Key_JustPressed(Key_Enter)) { running = true; }
+            else if (Key_JustPressed(Key_Enter)) { 
+                running = true;
+                DrawPlayPauseIcon(running);
+            }
             else if (Key_IsDown(Key_Clear)) { 
                 ClearBoard(mainBoard);
                 DrawBoard(mainBoard, true, 0, 0);
@@ -112,7 +146,7 @@ void main(void) {
                 DrawBoard(mainBoard, false, 0, 0);
             } else if (Key_IsDown(Key_Del)) { quit = true; } 
             else if (Key_IsDown(Key_Vars)) {
-                SetupBoard(mainBoard);
+                RandomBoard(mainBoard);
                 redraw = true;
             }
 
@@ -127,9 +161,31 @@ void main(void) {
         }
     }
     
+    DeleteBoard(mainBoard);
+    DeleteBoard(sampleBoard);
+    free(rulesList);
+
     Key_Reset();
     gc_CloseGraph();
     pgrm_CleanUp();
+}
+
+void DrawPlayPauseIcon(bool running) {
+    if (!running) {
+        DrawRectFill(282, 61, 7, 11, 255);
+        gc_SetColorIndex(4);
+        gc_NoClipVertLine(282, 61, 11);
+        gc_NoClipVertLine(283, 62, 9);
+        gc_NoClipVertLine(284, 63, 7);
+        gc_NoClipVertLine(285, 64, 5);
+        gc_NoClipVertLine(286, 65, 3);
+        gc_NoClipVertLine(287, 66, 1);
+    }
+    else {
+        DrawRectFill(282, 61, 7, 11, 255);
+        DrawRectFill(282, 61, 3, 9, 128);
+        DrawRectFill(286, 61, 3, 9, 128);
+    }
 }
 
 void InitRules() {
@@ -168,56 +224,56 @@ void InitRules() {
     rulesList[7].Live = 0x00;
     rulesList[7].Born = 0x04;
 
-    rulesList[8].Name = "Diamoeba (B35678/S5678)";
-    rulesList[8].Live = 0x1E0;
-    rulesList[8].Born = 0x1E8;
+    rulesList[8].Name = "Amoeba (B357/S357)";
+    rulesList[8].Live = 0xA8;
+    rulesList[8].Born = 0xA8;
 
-    rulesList[9].Name = "Day & Night (B3678/S34678)";
-    rulesList[9].Live = 0x1D8;
-    rulesList[9].Born = 0x1C8;
+    rulesList[9].Name = "Diamoeba (B35678/S5678)";
+    rulesList[9].Live = 0x1E0;
+    rulesList[9].Born = 0x1E8;
 
-    rulesList[10].Name = "Morley (B368/S245)";
-    rulesList[10].Live = 0x34;
-    rulesList[10].Born = 0x148;
+    rulesList[10].Name = "Day & Night (B3678/S34678)";
+    rulesList[10].Live = 0x1D8;
+    rulesList[10].Born = 0x1C8;
 
-    rulesList[11].Name = "Anneal (B4678/S35678)";
-    rulesList[11].Live = 0x1E8;
-    rulesList[11].Born = 0x1D0;
+    rulesList[11].Name = "Morley (B368/S245)";
+    rulesList[11].Live = 0x34;
+    rulesList[11].Born = 0x148;
 
-    rulesList[12].Name = "Gnarl (B1/S1)";
-    rulesList[12].Live = 0x02;
-    rulesList[12].Born = 0x02;
+    rulesList[12].Name = "Anneal (B4678/S35678)";
+    rulesList[12].Live = 0x1E8;
+    rulesList[12].Born = 0x1D0;
 
-    rulesList[13].Name = "Assimilation (S345/B4567)";
-    rulesList[13].Live = 0x38;
-    rulesList[13].Born = 0xF0;
+    rulesList[13].Name = "Gnarl (B1/S1)";
+    rulesList[13].Live = 0x02;
+    rulesList[13].Born = 0x02;
 
-    rulesList[14].Name = "Maze (S12345/B3)";
-    rulesList[14].Live = 0x3E;
-    rulesList[14].Born = 0x08;
+    rulesList[14].Name = "Assimilation (B4567/S345)";
+    rulesList[14].Live = 0x38;
+    rulesList[14].Born = 0xF0;
 
-    rulesList[15].Name = "Serviettes (S/B234)";
+    rulesList[15].Name = "Serviettes (B234/S)";
     rulesList[15].Live = 0x00;
     rulesList[15].Born = 0x1C;
 
-    rulesList[16].Name = "Coagulations (S378/B235678)";
+    rulesList[16].Name = "Coagulations (B235678/S378)";
     rulesList[16].Live = 0x188;
     rulesList[16].Born = 0x1EC;
 
-    rulesList[17].Name = "Coral (S45678/B3)";
+    rulesList[17].Name = "Coral (B3/S45678)";
     rulesList[17].Live = 0x1F0;
     rulesList[17].Born = 0x08;
 
-    rulesList[18].Name = "Walled Cities (S2345/B456789)";
+    rulesList[18].Name = "Walled Cities (B45678/S2345)";
     rulesList[18].Live = 0x3C;
-    rulesList[18].Born = 0x3F0;
+    rulesList[18].Born = 0x1F0;
 
 
     SetRule(mainBoard, &rulesList[0]);
 }
 
 void Settings() {
-    Menu* menu = CreateMenu(4, "Settings");
+    Menu* menu = CreateMenu(6, "Settings");
 
     menu->Items[0].Name = "Colors...";
     menu->Items[0].Function = ColorSettings;
@@ -227,13 +283,80 @@ void Settings() {
 
     menu->Items[2].Name = "Topologies...";
     menu->Items[2].Function = TopologySettings;
+
+    menu->Items[3].Name = "Cell Size...";
+    menu->Items[3].Function = CellSizeSettings;
+
+    menu->Items[4].Name = "Random Percentage...";
+    menu->Items[4].Function = RandomPercentageSettings;
     
-    menu->Items[3].Name = "Back";
-    menu->Items[3].Function = FUNCTION_BACK;
+    menu->Items[5].Name = "Back";
+    menu->Items[5].Function = FUNCTION_BACK;
 
     menu->BackKey = Key_Del;
     DisplayMenu(menu);
     DeleteMenu(menu);
+}
+
+void NumToRuleString(uint16_t num, char* rulesString, uint8_t* index) {
+    uint8_t j;
+    for (j = 0; j < 9; j++) {
+        if ((num & (1 << j)) != 0) {
+            rulesString[*index] = 48 + j;
+            (*index) = (*index) + 1;
+        }
+    }
+}
+
+void CellSizeSettings(MenuEventArgs* menuEventArgs) {
+    uint8_t i;
+    uint8_t previous;
+
+    Menu* menu = CreateMenu(16, "Cell Size");
+    menu->SelectionType = Single;
+
+    menu->Items[0].Name = "1";
+    menu->Items[1].Name = "2";
+    menu->Items[2].Name = "3";
+    menu->Items[3].Name = "4";
+    menu->Items[4].Name = "5";
+    menu->Items[5].Name = "6";
+    menu->Items[6].Name = "7";
+    menu->Items[7].Name = "8";
+    menu->Items[8].Name = "9";
+    menu->Items[9].Name = "10";
+    menu->Items[10].Name = "11";
+    menu->Items[11].Name = "12";
+    menu->Items[12].Name = "13";
+    menu->Items[13].Name = "14";
+    menu->Items[14].Name = "15";
+    menu->Items[15].Name = "Back";
+    menu->Items[15].Function = FUNCTION_BACK;
+
+    menu->Items[mainBoard->CellHeight - 1].Selected = true;
+    previous = mainBoard->CellHeight - 1;
+    
+    menu->BackKey = Key_Del;
+    DisplayMenu(menu);
+
+    for (i = 0; i < menu->NumItems - 1; i++) {
+        if (menu->Items[i].Selected && i != previous) {
+            int newSize = 224 / (i + 1);
+            if (newSize > 60) { newSize = 60; }
+
+            ResizeBoard(mainBoard, newSize, newSize);
+            
+            mainBoard->CellHeight = i + 1;
+            mainBoard->CellWidth = i + 1;
+            break;
+        }
+    }
+
+    DeleteMenu(menu);
+}
+
+void RandomPercentageSettings(MenuEventArgs* menuEventArgs) {
+
 }
 
 void RuleSettings(MenuEventArgs* menuEventArgs) {
@@ -348,7 +471,7 @@ void ColorPicker(MenuEventArgs* menuEventArgs) {
         gc_SetColorIndex(0);
         gc_NoClipRectangleOutline(10 * i, 10 * j + 99, 10, 10);
 
-        Key_ScanKeys(true);
+        Key_ScanKeys(125);
 
         old_i = i;
         old_j = j;
@@ -411,19 +534,15 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
     menu->SelectionType = Single;
     menu->ExtraFunction = DrawTopoSprite;
 
-    menu->Items[0].Name = "Plane";
-    menu->Items[1].Name = "Ring";
-    menu->Items[2].Name = "Mobius";
-    menu->Items[3].Name = "Torus";
-    menu->Items[4].Name = "Sphere";
-    menu->Items[5].Name = "Klein";
-    menu->Items[6].Name = "Projection";
+    for (i = 0; i < NUM_WRAPPING_MODES; i++) {
+        menu->Items[i].Name = WrappingModeNames[i];
+    }
     menu->Items[7].Name = "Back";
     menu->Items[7].Function = FUNCTION_BACK;
 
     menu->Items[mainBoard->WrappingMode].Selected = true;
 
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < NUM_WRAPPING_MODES; i++) {
         menu->Items[i].Function = DrawTopoSprite;
     }
 

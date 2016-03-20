@@ -38,14 +38,34 @@ bool Key_JustPressed(key_t key) {
     return !Key_WasDown(key) && Key_IsDown(key);
 }
 
-void Key_ScanKeys(bool debounce) {
-    int i = 0;
+void Key_ScanKeys(uint32_t keyDelayMs) {
+    uint8_t i;
+    uint8_t j;
+    uint16_t* debounceKeys;
+    uint32_t currentTime = keyDelayMs;
+
     memcpy(__previousKeys, kb_dataArray, 8*sizeof(uint16_t));
-    if (debounce) {
-        for (i = 0; i < 100; i++) { kb_Scan(); }
+    debounceKeys = malloc(8 * sizeof(uint16_t));
+    memset_fast(debounceKeys, 0, 8);
+    if (keyDelayMs > 0) {
+        do {
+            kb_Scan(); 
+            for (j = 0; j < 8; j++) {
+                debounceKeys[j] |= kb_dataArray[j];
+            }
+            currentTime--;
+        } while (currentTime > 0);
+
+        for (j = 0; j < 8; j++) {
+            kb_dataArray[j] = debounceKeys[j];
+        }
+        free(debounceKeys);
     } else {
         kb_Scan();
     }
 }
 
-void Key_Reset() { kb_Reset(); }
+void Key_Reset() { 
+    free(__previousKeys);
+    kb_Reset(); 
+}

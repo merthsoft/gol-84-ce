@@ -89,7 +89,7 @@ void Key_Init();
 bool Key_IsDown(key_t key);
 bool Key_WasDown(key_t key);
 bool Key_JustPressed(key_t key);
-void Key_ScanKeys(bool debounce);
+void Key_ScanKeys(uint32_t keyDelayMs);
 void Key_Reset();
 
 #endif // !KEY_H

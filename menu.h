@@ -26,6 +26,7 @@ typedef struct Menu {
     void* ExtraFunction;
     MenuSelectionType SelectionType;
     key_t BackKey;
+    char CursorChar;
 } Menu;
 
 typedef struct MenuEventArgs {
