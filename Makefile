@@ -7,7 +7,7 @@ DESCRIPTION ?= "Game of Life"
 ARCHIVED ?= NO
 APPVAR ?= NO
 
-L := graphc keypadc
+L := graphc keypadc fileioc
 
 empty :=
 space := $(empty) $(empty)

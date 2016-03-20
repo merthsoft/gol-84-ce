@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <graphc.h>
+#include <fileioc.h>
 
 #include "draw.h"
 #include "key_helper.h"

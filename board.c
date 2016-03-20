@@ -144,7 +144,7 @@ void DrawCell(Board* board, uint8_t x, uint8_t y) {
 }
 
 void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety) {
-    __drawCell(board, x, y, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
+    __drawCell(board, x + offsetx, y + offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
 }
 
 void RandomBoard(Board* board) {
@@ -173,17 +173,41 @@ void ClearBoard(Board* board) {
     board->BoardNumber = 0;
 }
 
+Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
+    int i;
+    int j;
+    Board* b = malloc(sizeof(Board));
+    b->BoardWidth = boardWidth;
+    b->BoardHeight = boardHeight;
+
+    for (i = 0; i < 2; i++) {
+        b->Cells[i] = malloc(8 * (boardWidth + 2));
+        for (j = 0; j < boardWidth + 2; j++) {
+            b->Cells[i][j] = malloc(8 * (boardHeight + 2));
+        }
+    }
+
+    b->BoardNumber = 0;
+    b->Rule = malloc(sizeof(Rule));
+    b->Rule->Live = 0;
+    b->Rule->Born = 0;
+    b->Rule->Name = NULL;
+    return b;
+}
+
+void DeleteBoard(Board* b) {
+    //FreeCells(b);
+
+    free(b->Rule);
+    free(b);
+}
+
 void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight) {
     int i;
     int j;
 
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < b->BoardWidth + 2; j++) {
-            free(b->Cells[i][j]);
-        }
-        free(b->Cells[i]);
-    }
-    
+    FreeCells(b);
+
     b->BoardWidth = boardWidth;
     b->BoardHeight = boardHeight;
 
@@ -197,40 +221,20 @@ void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight) {
     ClearBoard(b);
 }
 
-Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
+void FreeCells(Board* b) {
     int i;
     int j;
-    Board* b = malloc(sizeof(Board));
-    b->BoardWidth = boardWidth;
-    b->BoardHeight = boardHeight;
 
-    for (i = 0; i < 2; i++) {
-        b->Cells[i] = malloc(8 * (boardWidth+2));
-        for (j = 0; j < boardWidth+2; j++) {
-            b->Cells[i][j] = malloc(8 * (boardHeight+2));
+    if (b->Cells[0] != NULL) {
+        for (i = 0; i < 2; i++) {
+            for (j = 0; j < b->BoardWidth + 2; j++) {
+                free(b->Cells[i][j]);
+                //b->Cells[i][j] = NULL;
+            }
+            free(b->Cells[i]);
+            //b->Cells[i] = NULL;
         }
     }
-
-    b->BoardNumber = 0;
-    b->Rule = malloc(sizeof(Rule));
-    b->Rule->Live = 0;
-    b->Rule->Born = 0;
-    b->Rule->Name = NULL;
-    return b;
-}
-
-void DeleteBoard(Board* b) {
-    int i;
-    int j;
-    for (i = 0; i < 2; i++) {
-        for (j = 0; j < b->BoardWidth + 2; j++) {
-            free(b->Cells[i][j]);
-        }
-        free(b->Cells[i]);
-    }
-
-    free(b->Rule);
-    free(b);
 }
 
 void SetRule(Board* b, Rule* rule) {
@@ -249,10 +253,10 @@ void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety) {
         for (j = 1; j <= board->BoardHeight; j++) {
             if (board->Cells[boardNumber][i][j] != board->Cells[!boardNumber][i][j] || redraw) {
                 if (cellWidth > 2) {
-                    DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
+                    DrawRectFill(i*cellWidth + 1 + offsetx, j * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
                 }
                 else {
-                    DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
+                    DrawRectFill(i*cellWidth + offsetx, j * cellHeight + offsety, cellWidth, cellHeight, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
                 }
             }
         }

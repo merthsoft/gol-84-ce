@@ -60,5 +60,6 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
 void DrawCell(Board* board, uint8_t x, uint8_t y);
 void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety);
 void SetRule(Board* b, Rule* rule);
+void FreeCells(Board* b);
 
 #endif BOARD_H

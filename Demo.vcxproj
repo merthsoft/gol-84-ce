@@ -89,6 +89,7 @@ makece SHELL=cmd.exe</NMakeReBuildCommandLine>
     <ClCompile Include="draw.c" />
     <ClCompile Include="key_helper.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="rule.c" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="checkbox_checked.png" />
