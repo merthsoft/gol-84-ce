@@ -17,8 +17,11 @@
 #define kb_dataArray ((uint16_t*)0xF50010)
 uint16_t* __previousKeys;
 
+#define NUM_KEY_ELEMENTS 8
+
 void Key_Init() {
-    __previousKeys = malloc(8 * sizeof(uint16_t));
+    __previousKeys = malloc(NUM_KEY_ELEMENTS * sizeof(uint16_t));
+    memset_fast(__previousKeys, 0, NUM_KEY_ELEMENTS);
 }
 
 bool Key_IsDown(key_t key) {
@@ -39,25 +42,25 @@ bool Key_JustPressed(key_t key) {
     return !Key_WasDown(key) && Key_IsDown(key);
 }
 
-void Key_ScanKeys(uint32_t keyDelayMs) {
+void Key_ScanKeys(uint32_t keyDelay) {
     uint8_t i;
     uint8_t j;
     uint16_t* debounceKeys;
-    uint32_t currentTime = keyDelayMs;
+    uint32_t currentTime = keyDelay;
 
-    memcpy(__previousKeys, kb_dataArray, 8*sizeof(uint16_t));
-    debounceKeys = malloc(8 * sizeof(uint16_t));
-    memset_fast(debounceKeys, 0, 8);
-    if (keyDelayMs > 0) {
+    memcpy(__previousKeys, kb_dataArray, NUM_KEY_ELEMENTS * sizeof(uint16_t));
+    debounceKeys = malloc(NUM_KEY_ELEMENTS * sizeof(uint16_t));
+    memset_fast(debounceKeys, 0, NUM_KEY_ELEMENTS);
+    if (keyDelay > 0) {
         do {
             kb_Scan(); 
-            for (j = 0; j < 8; j++) {
+            for (j = 0; j < NUM_KEY_ELEMENTS; j++) {
                 debounceKeys[j] |= kb_dataArray[j];
             }
             currentTime--;
         } while (currentTime > 0);
 
-        for (j = 0; j < 8; j++) {
+        for (j = 0; j < NUM_KEY_ELEMENTS; j++) {
             kb_dataArray[j] = debounceKeys[j];
         }
         free(debounceKeys);
