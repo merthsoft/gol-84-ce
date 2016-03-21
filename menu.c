@@ -21,6 +21,7 @@ Menu* CreateMenu(uint8_t numItems, const char* title) {
         menu->Items[i].Function = FUNCTION_NONE;
         menu->Items[i].Name = "";
         menu->Items[i].Selected = false;
+        menu->Items[i].Tag = NULL;
     }
     menu->NumItems = numItems;
 
@@ -28,6 +29,7 @@ Menu* CreateMenu(uint8_t numItems, const char* title) {
     menu->ExtraFunction = FUNCTION_NONE;
     menu->BackKey = 0;
     menu->CursorChar = 0x10;
+    menu->Tag = NULL;
 
     return menu;
 }

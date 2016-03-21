@@ -22,18 +22,5 @@
 
 void NumToRuleString(uint16_t num, char* rulesString, uint8_t* index);
 void DrawPlayPauseIcon(bool running);
-void Settings();
-void ColorSettings(MenuEventArgs* menuEventArgs);
-void TopologySettings(MenuEventArgs* menuEventArgs);
-void DrawSampleBoard(MenuEventArgs* menuEventArgs);
-void ColorPicker(MenuEventArgs* menuEventArgs);
-void SaveColors(MenuEventArgs* menuEventArgs);
-void DrawTopoSprite(MenuEventArgs* menuEventArgs);
-void RuleSettings(MenuEventArgs* menuEventArgs);
-void SetRuleMenuEvent(MenuEventArgs* menuEventArgs);
-void CellSizeSettings(MenuEventArgs* menuEventArgs);
-void RandomPercentageSettings(MenuEventArgs* menuEventArgs);
-void SaveSettings();
-void LoadSettings();
 
 #endif

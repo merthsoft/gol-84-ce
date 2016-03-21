@@ -10,7 +10,11 @@ typedef struct Rule {
     char* Name;
 } Rule;
 
-uint8_t InitRules(Rule** rulesList);
+typedef struct RulesList {
+    uint8_t NumRules;
+    Rule* List;
+} RulesList;
 
+RulesList* InitRules();
 
 #endif

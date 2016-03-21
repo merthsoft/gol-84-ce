@@ -11,6 +11,7 @@ typedef struct MenuItem {
     char* Name;
     void* Function;
     bool Selected;
+    void* Tag;
 } MenuItem;
 
 typedef enum MenuSelectionType {
@@ -27,6 +28,7 @@ typedef struct Menu {
     MenuSelectionType SelectionType;
     key_t BackKey;
     char CursorChar;
+    void* Tag;
 } Menu;
 
 typedef struct MenuEventArgs {

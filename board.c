@@ -128,23 +128,23 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
     return board->Cells[board->BoardNumber][lC][lR];
 }
 
-void __drawCell(Board* board, uint8_t x, uint8_t y, uint8_t color) {
+void __drawCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety, uint8_t color) {
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
     if (cellWidth > 2) {
-        DrawRectFill(x*cellWidth + 1, y * cellHeight + 1, cellWidth - 1, cellHeight - 1, color);
+        DrawRectFill(x*cellWidth + 1 + offsetx, y * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, color);
     } else {
-        DrawRectFill(x*cellWidth, y * cellHeight, cellWidth, cellHeight, color);
+        DrawRectFill(x*cellWidth + offsetx, y * cellHeight + offsety, cellWidth, cellHeight, color);
     }
 }
 
-void DrawCell(Board* board, uint8_t x, uint8_t y) {
-    __drawCell(board, x, y, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
+void DrawCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety) {
+    __drawCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
 }
 
 void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety) {
-    __drawCell(board, x + offsetx, y + offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
+    __drawCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
 }
 
 void RandomBoard(Board* board) {
