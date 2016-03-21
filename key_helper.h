@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define kb_dataArray ((uint16_t*)0xF50010)
-
 typedef uint16_t key_t;
 
 /**

@@ -9,6 +9,8 @@
 #include "draw.h"
 #include "key_helper.h"
 
+#define MOD_CYCLE(n, c) (((n) + (c)) % (c))
+
 void Step(Board* board) {
     uint8_t numN; // The number of neighbors
     uint8_t i;

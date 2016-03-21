@@ -7,8 +7,6 @@
 
 #include "rule.h"
 
-#define MOD_CYCLE(n, c) (((n) + (c)) % (c))
-
 typedef enum {
     Plane   = 0,
     Ring    = 1,

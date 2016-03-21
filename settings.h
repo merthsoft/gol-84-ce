@@ -14,7 +14,7 @@ void RuleSettings(MenuEventArgs* menuEventArgs);
 void SetRuleMenuEvent(MenuEventArgs* menuEventArgs);
 void CellSizeSettings(MenuEventArgs* menuEventArgs);
 void RandomPercentageSettings(MenuEventArgs* menuEventArgs);
-void SaveSettings();
-void LoadSettings();
+void SaveSettings(Board* mainBoard, char* appVarName);
+void LoadSettings(Board* mainBoard, char* appVarName);
 
 #endif

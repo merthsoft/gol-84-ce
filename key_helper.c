@@ -14,7 +14,8 @@
 
 #include "key_helper.h"
 
-uint16_t* __previousKeys; // This is in the .c so it doesn't clog up other files when you include the .h
+#define kb_dataArray ((uint16_t*)0xF50010)
+uint16_t* __previousKeys;
 
 void Key_Init() {
     __previousKeys = malloc(8 * sizeof(uint16_t));

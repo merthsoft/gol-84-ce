@@ -22,17 +22,16 @@
 #include "rule.h"
 #include "settings.h"
 
-Board* mainBoard;
-RulesList* rulesList;
-
-const char appVarName[] = "[GoL";
-
 void main(void) {
     uint8_t x = 1;
     uint8_t y = 1;
     uint8_t old_x = x;
     uint8_t old_y = y;
     uint8_t i;
+
+    Board* mainBoard;
+    RulesList* rulesList;
+    const char appVarName[] = "[GoL";
     
     bool redraw = true;
     bool toggled = false;
@@ -160,67 +159,12 @@ void main(void) {
         }
     }
     
-    SaveSettings();
+    SaveSettings(mainBoard, appVarName);
     //DeleteBoard(mainBoard);
 
     Key_Reset();
     gc_CloseGraph();
     pgrm_CleanUp();
-}
-
-void SaveSettings() {
-    ti_var_t file;
-    ti_CloseAll();
-
-    file = ti_Open(appVarName, "w");
-    if (!file) { return; }
-    if (ti_IsArchived(file)) {
-        ti_SetArchiveStatus(false, file);
-        file = ti_Open(appVarName, "w");
-    }
-
-    FreeCells(mainBoard);
-    ti_Write("SETTINGS:", 9, 1, file);
-    ti_Write(mainBoard, sizeof(Board), 1, file);
-    ti_Write(mainBoard->Rule, sizeof(Rule), 1, file);
-
-    ti_SetArchiveStatus(true, file);
-}
-
-void LoadSettings() {
-    ti_var_t file;
-    ti_CloseAll();
-
-    file = ti_Open(appVarName, "r");
-    if (!file) { return; }
-    if (ti_IsArchived(file)) {
-        ti_SetArchiveStatus(false, file);
-        file = ti_Open(appVarName, "r");
-    }
-
-    mainBoard = malloc(sizeof(Board));
-
-    ti_Seek(9, SEEK_SET, file);
-    if (!ti_Read(mainBoard, sizeof(Board), 1, file)) {
-        free(mainBoard);
-        mainBoard = NULL;
-        return;
-    }
-
-    mainBoard->Rule = malloc(sizeof(Rule));
-    if (!ti_Read(mainBoard->Rule, sizeof(Rule), 1, file)) {
-        free(mainBoard->Rule);
-        free(mainBoard);
-        mainBoard = NULL;
-        return;
-    }
-
-    mainBoard->Cells[0] = NULL;
-    mainBoard->Cells[1] = NULL;
-    ResizeBoard(mainBoard, mainBoard->BoardWidth, mainBoard->BoardHeight);
-    mainBoard->Rule->Name = NULL;
-
-    ti_Close(file);
 }
 
 void DrawPlayPauseIcon(bool running) {
