@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <graphc.h>
-#include <fileioc.h>
+#include <lib/ce/graphc.h>
+#include <lib/ce/fileioc.h>
 
 #include "draw.h"
 #include "key_helper.h"

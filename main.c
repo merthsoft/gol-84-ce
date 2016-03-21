@@ -11,8 +11,8 @@
 #include <string.h>
 #include <debug.h>
 
-#include <fileioc.h>
-#include <graphc.h>
+#include <lib/ce/fileioc.h>
+#include <lib/ce/graphc.h>
 
 #include "key_helper.h"
 #include "board.h"
@@ -216,11 +216,17 @@ void LoadSettings() {
     }
 
     mainBoard = malloc(sizeof(Board));
-    mainBoard->Rule = malloc(sizeof(Rule));
 
     ti_Seek(9, SEEK_SET, file);
-    if (!(ti_Read(mainBoard, sizeof(Board), 1, file) &&
-        ti_Read(mainBoard->Rule, sizeof(Rule), 1, file))) {
+    if (!ti_Read(mainBoard, sizeof(Board), 1, file)) {
+        free(mainBoard);
+        mainBoard = NULL;
+        return;
+    }
+
+    mainBoard->Rule = malloc(sizeof(Rule));
+    if (!ti_Read(mainBoard->Rule, sizeof(Rule), 1, file)) {
+        free(mainBoard->Rule);
         free(mainBoard);
         mainBoard = NULL;
         return;

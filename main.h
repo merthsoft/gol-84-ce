@@ -14,8 +14,6 @@
 #include <string.h>
 #include <debug.h>
 
-#include <graphc.h>
-
 #include "key_helper.h"
 #include "board.h"
 #include "draw.h"

@@ -70,7 +70,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Linkcmd" />
     <None Include="Makefile" />
     <None Include="menu.c">
       <Filter>Source Files</Filter>
