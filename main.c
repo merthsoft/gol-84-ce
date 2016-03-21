@@ -11,7 +11,6 @@
 #include <string.h>
 #include <debug.h>
 
-#include <lib/ce/fileioc.h>
 #include <lib/ce/graphc.h>
 
 #include "main.h"
@@ -65,44 +64,7 @@ void main(void) {
 
     while (!quit) {
         if (redraw) {
-            uint8_t i = 0;
-            char* rulesString = malloc(sizeof(char) * 11);
-            memset(rulesString, 0, 11);
-                        
-            gc_FillScrn(255);
-            gc_PrintStringXY("2nd-Toggle", 240, 8);
-            gc_PrintStringXY("Del-Quit", 240, 17);
-            gc_PrintStringXY("Clear-Clear", 240, 26);
-            gc_PrintStringXY("Vars-Rand", 240, 35);
-            gc_PrintStringXY("+-Step", 240, 44);
-            gc_PrintStringXY("Mode-Setup", 240, 53);
-            gc_PrintStringXY("Enter-", 240, 62);
-            DrawGrid(mainBoard, 0, 0);
-            DrawBoard(mainBoard, true, 0, 0);     
-            DrawPlayPauseIcon(running);
-
-            DrawRectFill(239, 72, 80, 2, 0);
-
-            gc_PrintStringXY("Topology:", 240, 77);
-            gc_PrintStringXY(WrappingModeNames[mainBoard->WrappingMode], 245, 86);
-            gc_PrintStringXY("Rules:", 240, 95);
-            
-            rulesString[0] = 'B';
-            i = 1;
-            NumToRuleString(mainBoard->Rule->Born, rulesString, &i);
-            gc_PrintStringXY(rulesString, 245, 104);
-
-            memset(rulesString, 0, 11);
-            rulesString[0] = 'S';
-            i = 1;
-            NumToRuleString(mainBoard->Rule->Live, rulesString, &i);
-            gc_PrintStringXY(rulesString, 245, 113);
-
-            gc_PrintStringXY("Cell Size:", 240, 122);
-            gc_SetTextXY(245, 131);
-            gc_PrintInt(mainBoard->CellHeight, log10(mainBoard->CellHeight) + 1);
-
-            free(rulesString);
+            DrawHelpText(mainBoard, running);
             redraw = false;
         }
         
@@ -167,21 +129,63 @@ void main(void) {
     pgrm_CleanUp();
 }
 
+void DrawHelpText(Board* mainBoard, bool running) {
+    uint8_t i = 0;
+    char* rulesString = malloc(sizeof(char) * 11);
+    memset(rulesString, 0, 11);
+
+    gc_FillScrn(255);
+    gc_PrintStringXY("2nd-Toggle", 240, 8);
+    gc_PrintStringXY("Del-Quit", 240, 17);
+    gc_PrintStringXY("Clear-Clear", 240, 26);
+    gc_PrintStringXY("Vars-Rand", 240, 35);
+    gc_PrintStringXY("+-Step", 240, 44);
+    gc_PrintStringXY("Mode-Setup", 240, 53);
+    gc_PrintStringXY("Enter-", 240, 62);
+    DrawGrid(mainBoard, 0, 0);
+    DrawBoard(mainBoard, true, 0, 0);
+    DrawPlayPauseIcon(running);
+
+    DrawRectFill(239, 72, 80, 2, 0);
+
+    gc_PrintStringXY("Topology:", 240, 77);
+    gc_PrintStringXY(WrappingModeNames[mainBoard->WrappingMode], 245, 86);
+    gc_PrintStringXY("Rules:", 240, 95);
+
+    rulesString[0] = 'B';
+    i = 1;
+    NumToRuleString(mainBoard->Rule->Born, rulesString, &i);
+    gc_PrintStringXY(rulesString, 245, 104);
+
+    memset(rulesString, 0, 11);
+    rulesString[0] = 'S';
+    i = 1;
+    NumToRuleString(mainBoard->Rule->Live, rulesString, &i);
+    gc_PrintStringXY(rulesString, 245, 113);
+
+    gc_PrintStringXY("Cell Size:", 240, 122);
+    gc_SetTextXY(245, 131);
+    gc_PrintInt(mainBoard->CellHeight, log10(mainBoard->CellHeight) + 1);
+
+    free(rulesString);
+}
+
 void DrawPlayPauseIcon(bool running) {
+    #define COLUMN 287
     if (!running) {
-        DrawRectFill(282, 61, 7, 11, 255);
+        DrawRectFill(COLUMN, 61, 7, 11, 255);
         gc_SetColorIndex(4);
-        gc_NoClipVertLine(282, 61, 11);
-        gc_NoClipVertLine(283, 62, 9);
-        gc_NoClipVertLine(284, 63, 7);
-        gc_NoClipVertLine(285, 64, 5);
-        gc_NoClipVertLine(286, 65, 3);
-        gc_NoClipVertLine(287, 66, 1);
+        gc_NoClipVertLine(COLUMN, 61, 11);
+        gc_NoClipVertLine(COLUMN+1, 62, 9);
+        gc_NoClipVertLine(COLUMN+2, 63, 7);
+        gc_NoClipVertLine(COLUMN+3, 64, 5);
+        gc_NoClipVertLine(COLUMN+4, 65, 3);
+        gc_NoClipVertLine(COLUMN+5, 66, 1);
     }
     else {
-        DrawRectFill(282, 61, 7, 11, 255);
-        DrawRectFill(282, 61, 3, 9, 128);
-        DrawRectFill(286, 61, 3, 9, 128);
+        DrawRectFill(COLUMN, 61, 7, 11, 255);
+        DrawRectFill(COLUMN, 61, 3, 9, 128);
+        DrawRectFill(COLUMN+4, 61, 3, 9, 128);
     }
 }
 

@@ -23,6 +23,7 @@
 #include "topo_sprites.h"
 
 #include "settings.h"
+#include "settings_private.h"
 #include "board.h"
 
 void Settings(Board* board, RulesList* rulesList) {
