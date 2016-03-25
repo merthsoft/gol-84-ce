@@ -13,5 +13,9 @@ void RuleSettings(MenuEventArgs* menuEventArgs);
 void SetRuleMenuEvent(MenuEventArgs* menuEventArgs);
 void CellSizeSettings(MenuEventArgs* menuEventArgs);
 void RandomPercentageSettings(MenuEventArgs* menuEventArgs);
+void CustomRuleSettings(MenuEventArgs* menuEventArgs);
+void CustomRuleMenuItemStrings(Board* mainBoard, Menu* menu);
+void SetCustomRule(MenuEventArgs* menuEventArgs);
+void SetRuleIndex(MenuEventArgs* menuEventArgs);
 
 #endif

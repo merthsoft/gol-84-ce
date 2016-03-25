@@ -14,10 +14,10 @@
 #include <lib/ce/fileioc.h>
 #include <lib/ce/graphc.h>
 
+#include "menu.h"
 #include "key_helper.h"
 #include "board.h"
 #include "draw.h"
-#include "menu.h"
 #include "rule.h"
 #include "main.h"
 #include "topo_sprites.h"
@@ -45,7 +45,7 @@ void Settings(Board* board, RulesList* rulesList) {
     menu->Items[4].Name = "Random Percentage...";
     menu->Items[4].Function = RandomPercentageSettings;
 
-    menu->Items[5].Name = "Back";
+    menu->Items[5].Name = BackString;
     menu->Items[5].Function = FUNCTION_BACK;
 
     menu->BackKey = Key_Del;
@@ -78,7 +78,7 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[12].Name = "13";
     menu->Items[13].Name = "14";
     menu->Items[14].Name = "15";
-    menu->Items[15].Name = "Back";
+    menu->Items[15].Name = BackString;
     menu->Items[15].Function = FUNCTION_BACK;
 
     menu->Items[mainBoard->CellHeight - 1].Selected = true;
@@ -104,7 +104,38 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
 }
 
 void RandomPercentageSettings(MenuEventArgs* menuEventArgs) {
+    uint8_t i;
+    uint8_t previous;
+    Board* mainBoard = menuEventArgs->Menu->Tag;
 
+    Menu* menu = CreateMenu(10, "Cell Size");
+    menu->SelectionType = Single;
+
+    menu->Items[0].Name = "10";
+    menu->Items[1].Name = "20";
+    menu->Items[2].Name = "30";
+    menu->Items[3].Name = "40";
+    menu->Items[4].Name = "50";
+    menu->Items[5].Name = "60";
+    menu->Items[6].Name = "70";
+    menu->Items[7].Name = "80";
+    menu->Items[8].Name = "90";;
+    menu->Items[9].Name = BackString;
+    menu->Items[9].Function = FUNCTION_BACK;
+
+    menu->Items[(mainBoard->RandomChance - 1) / 10].Selected = true;
+
+    menu->BackKey = Key_Del;
+    DisplayMenu(menu);
+
+    for (i = 0; i < 9; i++) {
+        if (menu->Items[i].Selected) {
+            mainBoard->RandomChance = (i + 1) * 10;
+            break;
+        }
+    }
+
+    DeleteMenu(menu);
 }
 
 void RuleSettings(MenuEventArgs* menuEventArgs) {
@@ -129,8 +160,10 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
     }
 
     menu->Items[numRules].Name = "Custom...";
+    menu->Items[numRules].Function = CustomRuleSettings;
+    menu->Items[numRules].Selected = !foundRule;
 
-    menu->Items[numRules + 1].Name = "Back";
+    menu->Items[numRules + 1].Name = BackString;
     menu->Items[numRules + 1].Function = FUNCTION_BACK;
 
     menu->BackKey = Key_Del;
@@ -138,6 +171,93 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
 
     DisplayMenu(menu);
     DeleteMenu(menu);
+}
+
+void CustomRuleSettings(MenuEventArgs* menuEventArgs) {
+    Board* mainBoard = menuEventArgs->Menu->Tag;
+    Menu* menu = CreateMenu(3, "Custom Rule");
+    
+    menu->Items[0].Name = malloc(20);
+    menu->Items[1].Name = malloc(17);
+    
+    CustomRuleMenuItemStrings(mainBoard, menu);
+
+    menu->Items[0].Function = SetCustomRule;
+    menu->Items[1].Function = SetCustomRule;
+
+    menu->Items[2].Name = BackString;
+    menu->Items[2].Function = FUNCTION_BACK;
+
+    menu->Tag = mainBoard;
+    menu->BackKey = Key_Del;
+    
+    DisplayMenu(menu);
+
+    free(menu->Items[0].Name);
+    free(menu->Items[1].Name);
+    DeleteMenu(menu);
+}
+
+void CustomRuleMenuItemStrings(Board* mainBoard, Menu* menu) {
+    uint8_t i;
+
+    memcpy(menu->Items[0].Name, "Survive: \0\0\0\0\0\0\0\0\0\0\0", 20);
+    memcpy(menu->Items[1].Name, "Born: \0\0\0\0\0\0\0\0\0\0\0", 17);
+
+    i = 9;
+    NumToRuleString(mainBoard->Rule->Live, menu->Items[0].Name, &i);
+    i = 6;
+    NumToRuleString(mainBoard->Rule->Born, menu->Items[1].Name, &i);
+}
+
+void SetCustomRule(MenuEventArgs* menuEventArgs) {
+    Menu* menu;
+    uint8_t i;
+    Board* mainBoard = menuEventArgs->Menu->Tag;
+    char* ruleName;
+    int* rule;
+
+    if (menuEventArgs->Index == 0) {
+        ruleName = "Survive";
+        rule = &(mainBoard->Rule->Live);
+    } else {
+        ruleName = "Born";
+        rule = &(mainBoard->Rule->Born);
+    }
+
+    menu = CreateMenu(10, ruleName);
+    menu->SelectionType = Multiple;
+    
+    for (i = 0; i < 9; i++) {
+        menu->Items[i].Name = malloc(2);
+        menu->Items[i].Name[0] = 48 + i;
+        menu->Items[i].Name[1] = 0;
+        menu->Items[i].Selected = ((*rule) & (1 << i)) != 0;
+        menu->Items[i].Tag = rule;
+        menu->Items[i].Function = SetRuleIndex;
+    }
+
+    menu->Items[9].Name = BackString;
+    menu->Items[9].Function = FUNCTION_BACK;
+
+    menu->Tag = mainBoard;
+    menu->BackKey = Key_Del;
+    DisplayMenu(menu);
+
+    for (i = 0; i < 9; i++) {
+        free(menu->Items[i].Name);
+    }
+
+    CustomRuleMenuItemStrings(mainBoard, menuEventArgs->Menu);
+
+    DeleteMenu(menu);
+}
+
+void SetRuleIndex(MenuEventArgs* menuEventArgs) {
+    uint8_t index = menuEventArgs->Index;
+    MenuItem item = menuEventArgs->Menu->Items[index];
+    int* rule = menuEventArgs->Menu->Items[index].Tag;
+    *rule ^= 1 << index;
 }
 
 void SetRuleMenuEvent(MenuEventArgs* menuEventArgs) {
@@ -183,7 +303,7 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[5].Name = "Save";
     menu->Items[5].Function = SaveColors;
     menu->Items[5].Tag = sampleBoard;
-    menu->Items[6].Name = "Back";
+    menu->Items[6].Name = BackString;
     menu->Items[6].Function = FUNCTION_BACK;
 
     for (i = 0; i < 5; i++) {
@@ -319,15 +439,15 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
     int i;
     Board* mainBoard = menuEventArgs->Menu->Tag;
 
-    Menu* menu = CreateMenu(8, "Topologies");
+    Menu* menu = CreateMenu(NUM_WRAPPING_MODES + 1, "Topologies");
     menu->SelectionType = Single;
     menu->ExtraFunction = DrawTopoSprite;
 
     for (i = 0; i < NUM_WRAPPING_MODES; i++) {
         menu->Items[i].Name = WrappingModeNames[i];
     }
-    menu->Items[7].Name = "Back";
-    menu->Items[7].Function = FUNCTION_BACK;
+    menu->Items[NUM_WRAPPING_MODES].Name = BackString;
+    menu->Items[NUM_WRAPPING_MODES].Function = FUNCTION_BACK;
 
     menu->Items[mainBoard->WrappingMode].Selected = true;
 
@@ -338,7 +458,7 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
     menu->BackKey = Key_Del;
     DisplayMenu(menu);
 
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < NUM_WRAPPING_MODES; i++) {
         if (menu->Items[i].Selected) {
             mainBoard->WrappingMode = i;
             break;

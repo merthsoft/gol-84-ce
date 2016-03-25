@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "key_helper.h"
+
 #define FUNCTION_BACK (void*)1
 #define FUNCTION_NONE (void*)0
 
@@ -37,6 +39,8 @@ typedef struct MenuEventArgs {
     uint32_t FrameNumber;
     bool Back;
 } MenuEventArgs;
+
+char* BackString = "Back";
 
 Menu* CreateMenu(uint8_t numItems, const char* title);
 void DeleteMenu(Menu* menu);

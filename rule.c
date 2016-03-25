@@ -32,8 +32,8 @@ RulesList*  InitRules() {
     rulesList->List[5].Live = 0x26;
     rulesList->List[5].Born = 0x09;
 
-    rulesList->List[6].Name = "Life without Death";
-    rulesList->List[6].Live = 0xFF;
+    rulesList->List[6].Name = "Life without Death (B3/S012345678)";
+    rulesList->List[6].Live = 0x1FF;
     rulesList->List[6].Born = 0x08;
 
     rulesList->List[7].Name = "Seeds (B2/S)";
@@ -85,4 +85,14 @@ RulesList*  InitRules() {
     rulesList->List[18].Born = 0x1F0;
 
     return rulesList;
+}
+
+void NumToRuleString(uint16_t num, char* rulesString, uint8_t* index) {
+    uint8_t j;
+    for (j = 0; j < 9; j++) {
+        if ((num & (1 << j)) != 0) {
+            rulesString[*index] = 48 + j;
+            (*index) = (*index) + 1;
+        }
+    }
 }

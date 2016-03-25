@@ -16,5 +16,6 @@ typedef struct RulesList {
 } RulesList;
 
 RulesList* InitRules();
+void NumToRuleString(uint16_t num, char* rulesString, uint8_t* index);
 
 #endif

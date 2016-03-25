@@ -20,7 +20,6 @@
 #include "menu.h"
 #include "rule.h"
 
-void NumToRuleString(uint16_t num, char* rulesString, uint8_t* index);
 void DrawPlayPauseIcon(bool running);
 void DrawHelpText(Board* mainBoard, bool running);
 

@@ -42,7 +42,7 @@ typedef struct Board {
     uint8_t CellHeight;
     uint8_t CursorAliveColor;
     uint8_t CursorDeadColor;
-    uint8_t RandomMod;
+    uint8_t RandomChance;
     Rule* Rule;
 } Board;
 
@@ -53,6 +53,7 @@ void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety);
 void DrawGrid(Board* board, uint8_t offsetx, uint8_t offsety);
 void RandomBoard(Board* board);
 void ClearBoard(Board* board);
+void FillBoard(Board* board);
 void Step(Board* board);
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
 void DrawCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety);

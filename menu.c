@@ -80,7 +80,7 @@ int DisplayMenu(Menu* menu) {
                         gc_NoClipDrawSprite(selected ? radiobutton_filled : radiobutton_empty, textPadding, 3 + linePadding + linePadding * i - 1, 9, 9);
                         break;
                     case Multiple:
-                        gc_NoClipDrawSprite(selected ? checkbox_checked : checkbox_empty, textPadding, 5 + linePadding + linePadding * i - 1, 9, 9);
+                        gc_NoClipDrawSprite(selected ? checkbox_checked : checkbox_empty, textPadding, 3 + linePadding + linePadding * i - 1, 9, 9);
                         break;
                 }
             }
@@ -133,6 +133,7 @@ int DisplayMenu(Menu* menu) {
                 eventArgs->Back = false;
 
                 func(eventArgs);
+
                 y = eventArgs->Index + 1;
                 frameNumber = eventArgs->FrameNumber;
                 menu = eventArgs->Menu;
