@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\settings">
+      <UniqueIdentifier>{eedb703c-b6a5-40ad-866b-95f362a88391}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\settings">
+      <UniqueIdentifier>{7a50dec6-689f-48aa-8415-d15b7d1aff4c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
@@ -34,7 +40,19 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="settings.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\settings</Filter>
+    </ClCompile>
+    <ClCompile Include="rules_settings.c">
+      <Filter>Source Files\settings</Filter>
+    </ClCompile>
+    <ClCompile Include="topo_settings.c">
+      <Filter>Source Files\settings</Filter>
+    </ClCompile>
+    <ClCompile Include="color_settings.c">
+      <Filter>Source Files\settings</Filter>
+    </ClCompile>
+    <ClCompile Include="misc_settings.c">
+      <Filter>Source Files\settings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,10 +122,19 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="settings.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\settings</Filter>
     </ClInclude>
-    <ClInclude Include="settings_private.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="rules_settings.h">
+      <Filter>Header Files\settings</Filter>
+    </ClInclude>
+    <ClInclude Include="topo_settings.h">
+      <Filter>Header Files\settings</Filter>
+    </ClInclude>
+    <ClInclude Include="color_settings.h">
+      <Filter>Header Files\settings</Filter>
+    </ClInclude>
+    <ClInclude Include="misc_settings.h">
+      <Filter>Header Files\settings</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
