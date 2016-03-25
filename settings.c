@@ -377,7 +377,7 @@ void ColorPicker(MenuEventArgs* menuEventArgs) {
         gc_SetColorIndex(0);
         gc_NoClipRectangleOutline(10 * i, 10 * j + 99, 10, 10);
 
-        Key_ScanKeys(125);
+        Key_ScanKeys(150);
 
         old_i = i;
         old_j = j;

@@ -82,7 +82,7 @@ void main(void) {
         } else {
             DrawCursor(mainBoard, x, y, 0, 0);
 
-            Key_ScanKeys(125);
+            Key_ScanKeys(150);
 
             old_x = x;
             old_y = y;
@@ -165,11 +165,11 @@ void DrawHelpText(Board* mainBoard, bool running) {
     memset(rulesString, 0, 11);
     i = 0;
     NumToRuleString(mainBoard->Rule->Born, rulesString, &i);
-    gc_PrintStringXY(rulesString, 245, 131);
+    gc_PrintStringXY(rulesString, 245, 140);
 
-    gc_PrintStringXY("Cell Size:", 240, 140);
+    gc_PrintStringXY("Cell Size:", 240, 149);
     sprintf(rulesString, "%d", mainBoard->CellHeight);
-    gc_PrintStringXY(rulesString, 245, 149);
+    gc_PrintStringXY(rulesString, 245, 158);
 
     free(rulesString);
 }
