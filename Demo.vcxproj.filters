@@ -19,6 +19,9 @@
     <Filter Include="Header Files\settings">
       <UniqueIdentifier>{7a50dec6-689f-48aa-8415-d15b7d1aff4c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\sprites">
+      <UniqueIdentifier>{43018b20-756c-4f5d-b410-f74a107960f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
@@ -109,16 +112,10 @@
     <ClInclude Include="menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="menu_sprites.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="rule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="topo_sprites.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="settings.h">
@@ -135,6 +132,12 @@
     </ClInclude>
     <ClInclude Include="misc_settings.h">
       <Filter>Header Files\settings</Filter>
+    </ClInclude>
+    <ClInclude Include="menu_sprites.h">
+      <Filter>Header Files\sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="topo_sprites.h">
+      <Filter>Header Files\sprites</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
