@@ -61,51 +61,99 @@ void SaveSettings(Board* mainBoard, char* appVarName) {
 
     file = ti_Open(appVarName, "w");
     if (!file) { return; }
-    if (ti_IsArchived(file)) {
-        ti_SetArchiveStatus(false, file);
-        file = ti_Open(appVarName, "w");
+
+    ti_Write("Settings:", 9, 1, file);
+    ti_Write(&(mainBoard->BoardWidth), 1, 1, file);
+    ti_Write(&(mainBoard->BoardHeight), 1, 1, file);
+    ti_Write(&(mainBoard->CellWidth), 1, 1, file);
+    ti_Write(&(mainBoard->CellHeight), 1, 1, file);
+    ti_Write(&(mainBoard->WrappingMode), 3, 1, file);
+    ti_Write(&(mainBoard->GridColor), 1, 1, file);
+    ti_Write(&(mainBoard->DeadColor), 1, 1, file);
+    ti_Write(&(mainBoard->AliveColor), 1, 1, file);
+    ti_Write(&(mainBoard->CursorAliveColor), 1, 1, file);
+    ti_Write(&(mainBoard->CursorDeadColor), 1, 1, file);
+    ti_Write(&(mainBoard->RandomChance), 1, 1, file);
+    ti_Write(&(mainBoard->Rule->Born), 1, 1, file);
+    ti_Write(&(mainBoard->Rule->Live), 1, 1, file);
+    
+    if (!ti_IsArchived(file)) {
+        ti_SetArchiveStatus(true, file);
     }
 
-    FreeCells(mainBoard);
-    ti_Write("SETTINGS:", 9, 1, file);
-    ti_Write(mainBoard, sizeof(Board), 1, file);
-    ti_Write(mainBoard->Rule, sizeof(Rule), 1, file);
-
-    ti_SetArchiveStatus(true, file);
+    ti_Close(file);
+    ti_CloseAll();
 }
 
-void LoadSettings(Board* mainBoard, char* appVarName) {
+Board* LoadSettings(char* appVarName) {
     ti_var_t file;
+    Board* mainBoard;
+    size_t count = 0;
+
     ti_CloseAll();
 
-    file = ti_Open(appVarName, "r");
-    if (!file) { return; }
-    if (ti_IsArchived(file)) {
-        ti_SetArchiveStatus(false, file);
-        file = ti_Open(appVarName, "r");
-    }
+    file = ti_Open(appVarName, "r+");
+    if (!file) { return NULL;  }
 
     mainBoard = malloc(sizeof(Board));
 
-    ti_Seek(9, SEEK_SET, file);
-    if (!ti_Read(mainBoard, sizeof(Board), 1, file)) {
-        free(mainBoard);
-        mainBoard = NULL;
-        return;
-    }
+    mainBoard->Rule = malloc(sizeof(Board));
 
-    mainBoard->Rule = malloc(sizeof(Rule));
-    if (!ti_Read(mainBoard->Rule, sizeof(Rule), 1, file)) {
+    ti_Seek(9, 2, file);
+
+    count = ti_Read(&(mainBoard->BoardWidth), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->BoardHeight), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->CellWidth), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->CellHeight), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->WrappingMode), 3, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->GridColor), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->DeadColor), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->AliveColor), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->CursorAliveColor), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->CursorDeadColor), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->RandomChance), 1, 1, file);
+    if (!count) { goto load_error; }
+    
+    count = ti_Read(&(mainBoard->Rule->Born), 1, 1, file);
+    if (!count) { goto load_error; }
+
+    count = ti_Read(&(mainBoard->Rule->Live), 1, 1, file);
+    if (!count) {
+        load_error:
         free(mainBoard->Rule);
         free(mainBoard);
-        mainBoard = NULL;
-        return;
+        return NULL;
     }
 
     mainBoard->Cells[0] = NULL;
     mainBoard->Cells[1] = NULL;
+
     ResizeBoard(mainBoard, mainBoard->BoardWidth, mainBoard->BoardHeight);
     mainBoard->Rule->Name = NULL;
+    mainBoard->BoardNumber = 0;
 
     ti_Close(file);
+    ti_CloseAll();
+    
+    return mainBoard;
 }

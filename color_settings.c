@@ -133,7 +133,11 @@ void ColorPicker(MenuEventArgs* menuEventArgs) {
         old_i = i;
         old_j = j;
 
-        if (Key_IsDown(Key_Up)) { j = j == 0 ? 7 : j - 1; } else if (Key_IsDown(Key_Down)) { j = j == 7 ? 0 : j + 1; } else if (Key_IsDown(Key_Left)) { i = i == 0 ? 31 : i - 1; } else if (Key_IsDown(Key_Right)) { i = i == 31 ? 0 : i + 1; } else if (Key_JustPressed(Key_2nd) || Key_JustPressed(Key_Enter)) {
+        if (Key_IsDown(Key_Up)) { j = j == 0 ? 7 : j - 1; } 
+        else if (Key_IsDown(Key_Down)) { j = j == 7 ? 0 : j + 1; } 
+        else if (Key_IsDown(Key_Left)) { i = i == 0 ? 31 : i - 1; } 
+        else if (Key_IsDown(Key_Right)) { i = i == 31 ? 0 : i + 1; } 
+        else if (Key_JustPressed(Key_2nd) || Key_JustPressed(Key_Enter)) {
             c = i % 32 + j * 32;
 
             switch (menuEventArgs->Index) {

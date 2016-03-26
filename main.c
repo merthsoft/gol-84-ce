@@ -42,8 +42,8 @@ void main(void) {
     rulesList = InitRules();
 
     mainBoard = NULL;
-    //LoadSettings();
-
+    mainBoard = LoadSettings(appVarName);
+    
     if (mainBoard == NULL) {
         mainBoard = CreateBoard(32, 32);
         mainBoard->CellHeight = 7;
@@ -56,10 +56,12 @@ void main(void) {
         mainBoard->CursorDeadColor = 224;
         mainBoard->CursorAliveColor = 15;
         mainBoard->RandomChance = 50;
+
+        SetRule(mainBoard, rulesList->List);
     }
     
     ClearBoard(mainBoard);
-    SetRule(mainBoard, rulesList->List);
+    
     Key_Init();
 
     while (!quit) {
@@ -124,7 +126,7 @@ void main(void) {
     }
     
     SaveSettings(mainBoard, appVarName);
-    //DeleteBoard(mainBoard);
+    DeleteBoard(mainBoard);
 
     Key_Reset();
     gc_CloseGraph();

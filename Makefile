@@ -10,7 +10,7 @@
 #----------------------------
 TARGET ?= GOL
 ICONC ?= ICON
-DEBUGMODE ?= DEBUG
+DEBUGMODE ?= NDEBUG
 DESCRIPTION ?= "Game of Life"
 ARCHIVED ?= NO
 APPVAR ?= NO

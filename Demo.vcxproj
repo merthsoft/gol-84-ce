@@ -87,7 +87,6 @@ makece SHELL=cmd.exe</NMakeReBuildCommandLine>
   <ItemGroup>
     <ClCompile Include="board.c" />
     <ClCompile Include="color_settings.c" />
-    <ClCompile Include="draw.c" />
     <ClCompile Include="key_helper.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="misc_settings.c" />

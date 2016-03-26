@@ -6,6 +6,6 @@
 
 void Settings(Board* board, RulesList* rulesList);
 void SaveSettings(Board* mainBoard, char* appVarName);
-void LoadSettings(Board* mainBoard, char* appVarName);
+Board* LoadSettings(char* appVarName);
 
 #endif
