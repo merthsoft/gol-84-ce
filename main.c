@@ -73,7 +73,7 @@ void main(void) {
         if (running) {
             Step(mainBoard);
 
-            DrawBoard(mainBoard, false, 0, 0);
+            //DrawBoard(mainBoard, false, 0, 0);
             
             Key_ScanKeys(0);
             if (Key_JustPressed(Key_Enter)) {
@@ -107,7 +107,7 @@ void main(void) {
                 redraw = true;
             } else if (Key_IsDown(Key_Add)) {
                 Step(mainBoard);
-                DrawBoard(mainBoard, false, 0, 0);
+                //DrawBoard(mainBoard, false, 0, 0);
             } else if (Key_IsDown(Key_Del)) { quit = true; } 
             else if (Key_IsDown(Key_Vars)) {
                 RandomBoard(mainBoard);

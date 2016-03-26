@@ -17,6 +17,8 @@ void Step(Board* board) {
     uint8_t j;
     uint8_t boardNum = board->BoardNumber;
     Rule* currentRule = board->Rule;
+    uint8_t cellWidth = board->CellWidth;
+    uint8_t cellHeight = board->CellHeight;
 
     for (i = 1; i <= board->BoardWidth; i++) {
         for (j = 1; j <= board->BoardHeight; j++) {
@@ -40,6 +42,14 @@ void Step(Board* board) {
 
             if ((currentRule->Born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
                 board->Cells[!boardNum][i][j] = 1;
+            }
+
+            if (board->Cells[boardNum][i][j] != board->Cells[!boardNum][i][j]) {
+                if (cellWidth > 2) {
+                    DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[!boardNum][i][j] ? board->AliveColor : board->DeadColor);
+                } else {
+                    DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->Cells[!boardNum][i][j] ? board->AliveColor : board->DeadColor);
+                }
             }
         }
     }
