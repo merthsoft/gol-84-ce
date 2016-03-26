@@ -8,6 +8,9 @@ https://en.wikipedia.org/wiki/Conway's_Game_of_Life
 The Game of Life is a cellular automaton created by John Conway in 1970. This is an implementation
 for the 84+CE graphing calculator.
 
+Requires the CE libraries made by MateoConLechuga:
+https://github.com/CE-Programming/libraries/releases/tag/v3.0
+
 Controls:
 Arrow keys - Move cursor around
 2nd - Toggle current cell state
