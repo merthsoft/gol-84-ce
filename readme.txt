@@ -1,4 +1,4 @@
-Game of Life 84+CE
+Game of Life 84+CE v 1.01
 2016 Merthsoft Creations
 shaun@shaunmcfall.com
 
@@ -45,3 +45,9 @@ many bugs for me I found along the way.
 Thanks to elfprince for his help in implementing the topologies, as well as providing the images for said topologies.
 
 Thanks to Tari for all his programming help. I'm bad at C, and he is significantly better :)
+
+Revision History:
+
+v 1.01 - Fix a memory leak in key_helper
+
+v 1 - Initial release
