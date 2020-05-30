@@ -14,12 +14,8 @@
 #include "include/const.h"
 
 int main(void) {
-    uint8_t x = 1;
-    uint8_t y = 1;
-    uint8_t old_x = x;
-    uint8_t old_y = y;
-    uint8_t i;
-
+    uint8_t x, old_x;
+    uint8_t y, old_y;
     Board* mainBoard;
     RulesList* rulesList;
     const char appVarName[] = "[GoL";
@@ -74,13 +70,12 @@ int main(void) {
             else if (Key_JustPressed(Key_Del)) 
                 quit = true;
         } else {
-            DrawCursor(mainBoard, x, y, 0, 0);
+            DrawCursor(mainBoard);
+                       
+            x = old_x = mainBoard->CursorX;
+            y = old_y = mainBoard->CursorY;
 
-            Key_ScanKeys(60);
-
-            old_x = x;
-            old_y = y;
-
+            Key_ScanKeys(150);
             if (Key_IsDown(Key_Up)) 
                 y = y == 1 ? mainBoard->BoardHeight : y - 1;
             else if (Key_IsDown(Key_Down)) 
@@ -93,22 +88,19 @@ int main(void) {
                 quit = true;
             else if (Key_IsDown(Key_Add))
                 Step(mainBoard);
+            else if (Key_IsDown(Key_Mode))
+                redraw = Settings(mainBoard, rulesList);
+            else if (Key_IsDown(Key_Vars))
+                redraw = RandomBoard(mainBoard);
             else if (Key_JustPressed(Key_Enter)) { 
-                running = true;
-                DrawPlayPauseIcon(running);
+                running = DrawPlayPauseIcon(true);
             } else if (Key_IsDown(Key_Clear)) {
                 ClearBoard(mainBoard);
-                DrawBoard(mainBoard, true, 0, 0);
+                DrawBoard(mainBoard, true);
             } else if (Key_IsDown(Key_Power)) {
                 FillBoard(mainBoard);
-                DrawBoard(mainBoard, true, 0, 0);
-            } else if (Key_IsDown(Key_Mode)) {
-                Settings(mainBoard, rulesList);
-                redraw = true;
-            } else if (Key_IsDown(Key_Vars)) {
-                RandomBoard(mainBoard);
-                redraw = true;
-            }
+                DrawBoard(mainBoard, true);
+            } 
 
             if (Key_JustPressed(Key_2nd)) {
                 mainBoard->Cells[mainBoard->BoardNumber][x][y] = !mainBoard->Cells[mainBoard->BoardNumber][x][y];
@@ -116,8 +108,11 @@ int main(void) {
             }
 
             if (old_x != x || old_y != y || running) {
-                DrawCell(mainBoard, old_x, old_y, 0, 0);
+                DrawCell(mainBoard);
             }
+
+            mainBoard->CursorX = x;
+            mainBoard->CursorY = y;
         }
     }
     
@@ -144,8 +139,8 @@ void DrawHelpText(Board* mainBoard, bool running) {
     DrawString("+-Step", 240, 53);
     DrawString("Mode-Setup", 240, 62);
     DrawString("Enter-", 240, 71);
-    DrawGrid(mainBoard, 0, 0);
-    DrawBoard(mainBoard, true, 0, 0);
+    DrawGrid(mainBoard);
+    DrawBoard(mainBoard, true);
     DrawPlayPauseIcon(running);
 
     DrawRectFill(239, 81, 80, 2, 0);
@@ -173,7 +168,7 @@ void DrawHelpText(Board* mainBoard, bool running) {
     free(rulesString);
 }
 
-void DrawPlayPauseIcon(bool running) {
+bool DrawPlayPauseIcon(bool running) {
     #define COLUMN 287
     #define ROW 70
     DrawRectFill(COLUMN, ROW, 7, 11, 255);
@@ -190,4 +185,6 @@ void DrawPlayPauseIcon(bool running) {
         DrawRectFill(COLUMN, ROW, 3, 9, 128);
         DrawRectFill(COLUMN+4, ROW, 3, 9, 128);
     }
+
+    return running;
 }

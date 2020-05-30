@@ -4,7 +4,7 @@
 #include "menu.h"
 #include "board.h"
 
-void Settings(Board* board, RulesList* rulesList);
+bool Settings(Board* board, RulesList* rulesList);
 void SaveSettings(Board* mainBoard, char* appVarName);
 Board* LoadSettings(char* appVarName);
 

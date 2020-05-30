@@ -19,7 +19,7 @@
 
 #include "include/const.h"
 
-void Settings(Board* board, RulesList* rulesList) {
+bool Settings(Board* board, RulesList* rulesList) {
     Menu* menu = CreateMenu(6, "Settings");
 
     menu->Items[0].Name = "Colors...";
@@ -46,6 +46,8 @@ void Settings(Board* board, RulesList* rulesList) {
 
     DisplayMenu(menu);
     DeleteMenu(menu);
+
+    return true;
 }
 
 void SaveSettings(Board* mainBoard, char* appVarName) {

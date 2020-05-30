@@ -3,7 +3,7 @@
 
 #include "board.h"
 
-void DrawPlayPauseIcon(bool running);
+bool DrawPlayPauseIcon(bool running);
 void DrawHelpText(Board* mainBoard, bool running);
 
 #endif

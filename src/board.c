@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <tice.h>
+#include <string.h>
 
 #include "include/board.h"
 #include "include/rule.h"
@@ -151,15 +152,23 @@ void __drawCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t off
     }
 }
 
-void DrawCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety) {
+void DrawCell(Board* board) {
+    uint8_t offsetx = board->OffsetX;
+    uint8_t offsety = board->OffsetY;
+    uint8_t x = board->CursorX;
+    uint8_t y = board->CursorY;
     __drawCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
 }
 
-void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety) {
+void DrawCursor(Board* board) {
+    uint8_t offsetx = board->OffsetX;
+    uint8_t offsety = board->OffsetY;
+    uint8_t x = board->CursorX;
+    uint8_t y = board->CursorY;
     __drawCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
 }
 
-void RandomBoard(Board* board) {
+bool RandomBoard(Board* board) {
     uint8_t i, j;
     srand(rtc_Time());
 
@@ -171,6 +180,8 @@ void RandomBoard(Board* board) {
     }
 
     board->BoardNumber = 0;
+
+    return true;
 }
 
 void __setValue(Board* board, uint8_t val) {
@@ -208,6 +219,8 @@ Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
     int i;
     int j;
     Board* b = malloc(sizeof(Board));
+    b->CursorX = 1;
+    b->CursorY = 1;
     b->BoardWidth = boardWidth;
     b->BoardHeight = boardHeight;
 
@@ -237,6 +250,9 @@ void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight) {
     b->BoardWidth = boardWidth;
     b->BoardHeight = boardHeight;
 
+    b->CursorX = 1;
+    b->CursorY = 1;
+
     __allocCells(b);
 
     ClearBoard(b);
@@ -264,8 +280,10 @@ void SetRule(Board* b, Rule* rule) {
     b->Rule->Name = rule->Name;
 }
 
-void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety) {
+void DrawBoard(Board* board, bool redraw) {
     uint8_t i, j;
+    uint8_t offsetx = board->OffsetX;
+    uint8_t offsety = board->OffsetY;
     uint8_t boardNumber = board->BoardNumber;
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
@@ -283,8 +301,10 @@ void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety) {
     }
 }
 
-void DrawGrid(Board* board, uint8_t offsetx, uint8_t offsety) {
+void DrawGrid(Board* board) {
     uint8_t i;
+    uint8_t offsetx = board->OffsetX;
+    uint8_t offsety = board->OffsetY;
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 

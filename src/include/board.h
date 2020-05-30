@@ -29,21 +29,25 @@ typedef struct {
     uint8_t CursorAliveColor;
     uint8_t CursorDeadColor;
     uint8_t RandomChance;
+    uint8_t CursorX;
+    uint8_t CursorY;
+    uint8_t OffsetX;
+    uint8_t OffsetY;
     Rule* Rule;
 } Board;
 
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
 void DeleteBoard(Board* board);
 void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight);
-void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety);
-void DrawGrid(Board* board, uint8_t offsetx, uint8_t offsety);
-void RandomBoard(Board* board);
+void DrawBoard(Board* board, bool redraw);
+void DrawGrid(Board* board);
+bool RandomBoard(Board* board);
 void ClearBoard(Board* board);
 void FillBoard(Board* board);
 void Step(Board* board);
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
-void DrawCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety);
-void DrawCursor(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety);
+void DrawCell(Board* board);
+void DrawCursor(Board* board);
 void SetRule(Board* b, Rule* rule);
 void FreeCells(Board* b);
 

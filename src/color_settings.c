@@ -15,6 +15,8 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
     Menu* menu;
 
     Board* sampleBoard = CreateBoard(5, 5);
+    sampleBoard->OffsetX = 150;
+    sampleBoard->OffsetY = 9;
     sampleBoard->CellHeight = mainBoard->CellHeight;
     sampleBoard->CellWidth = mainBoard->CellWidth;
 
@@ -63,10 +65,14 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
 
 void __drawSampleBoard(Board* sampleBoard) {
     DrawString("Sample:", 150, 0);
-    DrawGrid(sampleBoard, 150, 9);
-    DrawBoard(sampleBoard, true, 150, 9);
-    DrawCursor(sampleBoard, 1, 1, 150, 9);
-    DrawCursor(sampleBoard, 2, 1, 150, 9);
+    DrawGrid(sampleBoard);
+    DrawBoard(sampleBoard, true);
+    sampleBoard->CursorX = 1;
+    sampleBoard->CursorY = 1;
+    DrawCursor(sampleBoard);
+    sampleBoard->CursorX = 2;
+    sampleBoard->CursorY = 1;
+    DrawCursor(sampleBoard);
 }
 
 void DrawSampleBoard(MenuEventArgs* menuEventArgs) {

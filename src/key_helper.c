@@ -24,7 +24,7 @@ void Key_ScanKeys(uint32_t keyDelay) {
 
     memcpy(__previousKeys, kb_DataArray, NUM_KEY_ELEMENTS * sizeof(uint16_t));
     if (keyDelay > 0) {
-        memset_fast(__debounceKeys, 0, NUM_KEY_ELEMENTS);
+        memset(__debounceKeys, 0, NUM_KEY_ELEMENTS);
         do {
             kb_Scan(); 
             for (j = 0; j < NUM_KEY_ELEMENTS; j++) {
