@@ -1,7 +1,9 @@
 #ifndef DRAW_H
 #define DRAW_H
 
+#include <stdint.h>
 #include <graphx.h>
+
 #include "../gfx/gfx.h"
 
 #define GraphicsBegin()                         gfx_Begin()
@@ -15,8 +17,8 @@
 #define SetColorIndex(color_index)              gfx_SetColor(color_index)
 #define FillScreen(color_index)                 gfx_FillScreen(color_index)
 
-#define DrawRectFill(x, y, w, h, color_index)   gfx_SetColor(color_index); gfx_FillRectangle_NoClip(x, y, w, h)
-#define DrawRect(x, y, w, h, color_index)       gfx_SetColor(color_index); gfx_Rectangle_NoClip(x, y, w, h)
+void DrawRectFill(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);
+void DrawRect(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);
 
 #define VerticalLine(x, y, l)                   gfx_VertLine(x, y, l);
 #define HorizontalLine(x, y, l)                 gfx_HorizLine(x, y, l);
