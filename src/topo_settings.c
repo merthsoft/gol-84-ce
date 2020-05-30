@@ -11,16 +11,6 @@
 #include "include/draw.h"
 #include "include/const.h"
 
-char* WrappingModeNames[NUM_WRAPPING_MODES] = {
-    "Plane",
-    "Ring",
-    "Mobius",
-    "Torus",
-    "Sphere",
-    "Klein",
-    "Proj"
-};
-
 void TopologySettings(MenuEventArgs* menuEventArgs) {
     int i;
     Board* mainBoard = menuEventArgs->Menu->Tag;

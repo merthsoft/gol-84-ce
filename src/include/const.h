@@ -3,7 +3,7 @@
 
 #define NUM_WRAPPING_MODES 7
 
-static const char* WrappingModeNames[NUM_WRAPPING_MODES];
-static const char* BackString;
+extern const char* WrappingModeNames[NUM_WRAPPING_MODES];
+extern const char* BackString;
 
 #endif
