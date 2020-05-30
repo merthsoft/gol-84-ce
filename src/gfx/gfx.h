@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-#include "global_palette.h"
 #include "checkbox_checked.h"
 #include "checkbox_empty.h"
 #include "radiobutton_empty.h"

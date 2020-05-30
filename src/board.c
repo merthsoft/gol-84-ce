@@ -275,8 +275,7 @@ void DrawBoard(Board* board, bool redraw, uint8_t offsetx, uint8_t offsety) {
             if (board->Cells[boardNumber][i][j] != board->Cells[!boardNumber][i][j] || redraw) {
                 if (cellWidth > 2) {
                     DrawRectFill(i*cellWidth + 1 + offsetx, j * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
-                }
-                else {
+                } else {
                     DrawRectFill(i*cellWidth + offsetx, j * cellHeight + offsety, cellWidth, cellHeight, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
                 }
             }

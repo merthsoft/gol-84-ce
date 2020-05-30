@@ -82,7 +82,7 @@ int DisplayMenu(Menu* menu) {
             }
         }
 
-        DrawChar(2, 3 + linePadding * y, menu->CursorChar);
+        DrawChar(menu->CursorChar, 2, 3 + linePadding * y);
         Key_ScanKeys(0);
         old_y = y;
 

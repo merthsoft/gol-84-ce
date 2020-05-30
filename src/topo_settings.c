@@ -74,5 +74,5 @@ void DrawTopoSprite(MenuEventArgs* menuEventArgs) {
             break;
     }
 
-    DrawSprite(sprite, 150, 9);
+    DrawSpriteScaled(sprite, 150, 9, 9, 9);
 }

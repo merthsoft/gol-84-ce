@@ -25,7 +25,7 @@ typedef struct Menu {
     uint8_t NumItems;
     void* ExtraFunction;
     MenuSelectionType SelectionType;
-    key_t BackKey;
+    kb_key_t BackKey;
     char CursorChar;
     void* Tag;
 } Menu;

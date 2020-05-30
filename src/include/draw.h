@@ -15,12 +15,13 @@
 #define SetColorIndex(color_index)              gfx_SetColor(color_index)
 #define FillScreen(color_index)                 gfx_FillScreen(color_index)
 
-#define DrawRectFill(x, y, w, h, color_index)   gfx_SetColor(color_index); gfx_FillRectangle(x, y, w, h)
-#define DrawRect(x, y, w, h, color_index)       gfx_SetColor(color_index); gfx_Rectangle(x, y, w, h)
+#define DrawRectFill(x, y, w, h, color_index)   gfx_SetColor(color_index); gfx_FillRectangle_NoClip(x, y, w, h)
+#define DrawRect(x, y, w, h, color_index)       gfx_SetColor(color_index); gfx_Rectangle_NoClip(x, y, w, h)
 
 #define VerticalLine(x, y, l)                   gfx_VertLine(x, y, l);
 #define HorizontalLine(x, y, l)                 gfx_HorizLine(x, y, l);
 
-#define DrawSprite(sprite, x, y)                gfx_Sprite_NoClip(sprite, 130, 110)
+#define DrawSprite(sprite, x, y)                gfx_Sprite_NoClip(sprite, x, y)
+#define DrawSpriteScaled(sprite, x, y, w, h)    gfx_ScaledSprite_NoClip(sprite, x, y, w, h)
 
 #endif

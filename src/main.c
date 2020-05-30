@@ -64,27 +64,35 @@ int main(void) {
         
         if (running) {
             Step(mainBoard);
-
-            //DrawBoard(mainBoard, false, 0, 0);
             
             Key_ScanKeys(0);
-            if (Key_JustPressed(Key_Enter)) {
+            if (Key_JustPressed(Key_Enter)) 
+            {
                 running = false;
                 DrawPlayPauseIcon(running);
             }
-            else if (Key_JustPressed(Key_Del)) { quit = true; }
+            else if (Key_JustPressed(Key_Del)) 
+                quit = true;
         } else {
             DrawCursor(mainBoard, x, y, 0, 0);
 
-            Key_ScanKeys(150);
+            Key_ScanKeys(60);
 
             old_x = x;
             old_y = y;
 
-            if (Key_IsDown(Key_Up)) { y = y == 1 ? mainBoard->BoardHeight : y - 1; }
-            else if (Key_IsDown(Key_Down)) { y = y == mainBoard->BoardHeight ? 1 : y + 1; }
-            else if (Key_IsDown(Key_Left)) { x = x == 1 ? mainBoard->BoardWidth : x - 1; }
-            else if (Key_IsDown(Key_Right)) { x = x == mainBoard->BoardWidth ? 1 : x + 1; }
+            if (Key_IsDown(Key_Up)) 
+                y = y == 1 ? mainBoard->BoardHeight : y - 1;
+            else if (Key_IsDown(Key_Down)) 
+                y = y == mainBoard->BoardHeight ? 1 : y + 1;
+            else if (Key_IsDown(Key_Left))
+                x = x == 1 ? mainBoard->BoardWidth : x - 1;
+            else if (Key_IsDown(Key_Right)) 
+                x = x == mainBoard->BoardWidth ? 1 : x + 1;
+            else if (Key_IsDown(Key_Del)) 
+                quit = true;
+            else if (Key_IsDown(Key_Add))
+                Step(mainBoard);
             else if (Key_JustPressed(Key_Enter)) { 
                 running = true;
                 DrawPlayPauseIcon(running);
@@ -97,11 +105,7 @@ int main(void) {
             } else if (Key_IsDown(Key_Mode)) {
                 Settings(mainBoard, rulesList);
                 redraw = true;
-            } else if (Key_IsDown(Key_Add)) {
-                Step(mainBoard);
-                //DrawBoard(mainBoard, false, 0, 0);
-            } else if (Key_IsDown(Key_Del)) { quit = true; } 
-            else if (Key_IsDown(Key_Vars)) {
+            } else if (Key_IsDown(Key_Vars)) {
                 RandomBoard(mainBoard);
                 redraw = true;
             }
