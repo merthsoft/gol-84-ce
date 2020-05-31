@@ -8,7 +8,6 @@
 #include "include/menu.h"
 #include "include/key_helper.h"
 #include "include/board.h"
-#include "include/rule.h"
 #include "include/rules_settings.h"
 #include "include/const.h"
 
@@ -18,7 +17,7 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
     RulesList* list = menuEventArgs->Menu->Items[menuEventArgs->Index].Tag;
     uint8_t numRules = list->NumRules;
-    Rule* rulesList = list->List;
+    Rules* rulesList = list->List;
 
     Menu* menu = CreateMenu(numRules + 2, "Rules");
     menu->SelectionType = Single;
@@ -27,7 +26,7 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
         menu->Items[i].Name = rulesList[i].Name;
         menu->Items[i].Function = SetRuleMenuEvent;
         menu->Items[i].Tag = list;
-        if (rulesList[i].Born == mainBoard->Rule->Born && rulesList[i].Live == mainBoard->Rule->Live) {
+        if (rulesList[i].Born == mainBoard->Rules->Born && rulesList[i].Live == mainBoard->Rules->Live) {
             menu->Items[i].Selected = true;
             foundRule = true;
         }
@@ -40,7 +39,6 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[numRules + 1].Name = BackString;
     menu->Items[numRules + 1].Function = FUNCTION_BACK;
 
-    menu->BackKey = Key_Del;
     menu->Tag = mainBoard;
 
     DisplayMenu(menu);
@@ -63,13 +61,11 @@ void CustomRuleSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[2].Function = FUNCTION_BACK;
 
     menu->Tag = mainBoard;
-    menu->BackKey = Key_Del;
 
     DisplayMenu(menu);
 
     free(menu->Items[0].Name);
     free(menu->Items[1].Name);
-    DeleteMenu(menu);
 }
 
 void CustomRuleMenuItemStrings(Board* mainBoard, Menu* menu) {
@@ -79,9 +75,9 @@ void CustomRuleMenuItemStrings(Board* mainBoard, Menu* menu) {
     memcpy(menu->Items[1].Name, "Born: \0\0\0\0\0\0\0\0\0\0\0", 17);
 
     i = 9;
-    NumToRuleString(mainBoard->Rule->Live, menu->Items[0].Name, &i);
+    NumToRuleString(mainBoard->Rules->Live, menu->Items[0].Name, &i);
     i = 6;
-    NumToRuleString(mainBoard->Rule->Born, menu->Items[1].Name, &i);
+    NumToRuleString(mainBoard->Rules->Born, menu->Items[1].Name, &i);
 }
 
 void SetCustomRule(MenuEventArgs* menuEventArgs) {
@@ -89,14 +85,14 @@ void SetCustomRule(MenuEventArgs* menuEventArgs) {
     uint8_t i;
     Board* mainBoard = menuEventArgs->Menu->Tag;
     char* ruleName;
-    int* rule;
-
+    uint16_t* rule;
+    
     if (menuEventArgs->Index == 0) {
         ruleName = "Survive";
-        rule = &(mainBoard->Rule->Live);
+        rule = &(mainBoard->Rules->Live);
     } else {
         ruleName = "Born";
-        rule = &(mainBoard->Rule->Born);
+        rule = &(mainBoard->Rules->Born);
     }
 
     menu = CreateMenu(10, ruleName);
@@ -115,7 +111,6 @@ void SetCustomRule(MenuEventArgs* menuEventArgs) {
     menu->Items[9].Function = FUNCTION_BACK;
 
     menu->Tag = mainBoard;
-    menu->BackKey = Key_Del;
     DisplayMenu(menu);
 
     for (i = 0; i < 9; i++) {
@@ -137,5 +132,5 @@ void SetRuleIndex(MenuEventArgs* menuEventArgs) {
 void SetRuleMenuEvent(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
     RulesList* list = menuEventArgs->Menu->Items[menuEventArgs->Index].Tag;
-    SetRule(mainBoard, &list->List[menuEventArgs->Index]);
+    SetRules(mainBoard, &list->List[menuEventArgs->Index]);
 }

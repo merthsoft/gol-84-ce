@@ -5,13 +5,8 @@
 NAME		 ?= GOL
 ICON		 ?= assets/icon.png
 DESCRIPTION  ?= "Game of Life"
-COMPRESSED   ?= NO
+COMPRESSED   ?= YES
 ARCHIVED	 ?= NO
-
-# ----------------------------
-# Debug Options
-# ----------------------------
-
 OUTPUT_MAP   ?= NO
 
 include $(CEDEV)/include/.makefile

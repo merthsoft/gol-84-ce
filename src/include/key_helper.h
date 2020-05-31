@@ -15,6 +15,7 @@
 #define Key_Vars    kb_KeyVars
 #define Key_Mode    kb_KeyMode
 #define Key_Add     kb_KeyAdd
+#define Key_Alpha   kb_KeyAlpha
 
 void Key_ScanKeys(uint32_t keyDelay);
 void Key_Init();

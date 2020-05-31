@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "include/board.h"
-#include "include/rule.h"
 #include "include/draw.h"
 #include "include/key_helper.h"
 
@@ -15,7 +14,7 @@ void Step(Board* board) {
     uint8_t i;
     uint8_t j;
     uint8_t boardNum = board->BoardNumber;
-    Rule* currentRule = board->Rule;
+    Rules* currentRule = board->Rules;
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
@@ -168,20 +167,18 @@ void DrawCursor(Board* board) {
     __drawCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
 }
 
-bool RandomBoard(Board* board) {
+void RandomBoard(Board* board) {
     uint8_t i, j;
     srand(rtc_Time());
 
-    for (i = 0; i <= board->BoardWidth; i++) {
-        for (j = 0; j <= board->BoardHeight; j++) {
+    for (i = 1; i <= board->BoardWidth + 1; i++) {
+        for (j = 1; j <= board->BoardHeight + 1; j++) {
             board->Cells[0][i][j] = (rand() % 100) < board->RandomChance;
             board->Cells[1][i][j] = !(board->Cells[0][i][j]);
         }
     }
 
     board->BoardNumber = 0;
-
-    return true;
 }
 
 void __setValue(Board* board, uint8_t val) {
@@ -206,11 +203,15 @@ void FillBoard(Board* board) {
 
 void __allocCells(Board* b) {
     uint8_t i, j;
+    size_t mallocSize;
 
     for (i = 0; i < 2; i++) {
         b->Cells[i] = malloc(sizeof(uint8_t*) * (b->BoardWidth + 2));
         for (j = 0; j < b->BoardWidth + 2; j++) {
-            b->Cells[i][j] = malloc(sizeof(uint8_t*) * (b->BoardHeight + 2));
+            mallocSize = sizeof(uint8_t*) * (b->BoardHeight + 2);
+            
+            b->Cells[i][j] = malloc(mallocSize);
+            memset(b->Cells[i][j], 0, mallocSize);
         }
     }
 }
@@ -219,6 +220,7 @@ Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
     int i;
     int j;
     Board* b = malloc(sizeof(Board));
+    memset(b, 0, sizeof(Board));
     b->CursorX = 1;
     b->CursorY = 1;
     b->BoardWidth = boardWidth;
@@ -227,24 +229,22 @@ Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
     __allocCells(b);
 
     b->BoardNumber = 0;
-    b->Rule = malloc(sizeof(Rule));
-    b->Rule->Live = 0;
-    b->Rule->Born = 0;
-    b->Rule->Name = NULL;
+    b->Rules = malloc(sizeof(Rules));
+    b->Rules->Live = 0;
+    b->Rules->Born = 0;
+    b->Rules->Name = NULL;
     return b;
 }
 
 void DeleteBoard(Board* b) {
     FreeCells(b);
 
-    free(b->Rule);
+    if (b->Rules != NULL)
+        free(b->Rules);
     free(b);
 }
 
 void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight) {
-    int i;
-    int j;
-
     FreeCells(b);
 
     b->BoardWidth = boardWidth;
@@ -254,30 +254,32 @@ void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight) {
     b->CursorY = 1;
 
     __allocCells(b);
-
     ClearBoard(b);
 }
 
 void FreeCells(Board* b) {
-    int i;
-    int j;
+    uint8_t i;
+    uint8_t j;
 
-    if (b->Cells[0] != NULL) {
-        for (i = 0; i < 2; i++) {
-            for (j = 0; j < b->BoardWidth + 2; j++) {
-                free(b->Cells[i][j]);
-                b->Cells[i][j] = NULL;
-            }
-            free(b->Cells[i]);
-            b->Cells[i] = NULL;
+    if (b->Cells[0] == NULL)
+        return;
+    
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < b->BoardWidth + 2; j++) {
+            free(b->Cells[i][j]);
+            b->Cells[i][j] = NULL;
         }
+        free(b->Cells[i]);
+        b->Cells[i] = NULL;
     }
 }
 
-void SetRule(Board* b, Rule* rule) {
-    b->Rule->Live = rule->Live;
-    b->Rule->Born = rule->Born;
-    b->Rule->Name = rule->Name;
+void SetRules(Board* b, Rules* rules) {
+    b->Rules->Live = rules->Live;
+    b->Rules->Born = rules->Born;
+    b->Rules->Name = rules->Name;
+    b->Rules->NumStamps = rules->NumStamps;
+    b->Rules->Stamps = rules->Stamps;
 }
 
 void DrawBoard(Board* board, bool redraw) {

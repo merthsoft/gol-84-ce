@@ -4,6 +4,5 @@
 #include "menu.h"
 
 void TopologySettings(MenuEventArgs* menuEventArgs);
-void DrawTopoSprite(MenuEventArgs* menuEventArgs);
 
 #endif

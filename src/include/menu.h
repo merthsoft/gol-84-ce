@@ -33,6 +33,7 @@ typedef struct Menu {
 typedef struct MenuEventArgs {
     Menu* Menu;
     uint8_t Index;
+    void* Item;
     uint32_t FrameNumber;
     bool Back;
 } MenuEventArgs;

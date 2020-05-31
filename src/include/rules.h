@@ -3,15 +3,19 @@
 
 #include <stdint.h>
 
+#include "stamp.h"
+
 typedef struct {
-    int Live;
-    int Born;
+    uint16_t Live;
+    uint16_t Born;
     char* Name;
-} Rule;
+    uint8_t NumStamps;
+    Stamp* Stamps;
+} Rules;
 
 typedef struct {
     uint8_t NumRules;
-    Rule* List;
+    Rules* List;
 } RulesList;
 
 RulesList* InitRules();

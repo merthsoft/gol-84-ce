@@ -4,8 +4,5 @@
 #include "menu.h"
 
 void ColorSettings(MenuEventArgs* menuEventArgs);
-void DrawSampleBoard(MenuEventArgs* menuEventArgs);
-void ColorPicker(MenuEventArgs* menuEventArgs);
-void SaveColors(MenuEventArgs* menuEventArgs);
 
 #endif

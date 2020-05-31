@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "rule.h"
+#include "rules.h"
 
 typedef enum {
     Plane   = 0,
@@ -18,7 +18,6 @@ typedef enum {
 typedef struct {
     uint8_t BoardWidth;
     uint8_t BoardHeight;
-    uint8_t** Cells[2];
     uint8_t BoardNumber;
     WrappingMode WrappingMode;
     uint8_t GridColor;
@@ -33,7 +32,8 @@ typedef struct {
     uint8_t CursorY;
     uint8_t OffsetX;
     uint8_t OffsetY;
-    Rule* Rule;
+    Rules* Rules;
+    uint8_t** Cells[2];
 } Board;
 
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
@@ -41,14 +41,14 @@ void DeleteBoard(Board* board);
 void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight);
 void DrawBoard(Board* board, bool redraw);
 void DrawGrid(Board* board);
-bool RandomBoard(Board* board);
+void RandomBoard(Board* board);
 void ClearBoard(Board* board);
 void FillBoard(Board* board);
 void Step(Board* board);
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
 void DrawCell(Board* board);
 void DrawCursor(Board* board);
-void SetRule(Board* b, Rule* rule);
+void SetRules(Board* b, Rules* rules);
 void FreeCells(Board* b);
 
 #endif BOARD_H

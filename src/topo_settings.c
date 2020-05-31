@@ -11,6 +11,8 @@
 #include "include/draw.h"
 #include "include/const.h"
 
+void DrawTopoSprite(MenuEventArgs* menuEventArgs);
+
 void TopologySettings(MenuEventArgs* menuEventArgs) {
     int i;
     Board* mainBoard = menuEventArgs->Menu->Tag;
@@ -31,7 +33,6 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
         menu->Items[i].Function = DrawTopoSprite;
     }
 
-    menu->BackKey = Key_Del;
     DisplayMenu(menu);
 
     for (i = 0; i < NUM_WRAPPING_MODES; i++) {

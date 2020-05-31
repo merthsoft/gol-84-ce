@@ -38,7 +38,6 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[mainBoard->CellHeight - 1].Selected = true;
     previous = mainBoard->CellHeight - 1;
 
-    menu->BackKey = Key_Del;
     DisplayMenu(menu);
 
     for (i = 0; i < menu->NumItems - 1; i++) {
@@ -79,7 +78,6 @@ void RandomPercentageSettings(MenuEventArgs* menuEventArgs) {
 
     menu->Items[(mainBoard->RandomChance - 1) / 10].Selected = true;
 
-    menu->BackKey = Key_Del;
     DisplayMenu(menu);
 
     for (i = 0; i < 9; i++) {

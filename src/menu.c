@@ -23,7 +23,7 @@ Menu* CreateMenu(uint8_t numItems, const char* title) {
 
     menu->Title = title;
     menu->ExtraFunction = FUNCTION_NONE;
-    menu->BackKey = 0;
+    menu->BackKey = Key_Del;
     menu->CursorChar = 0x10;
     menu->Tag = NULL;
 
@@ -91,6 +91,7 @@ int DisplayMenu(Menu* menu) {
             eventArgs->FrameNumber = frameNumber;
             eventArgs->Menu = menu;
             eventArgs->Index = y - 1;
+            eventArgs->Item = menu->Items[y - 1].Tag;
             eventArgs->Back = false;
 
             func(eventArgs);
@@ -125,6 +126,7 @@ int DisplayMenu(Menu* menu) {
                 eventArgs->FrameNumber = frameNumber;
                 eventArgs->Menu = menu;
                 eventArgs->Index = index;
+                eventArgs->Item = menu->Items[index].Tag;
                 eventArgs->Back = false;
 
                 func(eventArgs);

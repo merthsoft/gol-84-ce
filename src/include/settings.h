@@ -4,8 +4,8 @@
 #include "menu.h"
 #include "board.h"
 
-bool Settings(Board* board, RulesList* rulesList);
-void SaveSettings(Board* mainBoard, char* appVarName);
-Board* LoadSettings(char* appVarName);
+void Settings(Board* board, RulesList* rulesList);
+void SaveSettings(Board* mainBoard, const char* appVarName);
+Board* LoadSettings(const char* appVarName);
 
 #endif

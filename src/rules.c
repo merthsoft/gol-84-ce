@@ -1,16 +1,29 @@
-
 #include <stdlib.h>
 
-#include "include/rule.h"
+#include "include/rules.h"
+
+void InitStamps(Rules* rules, uint8_t numStamps) {
+    rules->NumStamps = numStamps;
+    rules->Stamps = malloc(numStamps * sizeof(Stamp));
+}
+
+void life(Rules* rules) {
+    rules->Name = "Life (B23/S3)";
+    rules->Live = 0x0C;
+    rules->Born = 0x08;
+
+    InitStamps(rules, 1);
+    InitStamp(rules->Stamps, 3, 3);
+    rules->Stamps[0].Name = "Glider";
+}
 
 RulesList*  InitRules() {
     RulesList* rulesList = malloc(sizeof(RulesList));
     rulesList->NumRules = 19;
-    rulesList->List = malloc(rulesList->NumRules * sizeof(Rule));
+    rulesList->List = malloc(rulesList->NumRules * sizeof(Rules));
 
-    rulesList->List[0].Name = "Life (B3/S3)";
-    rulesList->List[0].Live = 0x0C;
-    rulesList->List[0].Born = 0x08;
+
+    life(rulesList->List);
 
     rulesList->List[1].Name = "HighLife (B36/S23)";
     rulesList->List[1].Live = 0x0C;

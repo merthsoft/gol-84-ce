@@ -4,11 +4,12 @@
 #include <stdint.h>
 #include <tice.h>
 #include <fileioc.h>
+#include <string.h>
+#include <debug.h>
 
 #include "include/menu.h"
 #include "include/key_helper.h"
 #include "include/draw.h"
-#include "include/rule.h"
 
 #include "include/settings.h"
 #include "include/misc_settings.h"
@@ -19,7 +20,19 @@
 
 #include "include/const.h"
 
-bool Settings(Board* board, RulesList* rulesList) {
+const char* GoLMagicString = "GOLV1.2\0";
+#define     GolMagicStringLength 8
+
+const char* RulesMagicString = "RULES\0";
+#define     RulesMagicStringLength 6
+
+const char* CellsMagicString = "CELLS\0";
+#define     CellsMagicStringLength 6
+
+const char* EndMagicString = "END\0";
+#define     EndMagicStringLength 6
+
+void Settings(Board* board, RulesList* rulesList) {
     Menu* menu = CreateMenu(6, "Settings");
 
     menu->Items[0].Name = "Colors...";
@@ -41,114 +54,117 @@ bool Settings(Board* board, RulesList* rulesList) {
     menu->Items[5].Name = BackString;
     menu->Items[5].Function = FUNCTION_BACK;
 
-    menu->BackKey = Key_Del;
     menu->Tag = board;
 
     DisplayMenu(menu);
     DeleteMenu(menu);
-
-    return true;
 }
 
-void SaveSettings(Board* mainBoard, char* appVarName) {
+void SaveSettings(Board* mainBoard, const char* appVarName) {
     ti_var_t file;
+    Rules* rules;
+    uint8_t** cells1;
+    uint8_t** cells2;
+    uint8_t i, j;
+
     ti_CloseAll();
 
     file = ti_Open(appVarName, "w");
     if (!file) { return; }
 
-    ti_Write("Settings:", 9, 1, file);
-    ti_Write(&(mainBoard->BoardWidth), 1, 1, file);
-    ti_Write(&(mainBoard->BoardHeight), 1, 1, file);
-    ti_Write(&(mainBoard->CellWidth), 1, 1, file);
-    ti_Write(&(mainBoard->CellHeight), 1, 1, file);
-    ti_Write(&(mainBoard->WrappingMode), 3, 1, file);
-    ti_Write(&(mainBoard->GridColor), 1, 1, file);
-    ti_Write(&(mainBoard->DeadColor), 1, 1, file);
-    ti_Write(&(mainBoard->AliveColor), 1, 1, file);
-    ti_Write(&(mainBoard->CursorAliveColor), 1, 1, file);
-    ti_Write(&(mainBoard->CursorDeadColor), 1, 1, file);
-    ti_Write(&(mainBoard->RandomChance), 1, 1, file);
-    ti_Write(&(mainBoard->Rule->Born), 1, 1, file);
-    ti_Write(&(mainBoard->Rule->Live), 1, 1, file);
+    rules = mainBoard->Rules;
+    cells1 = mainBoard->Cells[mainBoard->BoardNumber];
+    cells2 = mainBoard->Cells[!mainBoard->BoardNumber];
+    mainBoard->BoardNumber = 0;
+
+    mainBoard->Rules = NULL;
+    mainBoard->Cells[0] = NULL;
+    mainBoard->Cells[1] = NULL;
+
+    ti_Write(GoLMagicString, GolMagicStringLength, 1, file);
+    ti_Write(mainBoard, sizeof(Board), 1, file);
+    
+    ti_Write(RulesMagicString, RulesMagicStringLength, 1, file);
+    ti_Write(&(rules->Born), sizeof(uint16_t), 1, file);
+    ti_Write(&(rules->Live), sizeof(uint16_t), 1, file);
+    
+    ti_Write(CellsMagicString, CellsMagicStringLength, 1, file);
+    
+    for (i = 0; i <= mainBoard->BoardWidth + 2; i++) {
+        ti_Write(cells1[i], 1, mainBoard->BoardHeight + 2, file);
+    }
+    
+    ti_Write(EndMagicString, EndMagicStringLength, 1, file);
     
     if (!ti_IsArchived(file)) {
         ti_SetArchiveStatus(true, file);
     }
 
-    ti_Close(file);
     ti_CloseAll();
+
+    mainBoard->Rules = rules;
+    mainBoard->Cells[0] = cells1;
+    mainBoard->Cells[1] = cells2;
 }
 
-Board* LoadSettings(char* appVarName) {
+Board* LoadSettings(const char* appVarName) {
     ti_var_t file;
     Board* mainBoard;
+    uint8_t i, j;
+
     size_t count = 0;
+    char magicStringBuffer[10];
 
     ti_CloseAll();
-
-    file = ti_Open(appVarName, "r+");
-    if (!file) { return NULL;  }
-
-    mainBoard = malloc(sizeof(Board));
-
-    mainBoard->Rule = malloc(sizeof(Board));
-
-    ti_Seek(9, 2, file);
-
-    count = ti_Read(&(mainBoard->BoardWidth), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->BoardHeight), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->CellWidth), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->CellHeight), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->WrappingMode), 3, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->GridColor), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->DeadColor), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->AliveColor), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->CursorAliveColor), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->CursorDeadColor), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->RandomChance), 1, 1, file);
-    if (!count) { goto load_error; }
     
-    count = ti_Read(&(mainBoard->Rule->Born), 1, 1, file);
-    if (!count) { goto load_error; }
-
-    count = ti_Read(&(mainBoard->Rule->Live), 1, 1, file);
-    if (!count) {
-        load_error:
-        free(mainBoard->Rule);
-        free(mainBoard);
-        return NULL;
+    file = ti_Open(appVarName, "r+");
+    if (!file) { 
+        return NULL;  
     }
 
-    mainBoard->Cells[0] = NULL;
-    mainBoard->Cells[1] = NULL;
+    mainBoard = malloc(sizeof(Board));
+    memset(mainBoard, 0, sizeof(Board));
 
+    if (ti_Read(&magicStringBuffer, GolMagicStringLength, 1, file) != 1)
+        goto load_error;
+
+    if (strncmp(magicStringBuffer, GoLMagicString, GolMagicStringLength) != 0)
+        goto load_error;
+
+    if (ti_Read(mainBoard, sizeof(Board), 1, file) != 1)
+        goto load_error;
+    
+    mainBoard->Rules = malloc(sizeof(Rules));
     ResizeBoard(mainBoard, mainBoard->BoardWidth, mainBoard->BoardHeight);
-    mainBoard->Rule->Name = NULL;
-    mainBoard->BoardNumber = 0;
 
-    ti_Close(file);
+    if (ti_Read(magicStringBuffer, RulesMagicStringLength, 1, file) != 1)
+        goto load_error;
+
+    if (strncmp(magicStringBuffer, RulesMagicString, RulesMagicStringLength) != 0)
+        goto load_error;        
+
+    if (ti_Read(&(mainBoard->Rules->Born), sizeof(uint16_t), 1, file) != 1)
+        goto load_error;
+    
+    if (ti_Read(&(mainBoard->Rules->Live), sizeof(uint16_t), 1, file) != 1)
+        goto load_error;
+
+    if (ti_Read(magicStringBuffer, CellsMagicStringLength, 1, file) != 1)
+        goto load_error;
+
+    if (strncmp(magicStringBuffer, CellsMagicString, CellsMagicStringLength) != 0)
+        goto load_error;
+    
+    for (i = 0; i < mainBoard->BoardWidth + 2; i++) {
+        ti_Read(mainBoard->Cells[0][i], 1, mainBoard->BoardHeight + 2, file);
+    }
+
     ti_CloseAll();
     
     return mainBoard;
+
+load_error:
+    DeleteBoard(mainBoard);
+    ti_CloseAll();
+    return NULL;
 }

@@ -4,14 +4,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "include/main.h"
 #include "include/key_helper.h"
 #include "include/board.h"
 #include "include/draw.h"
 #include "include/menu.h"
-#include "include/rule.h"
+#include "include/rules.h"
 #include "include/settings.h"
 #include "include/const.h"
+#include "include/stamp_picker.h"
+
+void DrawPlayPauseIcon(bool running);
+void DrawHelpText(Board* mainBoard, bool running);
 
 int main(void) {
     uint8_t x, old_x;
@@ -45,10 +48,8 @@ int main(void) {
         mainBoard->CursorAliveColor = 15;
         mainBoard->RandomChance = 50;
 
-        SetRule(mainBoard, rulesList->List);
+        SetRules(mainBoard, rulesList->List);
     }
-    
-    ClearBoard(mainBoard);
     
     Key_Init();
 
@@ -88,12 +89,18 @@ int main(void) {
                 quit = true;
             else if (Key_IsDown(Key_Add))
                 Step(mainBoard);
-            else if (Key_IsDown(Key_Mode))
-                redraw = Settings(mainBoard, rulesList);
-            else if (Key_IsDown(Key_Vars))
-                redraw = RandomBoard(mainBoard);
-            else if (Key_JustPressed(Key_Enter)) { 
-                running = DrawPlayPauseIcon(true);
+            else if (Key_IsDown(Key_Mode)) {
+                Settings(mainBoard, rulesList);
+                redraw = true;
+            } else if (Key_IsDown(Key_Vars)) {
+                RandomBoard(mainBoard);
+                redraw = true;
+            } else if (Key_JustPressed(Key_Enter)) {
+                DrawPlayPauseIcon(true);
+                running = true;
+            } else if (Key_JustPressed(Key_Alpha)){ 
+                ChooseStamp(mainBoard);
+                redraw = true;
             } else if (Key_IsDown(Key_Clear)) {
                 ClearBoard(mainBoard);
                 DrawBoard(mainBoard, true);
@@ -152,13 +159,13 @@ void DrawHelpText(Board* mainBoard, bool running) {
     DrawString("Stay alive:", 245, 113);
     memset(rulesString, 0, 11);
     i = 0;
-    NumToRuleString(mainBoard->Rule->Live, rulesString, &i);
+    NumToRuleString(mainBoard->Rules->Live, rulesString, &i);
     DrawString(rulesString, 245, 122);
 
     DrawString("Born:", 245, 131);
     memset(rulesString, 0, 11);
     i = 0;
-    NumToRuleString(mainBoard->Rule->Born, rulesString, &i);
+    NumToRuleString(mainBoard->Rules->Born, rulesString, &i);
     DrawString(rulesString, 245, 140);
 
     DrawString("Cell Size:", 240, 149);
@@ -168,7 +175,7 @@ void DrawHelpText(Board* mainBoard, bool running) {
     free(rulesString);
 }
 
-bool DrawPlayPauseIcon(bool running) {
+void DrawPlayPauseIcon(bool running) {
     #define COLUMN 287
     #define ROW 70
     DrawRectFill(COLUMN, ROW, 7, 11, 255);
@@ -185,6 +192,4 @@ bool DrawPlayPauseIcon(bool running) {
         DrawRectFill(COLUMN, ROW, 3, 9, 128);
         DrawRectFill(COLUMN+4, ROW, 3, 9, 128);
     }
-
-    return running;
 }

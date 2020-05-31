@@ -9,6 +9,10 @@
 #include "include/draw.h"
 #include "include/const.h"
 
+void DrawSampleBoard(MenuEventArgs* menuEventArgs);
+void ColorPicker(MenuEventArgs* menuEventArgs);
+void SaveColors(MenuEventArgs* menuEventArgs);
+
 void ColorSettings(MenuEventArgs* menuEventArgs) {
     uint8_t i;
     Board* mainBoard = menuEventArgs->Menu->Tag;
@@ -36,7 +40,6 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
     sampleBoard->CursorAliveColor = mainBoard->CursorAliveColor;
 
     menu = CreateMenu(7, "Colors");
-
     menu->ExtraFunction = DrawSampleBoard;
 
     menu->Items[0].Name = "Grid...";
@@ -55,7 +58,6 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
         menu->Items[i].Tag = sampleBoard;
     }
 
-    menu->BackKey = Key_Del;
     menu->Tag = mainBoard;
 
     DisplayMenu(menu);
@@ -77,7 +79,7 @@ void __drawSampleBoard(Board* sampleBoard) {
 
 void DrawSampleBoard(MenuEventArgs* menuEventArgs) {
     if (menuEventArgs->FrameNumber == 0) {
-        __drawSampleBoard(menuEventArgs->Menu->Items[menuEventArgs->Index].Tag);
+        __drawSampleBoard(menuEventArgs->Item);
     }
 }
 
