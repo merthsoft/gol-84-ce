@@ -1,0 +1,19 @@
+output: c
+  include-file: gfx.h
+  converts:
+    - sprites
+
+convert: sprites
+  transparent-color-index: 0
+  images:
+    - checkbox_checked.png  
+    - checkbox_empty.png    
+    - radiobutton_empty.png 
+    - radiobutton_filled.png
+    - topo_klein.png        
+    - topo_mobius.png       
+    - topo_plane.png        
+    - topo_proj.png         
+    - topo_ring.png         
+    - topo_sphere.png       
+    - topo_torus.png        
