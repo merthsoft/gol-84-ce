@@ -11,8 +11,8 @@
 
 void Step(Board* board) {
     uint8_t numN; // The number of neighbors
-    uint8_t i;
-    uint8_t j;
+    uint8_t i, j;
+    bool cellStatus;
     uint8_t boardNum = board->BoardNumber;
     Rules* currentRule = board->Rules;
     uint8_t cellWidth = board->CellWidth;
@@ -31,22 +31,23 @@ void Step(Board* board) {
                     + WrapToBoard(board, i, j + 1) 
                     + WrapToBoard(board, i + 1, j + 1);
             
+            cellStatus = board->Cells[boardNum][i][j];
             // Rules:
             if (!(currentRule->Live & (1 << numN))) {
-                board->Cells[!boardNum][i][j] = 0;
-            } else {
-                board->Cells[!boardNum][i][j] = board->Cells[boardNum][i][j];
+                cellStatus = 0;
             }
-
             if ((currentRule->Born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
-                board->Cells[!boardNum][i][j] = 1;
+                cellStatus = 1;
             }
 
-            if (board->Cells[boardNum][i][j] != board->Cells[!boardNum][i][j]) {
+            board->Cells[!boardNum][i][j] = cellStatus;
+
+            if (board->Cells[boardNum][i][j] != cellStatus) {
+                uint8_t color = cellStatus ? board->AliveColor : board->DeadColor;
                 if (cellWidth > 2) {
-                    DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->Cells[!boardNum][i][j] ? board->AliveColor : board->DeadColor);
+                    DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, color);
                 } else {
-                    DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->Cells[!boardNum][i][j] ? board->AliveColor : board->DeadColor);
+                    DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, color);
                 }
             }
         }
