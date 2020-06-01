@@ -20,20 +20,23 @@ void __drawStampEvent(MenuEventArgs* menuEventArgs) {
         return;
     }
 
-    board = CreateBoard(stamp->Width, stamp->Height);
+    board = CreateBoard(stamp->Width + 2, stamp->Height + 2);
     board->OffsetX = XOffSet;
     board->OffsetY = YOffSet + 9;
+    board->CursorX = 2;
+    board->CursorY = 2;
     board->CellHeight = mainBoard->CellHeight;
     board->CellWidth = mainBoard->CellWidth;
     board->GridColor = mainBoard->GridColor;
     board->DeadColor = mainBoard->DeadColor;
     board->CursorAliveColor = mainBoard->CursorAliveColor;
     board->CursorDeadColor = mainBoard->CursorDeadColor;
-    
+    PlaceStamp(board, stamp);
+
     DrawString(stamp->Name, XOffSet, YOffSet);
     HorizontalLine(XOffSet, YOffSet + 9, MeasureString(stamp->Name));
     DrawGrid(board);
-    DrawStamp(board, stamp);
+    DrawBoard(board, true);
     DeleteBoard(board);
 }
 

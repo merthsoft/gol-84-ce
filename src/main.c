@@ -39,16 +39,16 @@ int main(void) {
     mainBoard = LoadSettings(appVarName, rulesList);
     
     if (mainBoard == NULL) {
-        mainBoard = CreateBoard(32, 32);
-        mainBoard->CellHeight = 7;
-        mainBoard->CellWidth = 7;
+        mainBoard = CreateBoard(0, 0);
+        ResizeCells(mainBoard, 10);
 
         mainBoard->AliveColor = 18;
         mainBoard->DeadColor = 255;
         mainBoard->GridColor = 0;
-        mainBoard->WrappingMode = Torus;
         mainBoard->CursorDeadColor = 224;
         mainBoard->CursorAliveColor = 15;
+        
+        mainBoard->WrappingMode = Torus;
         mainBoard->RandomChance = 50;
 
         SetRules(mainBoard, rulesList->List);
@@ -77,7 +77,7 @@ int main(void) {
             if (selectedStamp == NULL)
                 DrawCursor(mainBoard);
             else
-                DrawStamp(mainBoard, selectedStamp);
+                DrawStamp(mainBoard, selectedStamp, false);
                        
             x = old_x = mainBoard->CursorX;
             y = old_y = mainBoard->CursorY;
@@ -129,7 +129,7 @@ int main(void) {
                 if (selectedStamp == NULL) {
                     DrawCell(mainBoard);
                 } else {
-                    ClearStamp(mainBoard, selectedStamp);
+                    DrawStamp(mainBoard, selectedStamp, true);
                 }
             }
 

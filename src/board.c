@@ -20,9 +20,8 @@ void Step(Board* board) {
 
     for (i = 1; i <= board->BoardWidth; i++) {
         for (j = 1; j <= board->BoardHeight; j++) {
-            numN = 0;
             // Count the 8 cells around it
-            numN += WrapToBoard(board, i - 1, j - 1)
+            numN = WrapToBoard(board, i - 1, j - 1)
                     + WrapToBoard(board, i, j - 1) 
                     + WrapToBoard(board, i + 1, j - 1) 
                     + WrapToBoard(board, i - 1, j) 
@@ -36,7 +35,7 @@ void Step(Board* board) {
             if (!(currentRule->Live & (1 << numN))) {
                 cellStatus = 0;
             }
-            if ((currentRule->Born & (1 << numN)) && board->Cells[boardNum][i][j] == 0) {
+            if ((currentRule->Born & (1 << numN)) && cellStatus == 0) {
                 cellStatus = 1;
             }
 
@@ -69,7 +68,8 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
     bool ovC = lE || rE;
     bool ovR = tEE || bE;
 
-    if (!ovC && !ovR || board->WrappingMode == Plane) { return board->Cells[board->BoardNumber][c][r]; }
+    if (!ovC && !ovR || board->WrappingMode == Plane)
+        return board->Cells[board->BoardNumber][c][r];
 
     switch (board->WrappingMode) {
         case Plane:
@@ -125,18 +125,18 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
                     break;
             }
             break;
-    }
-    case Klein:
-        lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-        lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-        lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
-        break;
-    case Proj:
-        lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
-        lC = ovR ? (CYCLE_WIDTH - lC + 2) : lC;
-        lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
-        lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
-        break;
+        }
+        case Klein:
+            lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+            lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
+            lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
+            break;
+        case Proj:
+            lC = ovC ? (MOD_CYCLE(c - 1, CYCLE_WIDTH) + 1) : c;
+            lC = ovR ? (CYCLE_WIDTH - lC + 2) : lC;
+            lR = ovR ? (MOD_CYCLE(r - 1, CYCLE_HEIGHT) + 1) : r;
+            lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
+            break;
     }
     return board->Cells[board->BoardNumber][lC][lR];
 }
@@ -180,48 +180,42 @@ void PlaceStamp(Board* board, Stamp* stamp) {
     uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
-    uint8_t width = board->CellWidth;
-    uint8_t height = board->CellHeight;
+    uint8_t** cells = board->Cells[board->BoardNumber];
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
 
     for (i = 0; i < stamp->Width; i++)
         for (j = 0; j < stamp->Height; j++)
-            board->Cells[board->BoardNumber][x + i][y + j] = stamp->Cells[i][j];
+            if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height)
+                cells[x + i][y + j] = stamp->Cells[i][j];
 }
 
-void DrawStamp(Board* board, Stamp* stamp) {
+void DrawStamp(Board* board, Stamp* stamp, bool clear) {
     uint8_t i, j;
     uint8_t offsetx = board->OffsetX;
     uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
     uint8_t** cells = board->Cells[board->BoardNumber];
-    uint8_t width = board->CellWidth;
-    uint8_t height = board->CellHeight;
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
 
     for (i = 0; i < stamp->Width; i++) {
         for (j = 0; j < stamp->Height; j++) {
-            uint8_t color = stamp->Cells[i][j]
-                            ? cells[x + i][y + j]
-                              ? board->CursorAliveColor
-                              : board->CursorDeadColor
-                            : board->DeadColor;
-            __colorCell(board, x + i, y + j, offsetx, offsety, color);
+            if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height) {
+                uint8_t color = clear
+                                ? cells[x + i][y + j] 
+                                    ? board->AliveColor
+                                    : board->DeadColor
+                                : stamp->Cells[i][j]
+                                    ? cells[x + i][y + j]
+                                        ? board->CursorAliveColor
+                                        : board->CursorDeadColor
+                                    : board->DeadColor;
+                __colorCell(board, x + i, y + j, offsetx, offsety, color);
+            }
         }
     }
-}
-
-void ClearStamp(Board* board, Stamp* stamp) {
-    uint8_t i, j;
-    uint8_t offsetx = board->OffsetX;
-    uint8_t offsety = board->OffsetY;
-    uint8_t x = board->CursorX;
-    uint8_t y = board->CursorY;
-    uint8_t width = board->CellWidth;
-    uint8_t height = board->CellHeight;
-
-    for (i = x; i < x + stamp->Width; i++)
-        for (j = y; j < y + stamp->Height; j++)
-            __colorCell(board, i, j, offsetx, offsety, board->Cells[board->BoardNumber][i][j] ? board->AliveColor : board->DeadColor);
 }
 
 void RandomBoard(Board* board) {
@@ -271,6 +265,17 @@ void __allocCells(Board* b) {
             memset(b->Cells[i][j], 0, mallocSize);
         }
     }
+}
+
+void ResizeCells(Board* board, uint8_t cellSize) {
+    uint8_t newSize = 224 / cellSize;
+    if (newSize > 80) 
+        newSize = 80;
+
+    ResizeBoard(board, newSize, newSize);
+
+    board->CellHeight = cellSize;
+    board->CellWidth = cellSize;
 }
 
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {

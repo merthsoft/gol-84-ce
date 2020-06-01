@@ -39,9 +39,9 @@ typedef struct {
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
 void DeleteBoard(Board* board);
 void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight);
+void ResizeCells(Board* board, uint8_t cellSize);
 void DrawBoard(Board* board, bool redraw);
-void DrawStamp(Board* board, Stamp* stamp);
-void ClearStamp(Board* board, Stamp* stamp);
+void DrawStamp(Board* board, Stamp* stamp, bool clear);
 void PlaceStamp(Board* board, Stamp* stamp);
 void DrawGrid(Board* board);
 void RandomBoard(Board* board);
