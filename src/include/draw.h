@@ -3,10 +3,14 @@
 
 #include <stdint.h>
 #include <graphx.h>
+#include <tice.h>
 
 #include "../gfx/gfx.h"
 
-#define GraphicsBegin()                         gfx_Begin()
+#define SCREEN_WIDTH    LCD_WIDTH
+#define SCREEN_HEIGHT   LCD_HEIGHT
+
+#define GraphicsBegin()                         gfx_Begin();
 #define GraphicsEnd()                           gfx_End()
 
 #define SetTextColor(foreground, background)    gfx_SetTextBGColor(background); gfx_SetTextFGColor(foreground)

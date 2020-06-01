@@ -11,3 +11,4 @@ const char* WrappingModeNames[NUM_WRAPPING_MODES] = {
 };
 
 const char* BackString = "Back";
+const char* CustomString = "Custom";

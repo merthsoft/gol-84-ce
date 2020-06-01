@@ -107,8 +107,9 @@ void SaveSettings(Board* mainBoard, const char* appVarName) {
     mainBoard->Cells[1] = cells2;
 }
 
-Board* LoadSettings(const char* appVarName) {
+Board* LoadSettings(const char* appVarName, RulesList* rulesList) {
     ti_var_t file;
+    bool found;
     Board* mainBoard;
     uint8_t i, j;
 
@@ -148,6 +149,23 @@ Board* LoadSettings(const char* appVarName) {
     
     if (ti_Read(&(mainBoard->Rules->Live), sizeof(uint16_t), 1, file) != 1)
         goto load_error;
+
+    found = false;
+    for (i = 0; i < rulesList->NumRules; i++) {
+        if (rulesList->List[i].Born == mainBoard->Rules->Born 
+         && rulesList->List[i].Live == mainBoard->Rules->Live) {
+            found = true;
+            mainBoard->Rules->Name = rulesList->List[i].Name;
+            mainBoard->Rules->NumStamps = rulesList->List[i].NumStamps;
+            mainBoard->Rules->Stamps = rulesList->List[i].Stamps;
+         }
+    }
+
+    if (!found) {
+        mainBoard->Rules->Name = CustomString;
+        mainBoard->Rules->NumStamps = 0;
+        mainBoard->Rules->Stamps = NULL;
+    }
 
     if (ti_Read(magicStringBuffer, CellsMagicStringLength, 1, file) != 1)
         goto load_error;

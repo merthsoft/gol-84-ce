@@ -7,6 +7,7 @@
 #define FUNCTION_NONE (void*)0
 
 typedef struct MenuItem {
+    int Index;
     char* Name;
     void* Function;
     bool Selected;
@@ -25,6 +26,7 @@ typedef struct Menu {
     uint8_t NumItems;
     void* ExtraFunction;
     MenuSelectionType SelectionType;
+    MenuItem* SelectedItem;
     kb_lkey_t BackKey;
     char CursorChar;
     void* Tag;
@@ -33,7 +35,7 @@ typedef struct Menu {
 typedef struct MenuEventArgs {
     Menu* Menu;
     uint8_t Index;
-    void* Item;
+    MenuItem* Item;
     uint32_t FrameNumber;
     bool Back;
 } MenuEventArgs;

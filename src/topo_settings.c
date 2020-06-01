@@ -46,9 +46,13 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
 }
 
 void DrawTopoSprite(MenuEventArgs* menuEventArgs) {
+    uint8_t index = menuEventArgs->Index;
     gfx_sprite_t* sprite = NULL;
 
-    switch (menuEventArgs->Index) {
+    if ((index < 0 || index > 6) && menuEventArgs->Menu->SelectedItem != NULL)
+        index = menuEventArgs->Menu->SelectedItem->Index;
+
+    switch (index) {
         case 0:
             sprite = topo_plane;
             break;

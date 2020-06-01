@@ -5,5 +5,6 @@
 
 extern const char* WrappingModeNames[NUM_WRAPPING_MODES];
 extern const char* BackString;
+extern const char* CustomString;
 
 #endif

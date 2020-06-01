@@ -79,7 +79,7 @@ void __drawSampleBoard(Board* sampleBoard) {
 
 void DrawSampleBoard(MenuEventArgs* menuEventArgs) {
     if (menuEventArgs->FrameNumber == 0) {
-        __drawSampleBoard(menuEventArgs->Item);
+        __drawSampleBoard(menuEventArgs->Item->Tag);
     }
 }
 

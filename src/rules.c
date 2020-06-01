@@ -15,6 +15,12 @@ void life(Rules* rules) {
     InitStamps(rules, 1);
     InitStamp(rules->Stamps, 3, 3);
     rules->Stamps[0].Name = "Glider";
+
+    rules->Stamps[0].Cells[1][0] = 1;
+    rules->Stamps[0].Cells[2][1] = 1;
+    rules->Stamps[0].Cells[0][2] = 1;
+    rules->Stamps[0].Cells[1][2] = 1;
+    rules->Stamps[0].Cells[2][2] = 1;
 }
 
 RulesList*  InitRules() {

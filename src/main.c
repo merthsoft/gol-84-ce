@@ -1,3 +1,4 @@
+#include <debug.h>
 #include <tice.h>
 #include <graphx.h>
 #include <stdlib.h>
@@ -12,19 +13,21 @@
 #include "include/settings.h"
 #include "include/const.h"
 #include "include/stamp_picker.h"
+#include "include/stamp.h"
 
 void DrawPlayPauseIcon(bool running);
 void DrawHelpText(Board* mainBoard, bool running);
+
+const char appVarName[] = "[GoL";
 
 int main(void) {
     uint8_t x, old_x;
     uint8_t y, old_y;
     Board* mainBoard;
     RulesList* rulesList;
-    const char appVarName[] = "[GoL";
+    Stamp* selectedStamp = NULL;
     
     bool redraw = true;
-    bool toggled = false;
     bool running = false;
     bool quit = false;
     
@@ -33,7 +36,7 @@ int main(void) {
     rulesList = InitRules();
 
     mainBoard = NULL;
-    mainBoard = LoadSettings(appVarName);
+    mainBoard = LoadSettings(appVarName, rulesList);
     
     if (mainBoard == NULL) {
         mainBoard = CreateBoard(32, 32);
@@ -71,7 +74,10 @@ int main(void) {
             else if (Key_JustPressed(Key_Del)) 
                 quit = true;
         } else {
-            DrawCursor(mainBoard);
+            if (selectedStamp == NULL)
+                DrawCursor(mainBoard);
+            else
+                DrawStamp(mainBoard, selectedStamp);
                        
             x = old_x = mainBoard->CursorX;
             y = old_y = mainBoard->CursorY;
@@ -86,7 +92,7 @@ int main(void) {
             else if (Key_IsDown(Key_Right)) 
                 x = x == mainBoard->BoardWidth ? 1 : x + 1;
             else if (Key_IsDown(Key_Del)) 
-                quit = true;
+                quit = selectedStamp == NULL ? true : (selectedStamp = NULL) == NULL;
             else if (Key_IsDown(Key_Add))
                 Step(mainBoard);
             else if (Key_IsDown(Key_Mode)) {
@@ -99,7 +105,11 @@ int main(void) {
                 DrawPlayPauseIcon(true);
                 running = true;
             } else if (Key_JustPressed(Key_Alpha)){ 
-                ChooseStamp(mainBoard);
+                selectedStamp = ChooseStamp(mainBoard);
+                if (selectedStamp == NULL)
+                    dbg_sprintf(dbgout, "Stamp NULL\n");
+                else
+                    dbg_sprintf(dbgout, "Stamp %.20s\n", selectedStamp->Name);
                 redraw = true;
             } else if (Key_IsDown(Key_Clear)) {
                 ClearBoard(mainBoard);
@@ -107,15 +117,20 @@ int main(void) {
             } else if (Key_IsDown(Key_Power)) {
                 FillBoard(mainBoard);
                 DrawBoard(mainBoard, true);
-            } 
-
-            if (Key_JustPressed(Key_2nd)) {
-                mainBoard->Cells[mainBoard->BoardNumber][x][y] = !mainBoard->Cells[mainBoard->BoardNumber][x][y];
-                toggled = true;
+            } else if (Key_JustPressed(Key_2nd)) {
+                if (selectedStamp == NULL) {
+                    ToggleCell(mainBoard);
+                } else {
+                    PlaceStamp(mainBoard, selectedStamp);
+                }
             }
 
             if (old_x != x || old_y != y || running) {
-                DrawCell(mainBoard);
+                if (selectedStamp == NULL) {
+                    DrawCell(mainBoard);
+                } else {
+                    ClearStamp(mainBoard, selectedStamp);
+                }
             }
 
             mainBoard->CursorX = x;

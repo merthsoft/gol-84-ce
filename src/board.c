@@ -140,7 +140,7 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
     return board->Cells[board->BoardNumber][lC][lR];
 }
 
-void __drawCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety, uint8_t color) {
+void __colorCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety, uint8_t color) {
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
@@ -156,7 +156,7 @@ void DrawCell(Board* board) {
     uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
-    __drawCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
+    __colorCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
 }
 
 void DrawCursor(Board* board) {
@@ -164,7 +164,63 @@ void DrawCursor(Board* board) {
     uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
-    __drawCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
+    __colorCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
+}
+
+void ToggleCell(Board* board) {
+    uint8_t x = board->CursorX;
+    uint8_t y = board->CursorY;
+    board->Cells[board->BoardNumber][x][y] = !board->Cells[board->BoardNumber][x][y];
+}
+
+void PlaceStamp(Board* board, Stamp* stamp) {
+    uint8_t i, j;
+    uint8_t offsetx = board->OffsetX;
+    uint8_t offsety = board->OffsetY;
+    uint8_t x = board->CursorX;
+    uint8_t y = board->CursorY;
+    uint8_t width = board->CellWidth;
+    uint8_t height = board->CellHeight;
+
+    for (i = 0; i < stamp->Width; i++)
+        for (j = 0; j < stamp->Height; j++)
+            board->Cells[board->BoardNumber][x + i][y + j] = stamp->Cells[i][j];
+}
+
+void DrawStamp(Board* board, Stamp* stamp) {
+    uint8_t i, j;
+    uint8_t offsetx = board->OffsetX;
+    uint8_t offsety = board->OffsetY;
+    uint8_t x = board->CursorX;
+    uint8_t y = board->CursorY;
+    uint8_t** cells = board->Cells[board->BoardNumber];
+    uint8_t width = board->CellWidth;
+    uint8_t height = board->CellHeight;
+
+    for (i = 0; i < stamp->Width; i++) {
+        for (j = 0; j < stamp->Height; j++) {
+            uint8_t color = stamp->Cells[i][j]
+                            ? cells[x + i][y + j]
+                              ? board->CursorAliveColor
+                              : board->CursorDeadColor
+                            : board->DeadColor;
+            __colorCell(board, x + i, y + j, offsetx, offsety, color);
+        }
+    }
+}
+
+void ClearStamp(Board* board, Stamp* stamp) {
+    uint8_t i, j;
+    uint8_t offsetx = board->OffsetX;
+    uint8_t offsety = board->OffsetY;
+    uint8_t x = board->CursorX;
+    uint8_t y = board->CursorY;
+    uint8_t width = board->CellWidth;
+    uint8_t height = board->CellHeight;
+
+    for (i = x; i < x + stamp->Width; i++)
+        for (j = y; j < y + stamp->Height; j++)
+            __colorCell(board, i, j, offsetx, offsety, board->Cells[board->BoardNumber][i][j] ? board->AliveColor : board->DeadColor);
 }
 
 void RandomBoard(Board* board) {
@@ -290,17 +346,10 @@ void DrawBoard(Board* board, bool redraw) {
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
-    for (i = 1; i <= board->BoardWidth; i++) {
-        for (j = 1; j <= board->BoardHeight; j++) {
-            if (board->Cells[boardNumber][i][j] != board->Cells[!boardNumber][i][j] || redraw) {
-                if (cellWidth > 2) {
-                    DrawRectFill(i*cellWidth + 1 + offsetx, j * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
-                } else {
-                    DrawRectFill(i*cellWidth + offsetx, j * cellHeight + offsety, cellWidth, cellHeight, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
-                }
-            }
-        }
-    }
+    for (i = 1; i <= board->BoardWidth; i++)
+        for (j = 1; j <= board->BoardHeight; j++)
+            if (board->Cells[boardNumber][i][j] != board->Cells[!boardNumber][i][j] || redraw)
+                __colorCell(board, i, j, offsetx, offsety, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
 }
 
 void DrawGrid(Board* board) {
