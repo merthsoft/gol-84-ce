@@ -5,6 +5,9 @@
 
 #include "rules.h"
 
+#define MAX_BOARD_DRAW_SIZE 224
+#define MAX_BOARD_SIZE      80
+
 typedef enum {
     Plane   = 0,
     Ring    = 1,
@@ -39,7 +42,7 @@ typedef struct {
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
 void DeleteBoard(Board* board);
 void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight);
-void ResizeCells(Board* board, uint8_t cellSize);
+void SquareCells(Board* board, uint8_t cellSize, uint8_t drawSize, uint8_t maxSize);
 void DrawBoard(Board* board, bool redraw);
 void DrawStamp(Board* board, Stamp* stamp, bool clear);
 void PlaceStamp(Board* board, Stamp* stamp);

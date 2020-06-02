@@ -20,6 +20,8 @@ void DrawHelpText(Board* mainBoard, bool running);
 
 const char appVarName[] = "[GoL";
 
+#define HELP_TEXT_X 240
+
 int main(void) {
     uint8_t x, old_x;
     uint8_t y, old_y;
@@ -31,8 +33,6 @@ int main(void) {
     bool running = false;
     bool quit = false;
     
-    GraphicsBegin();
-    FillScreen(0);
     rulesList = InitRules();
 
     mainBoard = NULL;
@@ -40,7 +40,7 @@ int main(void) {
     
     if (mainBoard == NULL) {
         mainBoard = CreateBoard(0, 0);
-        ResizeCells(mainBoard, 10);
+        SquareCells(mainBoard, 10, MAX_BOARD_DRAW_SIZE, MAX_BOARD_SIZE);
 
         mainBoard->AliveColor = 18;
         mainBoard->DeadColor = 255;
@@ -55,6 +55,9 @@ int main(void) {
     }
     
     Key_Init();
+    
+    GraphicsBegin();
+    ClearScreen();
 
     while (!quit) {
         if (redraw) {
@@ -153,39 +156,39 @@ void DrawHelpText(Board* mainBoard, bool running) {
     memset(rulesString, 0, 11);
 
     FillScreen(255);
-    DrawString("2nd-Toggle", 240, 8);
-    DrawString("Del-Quit", 240, 17);
-    DrawString("Clear-Clear", 240, 26);
-    DrawString("^-Fill", 240, 35);
-    DrawString("Vars-Rand", 240, 44);
-    DrawString("+-Step", 240, 53);
-    DrawString("Mode-Setup", 240, 62);
-    DrawString("Enter-", 240, 71);
+    DrawString("2nd-Toggle", HELP_TEXT_X, 8);
+    DrawString("Del-Quit", HELP_TEXT_X, 17);
+    DrawString("Clear-Clear", HELP_TEXT_X, 26);
+    DrawString("^-Fill", HELP_TEXT_X, 35);
+    DrawString("Vars-Rand", HELP_TEXT_X, 44);
+    DrawString("+-Step", HELP_TEXT_X, 53);
+    DrawString("Mode-Setup", HELP_TEXT_X, 62);
+    DrawString("Enter-", HELP_TEXT_X, 71);
     DrawGrid(mainBoard);
     DrawBoard(mainBoard, true);
     DrawPlayPauseIcon(running);
 
     DrawRectFill(239, 81, 80, 2, 0);
 
-    DrawString("Topology:", 240, 86);
-    DrawString(WrappingModeNames[mainBoard->WrappingMode], 243, 95);
-    DrawString("Rules:", 240, 104);
+    DrawString("Topology:", HELP_TEXT_X, 86);
+    DrawString(WrappingModeNames[mainBoard->WrappingMode], HELP_TEXT_X + 3, 95);
+    DrawString("Rules:", HELP_TEXT_X, 104);
 
-    DrawString("Stay alive:", 245, 113);
+    DrawString("Stay alive:", HELP_TEXT_X + 5, 113);
     memset(rulesString, 0, 11);
     i = 0;
     NumToRuleString(mainBoard->Rules->Live, rulesString, &i);
-    DrawString(rulesString, 245, 122);
+    DrawString(rulesString, HELP_TEXT_X + 5, 122);
 
-    DrawString("Born:", 245, 131);
+    DrawString("Born:", HELP_TEXT_X + 5, 131);
     memset(rulesString, 0, 11);
     i = 0;
     NumToRuleString(mainBoard->Rules->Born, rulesString, &i);
-    DrawString(rulesString, 245, 140);
+    DrawString(rulesString, HELP_TEXT_X + 5, 140);
 
-    DrawString("Cell Size:", 240, 149);
+    DrawString("Cell Size:", HELP_TEXT_X, 149);
     sprintf(rulesString, "%d", mainBoard->CellHeight);
-    DrawString(rulesString, 245, 158);
+    DrawString(rulesString, HELP_TEXT_X + 5, 158);
 
     free(rulesString);
 }

@@ -20,6 +20,7 @@
 
 #define SetColorIndex(color_index)              gfx_SetColor(color_index)
 #define FillScreen(color_index)                 gfx_FillScreen(color_index)
+#define ClearScreen()                           gfx_ZeroScreen()
 
 void DrawRectFill(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);
 void DrawRect(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);

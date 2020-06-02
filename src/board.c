@@ -18,6 +18,9 @@ void Step(Board* board) {
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
+    gfx_SetDrawBuffer();
+    DrawGrid(board);
+
     for (i = 1; i <= board->BoardWidth; i++) {
         for (j = 1; j <= board->BoardHeight; j++) {
             // Count the 8 cells around it
@@ -52,6 +55,9 @@ void Step(Board* board) {
         }
     }
     board->BoardNumber = !boardNum; // Use the new board as the current board
+
+    gfx_SetDrawScreen();
+    gfx_BlitRectangle(gfx_screen, 0, 0, MAX_BOARD_DRAW_SIZE, MAX_BOARD_DRAW_SIZE);
 }
 
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
@@ -222,12 +228,11 @@ void RandomBoard(Board* board) {
     uint8_t i, j;
     srand(rtc_Time());
 
-    for (i = 1; i <= board->BoardWidth + 1; i++) {
+    for (i = 1; i <= board->BoardWidth + 1; i++)
         for (j = 1; j <= board->BoardHeight + 1; j++) {
             board->Cells[0][i][j] = (rand() % 100) < board->RandomChance;
             board->Cells[1][i][j] = !(board->Cells[0][i][j]);
         }
-    }
 
     board->BoardNumber = 0;
 }
@@ -235,11 +240,10 @@ void RandomBoard(Board* board) {
 void __setValue(Board* board, uint8_t val) {
     uint8_t i, j;
     for (i = 0; i < board->BoardWidth + 2; i++) {
-        for (j = 0; j < board->BoardHeight + 2; j++) {
+        for (j = 0; j < board->BoardHeight + 2; j++)
             board->Cells[0][i][j] = val;
             board->Cells[1][i][j] = val;
         }
-    }
 
     board->BoardNumber = 0;
 }
@@ -267,10 +271,10 @@ void __allocCells(Board* b) {
     }
 }
 
-void ResizeCells(Board* board, uint8_t cellSize) {
-    uint8_t newSize = 224 / cellSize;
-    if (newSize > 80) 
-        newSize = 80;
+void SquareCells(Board* board, uint8_t cellSize, uint8_t drawSize, uint8_t maxSize) {
+    uint8_t newSize = drawSize / cellSize;
+    if (newSize > maxSize) 
+        newSize = maxSize;
 
     ResizeBoard(board, newSize, newSize);
 
