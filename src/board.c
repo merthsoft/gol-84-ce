@@ -42,13 +42,12 @@ void Step(Board* board) {
             
             cellStatus = board->Cells[boardNum][i][j];
             // Rules:
-            if (!(currentRule->Live & (1 << numN))) {
+            if (!(currentRule->Live & (1 << numN)))
                 cellStatus = 0;
-            }
-            if ((currentRule->Born & (1 << numN)) && cellStatus == 0) {
-                cellStatus = 1;
-            }
 
+            if ((currentRule->Born & (1 << numN)) && cellStatus == 0)
+                cellStatus = 1;
+            
             if (cellStatus) 
                 if (cellWidth > 2)
                     DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->AliveColor);
