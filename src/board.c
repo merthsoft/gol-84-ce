@@ -17,6 +17,16 @@ void Step(Board* board) {
     Rules* currentRule = board->Rules;
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
+    uint8_t offsetX = board->OffsetX;
+    uint8_t offsetY = board->OffsetY;
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
+    uint8_t drawWidth = (width + 1) * cellWidth;
+    uint8_t drawHeight = (height + 1) * cellHeight;
+
+    gfx_SetDrawBuffer();
+    DrawRectFill(offsetX, offsetY,  drawWidth, drawHeight, 255);
+    DrawGrid(board);
 
     for (i = 1; i <= board->BoardWidth; i++) {
         for (j = 1; j <= board->BoardHeight; j++) {
@@ -39,19 +49,20 @@ void Step(Board* board) {
                 cellStatus = 1;
             }
 
+            if (cellStatus) 
+                if (cellWidth > 2)
+                    DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->AliveColor);
+                else
+                    DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->AliveColor);
+
             board->Cells[!boardNum][i][j] = cellStatus;
 
-            if (board->Cells[boardNum][i][j] != cellStatus) {
-                uint8_t color = cellStatus ? board->AliveColor : board->DeadColor;
-                if (cellWidth > 2) {
-                    DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, color);
-                } else {
-                    DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, color);
-                }
-            }
         }
     }
     board->BoardNumber = !boardNum; // Use the new board as the current board
+
+    gfx_BlitRectangle(gfx_buffer, offsetX, offsetY, drawWidth, drawHeight);
+    gfx_SetDrawScreen();
 }
 
 uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
@@ -141,31 +152,62 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
     return board->Cells[board->BoardNumber][lC][lR];
 }
 
-void __colorCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety, uint8_t color) {
+void __colorCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety, color c) {
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
     if (cellWidth > 2) {
-        DrawRectFill(x*cellWidth + 1 + offsetx, y * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, color);
+        DrawRectFill(x*cellWidth + 1 + offsetx, y * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, c);
     } else {
-        DrawRectFill(x*cellWidth + offsetx, y * cellHeight + offsety, cellWidth, cellHeight, color);
+        DrawRectFill(x*cellWidth + offsetx, y * cellHeight + offsety, cellWidth, cellHeight, c);
     }
 }
 
-void DrawCell(Board* board) {
+void __drawStamp(Board* board, Stamp* stamp, bool clear) {
+    uint8_t i, j;
     uint8_t offsetx = board->OffsetX;
     uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
-    __colorCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->AliveColor : board->DeadColor);
+    uint8_t** cells = board->Cells[board->BoardNumber];
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
+
+    for (i = 0; i < stamp->Width; i++) {
+        for (j = 0; j < stamp->Height; j++) {
+            if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height) {
+                color color = clear
+                              ? cells[x + i][y + j] 
+                                  ? board->AliveColor
+                                  : board->DeadColor
+                              : stamp->Cells[i][j]
+                                  ? cells[x + i][y + j]
+                                      ? board->CursorAliveColor
+                                      : board->CursorDeadColor
+                                  : board->DeadColor;
+                __colorCell(board, x + i, y + j, offsetx, offsety, color);
+            }
+        }
+    }
 }
 
-void DrawCursor(Board* board) {
-    uint8_t offsetx = board->OffsetX;
-    uint8_t offsety = board->OffsetY;
-    uint8_t x = board->CursorX;
-    uint8_t y = board->CursorY;
-    __colorCell(board, x, y, offsetx, offsety, board->Cells[board->BoardNumber][x][y] ? board->CursorAliveColor : board->CursorDeadColor);
+void DrawCursor(Board* board, Stamp* stamp, bool clear) {
+    if (stamp != NULL)
+        __drawStamp(board, stamp, clear);
+    else {
+        uint8_t offsetx = board->OffsetX;
+        uint8_t offsety = board->OffsetY;
+        uint8_t x = board->CursorX;
+        uint8_t y = board->CursorY;
+        color color = clear
+                      ? board->Cells[board->BoardNumber][x][y]
+                        ? board->AliveColor
+                        : board->DeadColor
+                      : board->Cells[board->BoardNumber][x][y] 
+                        ? board->CursorAliveColor 
+                        : board->CursorDeadColor;
+        __colorCell(board, x, y, offsetx, offsety, color);
+    }
 }
 
 void ToggleCell(Board* board) {
@@ -180,66 +222,35 @@ void PlaceStamp(Board* board, Stamp* stamp) {
     uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
-    uint8_t** cells = board->Cells[board->BoardNumber];
     uint8_t width = board->BoardWidth;
     uint8_t height = board->BoardHeight;
 
     for (i = 0; i < stamp->Width; i++)
         for (j = 0; j < stamp->Height; j++)
             if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height)
-                cells[x + i][y + j] = stamp->Cells[i][j];
-}
-
-void DrawStamp(Board* board, Stamp* stamp, bool clear) {
-    uint8_t i, j;
-    uint8_t offsetx = board->OffsetX;
-    uint8_t offsety = board->OffsetY;
-    uint8_t x = board->CursorX;
-    uint8_t y = board->CursorY;
-    uint8_t** cells = board->Cells[board->BoardNumber];
-    uint8_t width = board->BoardWidth;
-    uint8_t height = board->BoardHeight;
-
-    for (i = 0; i < stamp->Width; i++) {
-        for (j = 0; j < stamp->Height; j++) {
-            if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height) {
-                uint8_t color = clear
-                                ? cells[x + i][y + j] 
-                                    ? board->AliveColor
-                                    : board->DeadColor
-                                : stamp->Cells[i][j]
-                                    ? cells[x + i][y + j]
-                                        ? board->CursorAliveColor
-                                        : board->CursorDeadColor
-                                    : board->DeadColor;
-                __colorCell(board, x + i, y + j, offsetx, offsety, color);
-            }
-        }
-    }
+                board->Cells[board->BoardNumber][x + i][y + j] = stamp->Cells[i][j];
 }
 
 void RandomBoard(Board* board) {
     uint8_t i, j;
     srand(rtc_Time());
 
-    for (i = 1; i <= board->BoardWidth + 1; i++) {
+    for (i = 1; i <= board->BoardWidth + 1; i++)
         for (j = 1; j <= board->BoardHeight + 1; j++) {
             board->Cells[0][i][j] = (rand() % 100) < board->RandomChance;
             board->Cells[1][i][j] = !(board->Cells[0][i][j]);
         }
-    }
 
     board->BoardNumber = 0;
 }
 
 void __setValue(Board* board, uint8_t val) {
     uint8_t i, j;
-    for (i = 0; i < board->BoardWidth + 2; i++) {
-        for (j = 0; j < board->BoardHeight + 2; j++) {
+    for (i = 1; i < board->BoardWidth + 2; i++) {
+        for (j = 1; j < board->BoardHeight + 2; j++)
             board->Cells[0][i][j] = val;
             board->Cells[1][i][j] = val;
         }
-    }
 
     board->BoardNumber = 0;
 }
@@ -267,10 +278,10 @@ void __allocCells(Board* b) {
     }
 }
 
-void ResizeCells(Board* board, uint8_t cellSize) {
-    uint8_t newSize = 224 / cellSize;
-    if (newSize > 80) 
-        newSize = 80;
+void SquareCells(Board* board, uint8_t cellSize, uint8_t drawSize, uint8_t maxSize) {
+    uint8_t newSize = drawSize / cellSize;
+    if (newSize > maxSize) 
+        newSize = maxSize;
 
     ResizeBoard(board, newSize, newSize);
 

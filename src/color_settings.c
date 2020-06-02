@@ -71,10 +71,10 @@ void __drawSampleBoard(Board* sampleBoard) {
     DrawBoard(sampleBoard, true);
     sampleBoard->CursorX = 1;
     sampleBoard->CursorY = 1;
-    DrawCursor(sampleBoard);
+    DrawCursor(sampleBoard, NULL, false);
     sampleBoard->CursorX = 2;
     sampleBoard->CursorY = 1;
-    DrawCursor(sampleBoard);
+    DrawCursor(sampleBoard, NULL, false);
 }
 
 void DrawSampleBoard(MenuEventArgs* menuEventArgs) {
