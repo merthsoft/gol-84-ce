@@ -7,6 +7,8 @@
 
 #include "../gfx/gfx.h"
 
+typedef uint8_t color;
+
 #define SCREEN_WIDTH    LCD_WIDTH
 #define SCREEN_HEIGHT   LCD_HEIGHT
 
@@ -22,8 +24,8 @@
 #define FillScreen(color_index)                 gfx_FillScreen(color_index)
 #define ClearScreen()                           gfx_ZeroScreen()
 
-void DrawRectFill(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);
-void DrawRect(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);
+void DrawRectFill(uint24_t x, uint8_t y, uint24_t width, color height, color color_index);
+void DrawRect(uint24_t x, uint8_t y, uint24_t width, color height, color color_index);
 
 #define VerticalLine(x, y, l)                   gfx_VertLine(x, y, l);
 #define HorizontalLine(x, y, l)                 gfx_HorizLine(x, y, l);

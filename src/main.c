@@ -20,8 +20,6 @@ void DrawHelpText(Board* mainBoard, bool running);
 
 const char appVarName[] = "[GoL";
 
-#define HELP_TEXT_X 240
-
 int main(void) {
     uint8_t x, old_x;
     uint8_t y, old_y;
@@ -77,10 +75,7 @@ int main(void) {
             else if (Key_JustPressed(Key_Del)) 
                 quit = true;
         } else {
-            if (selectedStamp == NULL)
-                DrawCursor(mainBoard);
-            else
-                DrawStamp(mainBoard, selectedStamp, false);
+            DrawCursor(mainBoard, selectedStamp, false);
                        
             x = old_x = mainBoard->CursorX;
             y = old_y = mainBoard->CursorY;
@@ -129,11 +124,7 @@ int main(void) {
             }
 
             if (old_x != x || old_y != y || running) {
-                if (selectedStamp == NULL) {
-                    DrawCell(mainBoard);
-                } else {
-                    DrawStamp(mainBoard, selectedStamp, true);
-                }
+                DrawCursor(mainBoard, selectedStamp, true);
             }
 
             mainBoard->CursorX = x;
