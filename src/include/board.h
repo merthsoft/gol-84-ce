@@ -38,7 +38,7 @@ typedef struct {
     uint8_t OffsetX;
     uint8_t OffsetY;
     Rules* Rules;
-    uint8_t** Cells[2];
+    uint8_t* Cells[2];
 } Board;
 
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);

@@ -63,8 +63,8 @@ void Settings(Board* board, RulesList* rulesList) {
 void SaveSettings(Board* mainBoard, const char* appVarName) {
     ti_var_t file;
     Rules* rules;
-    uint8_t** cells1;
-    uint8_t** cells2;
+    uint8_t* cells1;
+    uint8_t* cells2;
     uint8_t i, j;
 
     ti_CloseAll();
@@ -91,7 +91,7 @@ void SaveSettings(Board* mainBoard, const char* appVarName) {
     ti_Write(CellsMagicString, CellsMagicStringLength, 1, file);
     
     for (i = 0; i <= mainBoard->BoardWidth + 2; i++) {
-        ti_Write(cells1[i], 1, mainBoard->BoardHeight + 2, file);
+        ti_Write(cells1, 1, (mainBoard->BoardHeight + 2)*(mainBoard->BoardWidth + 2), file);
     }
     
     ti_Write(EndMagicString, EndMagicStringLength, 1, file);
@@ -174,7 +174,7 @@ Board* LoadSettings(const char* appVarName, RulesList* rulesList) {
         goto load_error;
     
     for (i = 0; i < mainBoard->BoardWidth + 2; i++) {
-        ti_Read(mainBoard->Cells[0][i], 1, mainBoard->BoardHeight + 2, file);
+        ti_Read(mainBoard->Cells[0], 1, (mainBoard->BoardHeight + 2) * (mainBoard->BoardWidth + 2), file);
     }
 
     ti_CloseAll();
