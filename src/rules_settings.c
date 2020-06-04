@@ -49,6 +49,10 @@ void CustomRuleSettings(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
     Menu* menu = CreateMenu(3, "Custom Rule");
 
+    mainBoard->Rules->Name = CustomString;
+    mainBoard->Rules->NumStamps = 0;
+    mainBoard->Rules->Stamps = NULL;
+
     menu->Items[0].Name = malloc(20);
     menu->Items[1].Name = malloc(17);
 
@@ -124,13 +128,12 @@ void SetCustomRule(MenuEventArgs* menuEventArgs) {
 
 void SetRuleIndex(MenuEventArgs* menuEventArgs) {
     uint8_t index = menuEventArgs->Index;
-    MenuItem item = menuEventArgs->Menu->Items[index];
-    int* rule = menuEventArgs->Menu->Items[index].Tag;
+    uint16_t* rule = menuEventArgs->Menu->Items[index].Tag;
     *rule ^= 1 << index;
 }
 
 void SetRuleMenuEvent(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
-    RulesList* list = menuEventArgs->Menu->Items[menuEventArgs->Index].Tag;
+    RulesList* list = menuEventArgs->Item->Tag;
     SetRules(mainBoard, &list->List[menuEventArgs->Index]);
 }

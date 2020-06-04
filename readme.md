@@ -47,5 +47,7 @@ The source is maintained in a [git repository available on bitbucket](https://bi
 | version | change note |
 | - | - |
 | 1.2 | Upgrade to v8.8 of toolchain |
+|     | Saving/loading of board |
+|     | Stamps |
 | 1.01 | Fix a memory leak in key_helper |
 | 1 | Initial release |

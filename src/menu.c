@@ -12,8 +12,10 @@ Menu* CreateMenu(uint8_t numItems, const char* title) {
     uint8_t i;
 
     Menu* menu = malloc(numItems * sizeof(Menu));
+    memset(menu, 0, sizeof(Menu));
     menu->Items = malloc(numItems * sizeof(MenuItem));
     for (i = 0; i < numItems; i++) {
+        menu->Items[i].Index = i;
         menu->Items[i].Function = FUNCTION_NONE;
         menu->Items[i].Name = "";
         menu->Items[i].Selected = false;
@@ -91,7 +93,7 @@ int DisplayMenu(Menu* menu) {
             eventArgs->FrameNumber = frameNumber;
             eventArgs->Menu = menu;
             eventArgs->Index = y - 1;
-            eventArgs->Item = menu->Items[y - 1].Tag;
+            eventArgs->Item = &(menu->Items[y - 1]);
             eventArgs->Back = false;
 
             func(eventArgs);
@@ -107,26 +109,32 @@ int DisplayMenu(Menu* menu) {
             uint8_t index = y - 1;
             void(*func)(MenuEventArgs*) = menu->Items[index].Function;
 
-            if (menu->SelectionType != None && menu->Items[y - 1].Function != FUNCTION_BACK) {
-                switch (menu->SelectionType) {
-                    case Single:
-                        if (index != previouslySelectedIndex) {
-                            menu->Items[previouslySelectedIndex].Selected = false;
-                            menu->Items[index].Selected = true;
-                        }
-                        break;
-                    case Multiple:
-                        menu->Items[index].Selected = !menu->Items[index].Selected;
-                        break;
+            if (menu->SelectionType != None) {
+                if (menu->Items[y - 1].Function != FUNCTION_BACK) {
+                    switch (menu->SelectionType) {
+                        case Single:
+                            if (index != previouslySelectedIndex) {
+                                menu->Items[previouslySelectedIndex].Selected = false;
+                                menu->Items[index].Selected = true;
+                                menu->SelectedItem = &menu->Items[index];
+                            }
+                            break;
+                        case Multiple:
+                            menu->Items[index].Selected = !menu->Items[index].Selected;
+                            break;
+                    }
                 }
-            } 
+            } else {
+                menu->SelectedItem = &menu->Items[index];
+            }
             
-            if (func == FUNCTION_BACK) { back = true; }
+            if (func == FUNCTION_BACK) 
+                back = true;
             else if (func != FUNCTION_NONE) { 
                 eventArgs->FrameNumber = frameNumber;
                 eventArgs->Menu = menu;
                 eventArgs->Index = index;
-                eventArgs->Item = menu->Items[index].Tag;
+                eventArgs->Item = &(menu->Items[index]);
                 eventArgs->Back = false;
 
                 func(eventArgs);
@@ -140,6 +148,7 @@ int DisplayMenu(Menu* menu) {
         } else if (Key_JustPressed(menu->BackKey)) {
             y = 0;
             back = true;
+            menu->SelectedItem = NULL;
         }
 
         if (old_y != y) {

@@ -42,13 +42,7 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
 
     for (i = 0; i < menu->NumItems - 1; i++) {
         if (menu->Items[i].Selected && i != previous) {
-            int newSize = 224 / (i + 1);
-            if (newSize > 80) { newSize = 80; }
-
-            ResizeBoard(mainBoard, newSize, newSize);
-
-            mainBoard->CellHeight = i + 1;
-            mainBoard->CellWidth = i + 1;
+            SquareCells(mainBoard, i + 1, MAX_BOARD_DRAW_SIZE, MAX_BOARD_SIZE);
             break;
         }
     }

@@ -3,10 +3,16 @@
 
 #include <stdint.h>
 #include <graphx.h>
+#include <tice.h>
 
 #include "../gfx/gfx.h"
 
-#define GraphicsBegin()                         gfx_Begin()
+typedef uint8_t color;
+
+#define SCREEN_WIDTH    LCD_WIDTH
+#define SCREEN_HEIGHT   LCD_HEIGHT
+
+#define GraphicsBegin()                         gfx_Begin();
 #define GraphicsEnd()                           gfx_End()
 
 #define SetTextColor(foreground, background)    gfx_SetTextBGColor(background); gfx_SetTextFGColor(foreground)
@@ -16,9 +22,10 @@
 
 #define SetColorIndex(color_index)              gfx_SetColor(color_index)
 #define FillScreen(color_index)                 gfx_FillScreen(color_index)
+#define ClearScreen()                           gfx_ZeroScreen()
 
-void DrawRectFill(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);
-void DrawRect(uint24_t x, uint8_t y, uint24_t width, uint8_t height, uint8_t color_index);
+void DrawRectFill(uint24_t x, uint8_t y, uint24_t width, color height, color color_index);
+void DrawRect(uint24_t x, uint8_t y, uint24_t width, color height, color color_index);
 
 #define VerticalLine(x, y, l)                   gfx_VertLine(x, y, l);
 #define HorizontalLine(x, y, l)                 gfx_HorizLine(x, y, l);
