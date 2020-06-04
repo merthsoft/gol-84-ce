@@ -23,15 +23,10 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
     sampleBoard->OffsetY = 9;
     sampleBoard->CellHeight = mainBoard->CellHeight;
     sampleBoard->CellWidth = mainBoard->CellWidth;
-
-    sampleBoard->Cells[0][3][2] = 1;
-    sampleBoard->Cells[0][4][3] = 1;
-    sampleBoard->Cells[0][2][4] = 1;
-    sampleBoard->Cells[0][3][4] = 1;
-    sampleBoard->Cells[0][4][4] = 1;
-    sampleBoard->Cells[0][2][1] = 1;
-    sampleBoard->Cells[1][4][4] = 1;
-    sampleBoard->Cells[1][2][1] = 1;
+    
+    sampleBoard->CursorX = 2;
+    sampleBoard->CursorY = 2;
+    PlaceStamp(sampleBoard, mainBoard->Rules[0].Stamps);
 
     sampleBoard->GridColor = mainBoard->GridColor;
     sampleBoard->DeadColor = mainBoard->DeadColor;

@@ -9,5 +9,4 @@ COMPRESSED   ?= YES
 ARCHIVED	 ?= NO
 OUTPUT_MAP   ?= NO
 
-.DEFAULT_GOAL := debug
 include $(CEDEV)/include/.makefile

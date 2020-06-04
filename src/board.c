@@ -30,6 +30,7 @@ void Step(Board* board) {
 
     for (i = 1; i <= board->BoardWidth; i++) {
         for (j = 1; j <= board->BoardHeight; j++) {
+            uint16_t cell = i * width + j;
             // Count the 8 cells around it
             numN = WrapToBoard(board, i - 1, j - 1)
                     + WrapToBoard(board, i, j - 1) 
@@ -40,7 +41,7 @@ void Step(Board* board) {
                     + WrapToBoard(board, i, j + 1) 
                     + WrapToBoard(board, i + 1, j + 1);
             
-            cellStatus = board->Cells[boardNum][i][j];
+            cellStatus = board->Cells[boardNum][cell];
             // Rules:
             if (!(currentRule->Live & (1 << numN)))
                 cellStatus = 0;
@@ -54,7 +55,7 @@ void Step(Board* board) {
                 else
                     DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->AliveColor);
 
-            board->Cells[!boardNum][i][j] = cellStatus;
+            board->Cells[!boardNum][cell] = cellStatus;
 
         }
     }
@@ -79,7 +80,7 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
     bool ovR = tEE || bE;
 
     if (!ovC && !ovR || board->WrappingMode == Plane)
-        return board->Cells[board->BoardNumber][c][r];
+        return board->Cells[board->BoardNumber][c * CYCLE_WIDTH + r];
 
     switch (board->WrappingMode) {
         case Plane:
@@ -148,18 +149,17 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
             lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
             break;
     }
-    return board->Cells[board->BoardNumber][lC][lR];
+    return board->Cells[board->BoardNumber][lC * CYCLE_WIDTH + lR];
 }
 
 void __colorCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety, color c) {
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
-    if (cellWidth > 2) {
+    if (cellWidth > 2)
         DrawRectFill(x*cellWidth + 1 + offsetx, y * cellHeight + 1 + offsety, cellWidth - 1, cellHeight - 1, c);
-    } else {
+    else
         DrawRectFill(x*cellWidth + offsetx, y * cellHeight + offsety, cellWidth, cellHeight, c);
-    }
 }
 
 void __drawStamp(Board* board, Stamp* stamp, bool clear) {
@@ -168,19 +168,20 @@ void __drawStamp(Board* board, Stamp* stamp, bool clear) {
     uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
-    uint8_t** cells = board->Cells[board->BoardNumber];
+    uint8_t* cells = board->Cells[board->BoardNumber];
     uint8_t width = board->BoardWidth;
     uint8_t height = board->BoardHeight;
 
     for (i = 0; i < stamp->Width; i++) {
         for (j = 0; j < stamp->Height; j++) {
             if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height) {
+                uint16_t cell = (x + i) * width + (y + j);
                 color color = clear
-                              ? cells[x + i][y + j] 
+                              ? cells[cell] 
                                   ? board->AliveColor
                                   : board->DeadColor
                               : stamp->Cells[i][j]
-                                  ? cells[x + i][y + j]
+                                  ? cells[cell]
                                       ? board->CursorAliveColor
                                       : board->CursorDeadColor
                                   : board->DeadColor;
@@ -198,11 +199,12 @@ void DrawCursor(Board* board, Stamp* stamp, bool clear) {
         uint8_t offsety = board->OffsetY;
         uint8_t x = board->CursorX;
         uint8_t y = board->CursorY;
+        uint16_t cell = x * board->BoardWidth + y;
         color color = clear
-                      ? board->Cells[board->BoardNumber][x][y]
+                      ? board->Cells[board->BoardNumber][cell]
                         ? board->AliveColor
                         : board->DeadColor
-                      : board->Cells[board->BoardNumber][x][y] 
+                      : board->Cells[board->BoardNumber][cell] 
                         ? board->CursorAliveColor 
                         : board->CursorDeadColor;
         __colorCell(board, x, y, offsetx, offsety, color);
@@ -210,9 +212,8 @@ void DrawCursor(Board* board, Stamp* stamp, bool clear) {
 }
 
 void ToggleCell(Board* board) {
-    uint8_t x = board->CursorX;
-    uint8_t y = board->CursorY;
-    board->Cells[board->BoardNumber][x][y] = !board->Cells[board->BoardNumber][x][y];
+    uint16_t cell = board->CursorX * board->BoardWidth + board->CursorY;
+    board->Cells[board->BoardNumber][cell] = !board->Cells[board->BoardNumber][cell];
 }
 
 void PlaceStamp(Board* board, Stamp* stamp) {
@@ -224,32 +225,46 @@ void PlaceStamp(Board* board, Stamp* stamp) {
     uint8_t width = board->BoardWidth;
     uint8_t height = board->BoardHeight;
 
-    for (i = 0; i < stamp->Width; i++)
-        for (j = 0; j < stamp->Height; j++)
-            if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height)
-                board->Cells[board->BoardNumber][x + i][y + j] = stamp->Cells[i][j];
+    for (i = 0; i < stamp->Width; i++) {
+        for (j = 0; j < stamp->Height; j++) {
+            if (x + i >= 1 && x + i <= width && y + j >= 1 && y + j <= height) {
+                uint16_t cell = (x + i) * width + (y + j);
+                board->Cells[board->BoardNumber][cell] = stamp->Cells[i][j];
+            }
+        }
+    }
 }
 
 void RandomBoard(Board* board) {
     uint8_t i, j;
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
     srand(rtc_Time());
 
-    for (i = 1; i <= board->BoardWidth + 1; i++)
-        for (j = 1; j <= board->BoardHeight + 1; j++) {
-            board->Cells[0][i][j] = (rand() % 100) < board->RandomChance;
-            board->Cells[1][i][j] = !(board->Cells[0][i][j]);
+    for (i = 1; i <= width + 1; i++) {
+        for (j = 1; j <= height + 1; j++) {
+            uint16_t cell = i * width + j;
+            bool alive = (rand() % 100) < board->RandomChance;
+            board->Cells[0][cell] = alive;
+            board->Cells[1][cell] = alive;
         }
+    }
 
     board->BoardNumber = 0;
 }
 
 void __setValue(Board* board, uint8_t val) {
     uint8_t i, j;
-    for (i = 1; i < board->BoardWidth + 2; i++) {
-        for (j = 1; j < board->BoardHeight + 2; j++)
-            board->Cells[0][i][j] = val;
-            board->Cells[1][i][j] = val;
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
+
+    for (i = 1; i < width + 2; i++) {
+        for (j = 1; j < height + 2; j++) {
+            uint16_t cell = i * width + j;
+            board->Cells[0][cell] = val;
+            board->Cells[1][cell] = val;
         }
+    }
 
     board->BoardNumber = 0;
 }
@@ -267,13 +282,7 @@ void __allocCells(Board* b) {
     size_t mallocSize;
 
     for (i = 0; i < 2; i++) {
-        b->Cells[i] = malloc(sizeof(uint8_t*) * (b->BoardWidth + 2));
-        for (j = 0; j < b->BoardWidth + 2; j++) {
-            mallocSize = sizeof(uint8_t*) * (b->BoardHeight + 2);
-            
-            b->Cells[i][j] = malloc(mallocSize);
-            memset(b->Cells[i][j], 0, mallocSize);
-        }
+        b->Cells[i] = malloc(sizeof(uint8_t*) * (b->BoardWidth + 2) * (b->BoardHeight + 2));
     }
 }
 
@@ -337,10 +346,6 @@ void FreeCells(Board* b) {
         return;
     
     for (i = 0; i < 2; i++) {
-        for (j = 0; j < b->BoardWidth + 2; j++) {
-            free(b->Cells[i][j]);
-            b->Cells[i][j] = NULL;
-        }
         free(b->Cells[i]);
         b->Cells[i] = NULL;
     }
@@ -361,11 +366,17 @@ void DrawBoard(Board* board, bool redraw) {
     uint8_t boardNumber = board->BoardNumber;
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
 
-    for (i = 1; i <= board->BoardWidth; i++)
-        for (j = 1; j <= board->BoardHeight; j++)
-            if (board->Cells[boardNumber][i][j] != board->Cells[!boardNumber][i][j] || redraw)
-                __colorCell(board, i, j, offsetx, offsety, board->Cells[boardNumber][i][j] ? board->AliveColor : board->DeadColor);
+    for (i = 1; i <= width; i++) {
+        for (j = 1; j <= height; j++) {
+            uint16_t cell = i * width + j;
+            if (board->Cells[boardNumber][cell] != board->Cells[!boardNumber][cell] || redraw) {
+                __colorCell(board, i, j, offsetx, offsety, board->Cells[boardNumber][cell] ? board->AliveColor : board->DeadColor);
+            }
+        }
+    }
 }
 
 void DrawGrid(Board* board) {
@@ -375,15 +386,14 @@ void DrawGrid(Board* board) {
     uint8_t cellWidth = board->CellWidth;
     uint8_t cellHeight = board->CellHeight;
 
-    if (board->CellHeight <= 2) { return; }
+    if (board->CellHeight <= 2)
+        return;
 
     SetColorIndex(board->GridColor);
 
-    for (i = 1; i <= board->BoardWidth + 1; i++) {
+    for (i = 1; i <= board->BoardWidth + 1; i++)
         VerticalLine(i*cellWidth + offsetx, cellHeight + offsety, (board->BoardHeight) * cellHeight + 1);
-    }
 
-    for (i = 1; i <= board->BoardHeight + 1; i++) {
+    for (i = 1; i <= board->BoardHeight + 1; i++)
         HorizontalLine(cellWidth + offsetx, i * cellHeight + offsety, (board->BoardWidth) * cellWidth + 1);
-    }
 }
