@@ -44,4 +44,4 @@ Menu* CreateMenu(uint8_t numItems, const char* title);
 void DeleteMenu(Menu* menu);
 int DisplayMenu(Menu* menu);
 
-#endif MENU_H
+#endif
