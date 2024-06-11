@@ -19,7 +19,9 @@
 
 void Key_ScanKeys(uint32_t keyDelay);
 void Key_Init();
-bool Key_IsDown(kb_lkey_t key);
+
+#define Key_IsDown(key) (kb_Data[(key & 0xFF00) >> 8] & (key & 0x00FF))
+
 bool Key_WasDown(kb_lkey_t key);
 bool Key_JustPressed(kb_lkey_t key);
 void Key_Reset();

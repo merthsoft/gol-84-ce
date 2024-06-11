@@ -80,7 +80,7 @@ int main(void) {
             x = old_x = mainBoard->CursorX;
             y = old_y = mainBoard->CursorY;
 
-            Key_ScanKeys(150);
+            Key_ScanKeys(70);
             if (Key_IsDown(Key_Up)) 
                 y = y == 1 ? mainBoard->BoardHeight : y - 1;
             else if (Key_IsDown(Key_Down)) 
@@ -89,8 +89,8 @@ int main(void) {
                 x = x == 1 ? mainBoard->BoardWidth : x - 1;
             else if (Key_IsDown(Key_Right)) 
                 x = x == mainBoard->BoardWidth ? 1 : x + 1;
-            else if (Key_IsDown(Key_Del)) 
-                quit = selectedStamp == NULL ? true : (selectedStamp = NULL) == NULL;
+             else if (Key_IsDown(Key_Del)) 
+                 quit = selectedStamp == NULL ? true : (selectedStamp = NULL) == NULL;
             else if (Key_IsDown(Key_Add))
                 Step(mainBoard);
             else if (Key_IsDown(Key_Mode)) {

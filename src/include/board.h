@@ -52,11 +52,10 @@ void RandomBoard(Board* board);
 void ClearBoard(Board* board);
 void FillBoard(Board* board);
 void Step(Board* board);
-uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r);
 void DrawCell(Board* board, bool clear);
 void ToggleCell(Board* board);
 void DrawCursor(Board* board, Stamp* stamp, bool clear);
 void SetRules(Board* b, Rules* rules);
 void FreeCells(Board* b);
 
-#endif BOARD_H
+#endif

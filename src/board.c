@@ -9,65 +9,9 @@
 
 #define MOD_CYCLE(n, c) (((n) + (c)) % (c))
 
-void Step(Board* board) {
-    uint8_t numN; // The number of neighbors
-    uint8_t i, j;
-    bool cellStatus;
-    uint8_t boardNum = board->BoardNumber;
-    Rules* currentRule = board->Rules;
-    uint8_t cellWidth = board->CellWidth;
-    uint8_t cellHeight = board->CellHeight;
-    uint8_t offsetX = board->OffsetX;
-    uint8_t offsetY = board->OffsetY;
-    uint8_t width = board->BoardWidth;
-    uint8_t height = board->BoardHeight;
-    uint8_t drawWidth = (width + 1) * cellWidth;
-    uint8_t drawHeight = (height + 1) * cellHeight;
-
-    gfx_SetDrawBuffer();
-    DrawRectFill(offsetX, offsetY,  drawWidth, drawHeight, 255);
-    DrawGrid(board);
-
-    for (i = 1; i <= board->BoardWidth; i++) {
-        for (j = 1; j <= board->BoardHeight; j++) {
-            uint16_t cell = i * width + j;
-            // Count the 8 cells around it
-            numN = WrapToBoard(board, i - 1, j - 1)
-                    + WrapToBoard(board, i, j - 1) 
-                    + WrapToBoard(board, i + 1, j - 1) 
-                    + WrapToBoard(board, i - 1, j) 
-                    + WrapToBoard(board, i + 1, j) 
-                    + WrapToBoard(board, i - 1, j + 1) 
-                    + WrapToBoard(board, i, j + 1) 
-                    + WrapToBoard(board, i + 1, j + 1);
-            
-            cellStatus = board->Cells[boardNum][cell];
-            // Rules:
-            if (!(currentRule->Live & (1 << numN)))
-                cellStatus = 0;
-
-            if ((currentRule->Born & (1 << numN)) && cellStatus == 0)
-                cellStatus = 1;
-            
-            if (cellStatus) 
-                if (cellWidth > 2)
-                    DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->AliveColor);
-                else
-                    DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->AliveColor);
-
-            board->Cells[!boardNum][cell] = cellStatus;
-
-        }
-    }
-    board->BoardNumber = !boardNum; // Use the new board as the current board
-
-    gfx_BlitRectangle(gfx_buffer, offsetX, offsetY, drawWidth, drawHeight);
-    gfx_SetDrawScreen();
-}
-
-uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
-    uint8_t CYCLE_WIDTH = board->BoardWidth;
-    uint8_t CYCLE_HEIGHT = board->BoardHeight;
+uint8_t WrapToBoard(uint8_t* cells, WrappingMode wrappingMode, uint8_t CYCLE_WIDTH, uint8_t CYCLE_HEIGHT, uint8_t c, uint8_t r) {
+    if (wrappingMode == Plane)
+        return cells[c * CYCLE_WIDTH + r];
 
     uint8_t lC = 0;
     uint8_t lR = 0;
@@ -79,10 +23,10 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
     bool ovC = lE || rE;
     bool ovR = tEE || bE;
 
-    if (!ovC && !ovR || board->WrappingMode == Plane)
-        return board->Cells[board->BoardNumber][c * CYCLE_WIDTH + r];
+    if (!ovC && !ovR)
+        return cells[c * CYCLE_WIDTH + r];
 
-    switch (board->WrappingMode) {
+    switch (wrappingMode) {
         case Plane:
             lC = c; lR = r;
             break;
@@ -149,8 +93,109 @@ uint8_t WrapToBoard(Board* board, uint8_t c, uint8_t r) {
             lR = ovC ? (CYCLE_HEIGHT - lR + 2) : lR;
             break;
     }
-    return board->Cells[board->BoardNumber][lC * CYCLE_WIDTH + lR];
+    return cells[lC * CYCLE_WIDTH + lR];
 }
+
+#define quickCell(c, w, i, j) (c[(i) * (w) + (j)])
+
+void Step(Board* board) {
+    uint8_t numN; // The number of neighbors
+    uint8_t i, j;
+    bool cellStatus;
+    uint8_t boardNum = board->BoardNumber;
+    Rules* currentRule = board->Rules;
+    uint8_t cellWidth = board->CellWidth;
+    uint8_t cellHeight = board->CellHeight;
+    uint8_t offsetX = board->OffsetX;
+    uint8_t offsetY = board->OffsetY;
+    uint8_t width = board->BoardWidth;
+    uint8_t height = board->BoardHeight;
+    uint8_t drawWidth = (width + 1) * cellWidth;
+    uint8_t drawHeight = (height + 1) * cellHeight;
+    uint8_t* cells = board->Cells[board->BoardNumber];
+    WrappingMode wrappingMode = board->WrappingMode;
+
+    gfx_SetDrawBuffer();
+    DrawRectFill(offsetX, offsetY,  drawWidth, drawHeight, 255);
+    DrawGrid(board);
+
+    if (wrappingMode == Plane) {
+        for (i = 1; i <= board->BoardWidth; i++) {
+            for (j = 1; j <= board->BoardHeight; j++) {
+                uint16_t cell = i * width + j;
+                // Count the 8 cells around it
+                numN = quickCell(cells, width, i - 1, j - 1)
+                     + quickCell(cells, width, i, j - 1) 
+                     + quickCell(cells, width, i + 1, j - 1) 
+                     + quickCell(cells, width, i - 1, j) 
+                     + quickCell(cells, width, i + 1, j) 
+                     + quickCell(cells, width, i - 1, j + 1) 
+                     + quickCell(cells, width, i, j + 1) 
+                     + quickCell(cells, width, i + 1, j + 1);
+                
+                cellStatus = board->Cells[boardNum][cell];
+                // Rules:
+                if (!(currentRule->Live & (1 << numN))) {
+                    cellStatus = 0;
+                }
+
+                if ((currentRule->Born & (1 << numN)) && cellStatus == 0) {
+                    cellStatus = 1;
+                }
+                
+                if (cellStatus)  {
+                    if (cellWidth > 2) {
+                        DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->AliveColor);
+                    } else {
+                        DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->AliveColor);
+                    }
+                }
+
+                board->Cells[!boardNum][cell] = cellStatus;
+            }
+        }
+    } else {
+        for (i = 1; i <= board->BoardWidth; i++) {
+            for (j = 1; j <= board->BoardHeight; j++) {
+                uint16_t cell = i * width + j;
+                // Count the 8 cells around it
+                numN = WrapToBoard(cells, wrappingMode, width, height, i - 1, j - 1)
+                    + WrapToBoard(cells, wrappingMode, width, height, i, j - 1) 
+                    + WrapToBoard(cells, wrappingMode, width, height, i + 1, j - 1) 
+                    + WrapToBoard(cells, wrappingMode, width, height, i - 1, j) 
+                    + WrapToBoard(cells, wrappingMode, width, height, i + 1, j) 
+                    + WrapToBoard(cells, wrappingMode, width, height, i - 1, j + 1) 
+                    + WrapToBoard(cells, wrappingMode, width, height, i, j + 1) 
+                    + WrapToBoard(cells, wrappingMode, width, height, i + 1, j + 1);
+                
+                cellStatus = board->Cells[boardNum][cell];
+                // Rules:
+                if (!(currentRule->Live & (1 << numN))) {
+                    cellStatus = 0;
+                }
+
+                if ((currentRule->Born & (1 << numN)) && cellStatus == 0) {
+                    cellStatus = 1;
+                }
+                
+                if (cellStatus)  {
+                    if (cellWidth > 2) {
+                        DrawRectFill(i*cellWidth + 1, j * cellHeight + 1, cellWidth - 1, cellHeight - 1, board->AliveColor);
+                    } else {
+                        DrawRectFill(i*cellWidth, j * cellHeight, cellWidth, cellHeight, board->AliveColor);
+                    }
+                }
+
+                board->Cells[!boardNum][cell] = cellStatus;
+            }
+        }
+    }
+    board->BoardNumber = !boardNum; // Use the new board as the current board
+
+    gfx_BlitRectangle(gfx_buffer, offsetX, offsetY, drawWidth, drawHeight);
+    gfx_SetDrawScreen();
+}
+
 
 void __colorCell(Board* board, uint8_t x, uint8_t y, uint8_t offsetx, uint8_t offsety, color c) {
     uint8_t cellWidth = board->CellWidth;
@@ -218,8 +263,6 @@ void ToggleCell(Board* board) {
 
 void PlaceStamp(Board* board, Stamp* stamp) {
     uint8_t i, j;
-    uint8_t offsetx = board->OffsetX;
-    uint8_t offsety = board->OffsetY;
     uint8_t x = board->CursorX;
     uint8_t y = board->CursorY;
     uint8_t width = board->BoardWidth;
@@ -278,8 +321,7 @@ void FillBoard(Board* board) {
 }
 
 void __allocCells(Board* b) {
-    uint8_t i, j;
-    size_t mallocSize;
+    uint8_t i;
 
     for (i = 0; i < 2; i++) {
         b->Cells[i] = malloc(sizeof(uint8_t*) * (b->BoardWidth + 2) * (b->BoardHeight + 2));
@@ -298,8 +340,6 @@ void SquareCells(Board* board, uint8_t cellSize, uint8_t drawSize, uint8_t maxSi
 }
 
 Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight) {
-    int i;
-    int j;
     Board* b = malloc(sizeof(Board));
     memset(b, 0, sizeof(Board));
     b->CursorX = 1;
@@ -340,7 +380,6 @@ void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight) {
 
 void FreeCells(Board* b) {
     uint8_t i;
-    uint8_t j;
 
     if (b->Cells[0] == NULL)
         return;
@@ -364,8 +403,6 @@ void DrawBoard(Board* board, bool redraw) {
     uint8_t offsetx = board->OffsetX;
     uint8_t offsety = board->OffsetY;
     uint8_t boardNumber = board->BoardNumber;
-    uint8_t cellWidth = board->CellWidth;
-    uint8_t cellHeight = board->CellHeight;
     uint8_t width = board->BoardWidth;
     uint8_t height = board->BoardHeight;
 

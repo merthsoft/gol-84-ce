@@ -1,6 +1,6 @@
-# Game of Life 84+CE v 1.2
+# Game of Life 84+CE v 1.3
 
-2020 [Merthsoft Creations](shaun@shaunmcfall.com)
+2024 [Merthsoft Creations](shaun@shaunmcfall.com)
 
 [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway's_Game_of_Life) is a cellular automaton created by John Conway in 1970. This is an implementation
 for the 84+CE graphing calculator.
@@ -34,7 +34,7 @@ There are seven topologies to choose from, which change the wrapping mode when t
 
 ## Source code
 
-The source is maintained in a [git repository available on bitbucket](https://bitbucket.org/merthsoft/gol-84-ce)
+The source is maintained in a [git repository available on github](https://github.com/merthsoft/gol-84-ce)
 
 ## Credits
 
@@ -46,6 +46,8 @@ The source is maintained in a [git repository available on bitbucket](https://bi
 
 | version | change note |
 | - | - |
+| 1.3 | Performance change to plane topology |
+|     | No stamps for now |
 | 1.2 | Upgrade to v8.8 of toolchain |
 |     | Saving/loading of board |
 |     | Stamps |

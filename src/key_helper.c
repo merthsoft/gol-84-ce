@@ -41,13 +41,6 @@ void Key_ScanKeys(uint32_t keyDelay) {
     }
 }
 
-bool Key_IsDown(kb_lkey_t key) {
-    uint8_t group = (key & 0xFF00) >> 8;
-    uint8_t code = key & 0x00FF;
-
-    return kb_Data[group] & (code);
-}
-
 bool Key_WasDown(kb_lkey_t key) {
     uint8_t group = (key & 0xFF00) >> 8;
     uint8_t code = key & 0x00FF;
