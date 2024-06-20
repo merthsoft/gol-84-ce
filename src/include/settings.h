@@ -5,7 +5,7 @@
 #include "board.h"
 
 void Settings(Board* board, RulesList* rulesList);
-void SaveSettings(Board* mainBoard, const char* appVarName);
-Board* LoadSettings(const char* appVarName, RulesList* rulesList);
+void SaveSettings(Board* board, const char* appVarName);
+void LoadSettings(Board* board, const char* appVarName, RulesList* rulesList);
 
 #endif

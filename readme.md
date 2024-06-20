@@ -1,11 +1,11 @@
-# Game of Life 84+CE v 1.3
+# Game of Life 84+CE v 1.4
 
 2024 [Merthsoft Creations](shaun@shaunmcfall.com)
 
 [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway's_Game_of_Life) is a cellular automaton created by John Conway in 1970. This is an implementation
 for the 84+CE graphing calculator.
 
-Requires [version 8.8 of the CE Standard Libraries](https://github.com/CE-Programming/libraries/releases/tag/v8.8).
+Requires [the CE Standard Libraries](https://github.com/CE-Programming/libraries/releases/).
 
 ## Controls
 
@@ -46,6 +46,9 @@ The source is maintained in a [git repository available on github](https://githu
 
 | version | change note |
 | - | - |
+| 1.4 | Memory cleanup |
+|     | Improved controls |
+|     | Improved drawing |
 | 1.3 | Performance change to plane topology |
 |     | No stamps for now |
 | 1.2 | Upgrade to v8.8 of toolchain |

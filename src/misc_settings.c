@@ -15,6 +15,7 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
 
     Menu* menu = CreateMenu(16, "Cell Size");
+    menu->FillColor = mainBoard->DeadColor;
     menu->SelectionType = Single;
 
     menu->Items[0].Name = "1";
@@ -32,7 +33,7 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[12].Name = "13";
     menu->Items[13].Name = "14";
     menu->Items[14].Name = "15";
-    menu->Items[15].Name = BackString;
+    menu->Items[15].Name = (char*)BackString;
     menu->Items[15].Function = FUNCTION_BACK;
 
     menu->Items[mainBoard->CellHeight - 1].Selected = true;
@@ -52,10 +53,10 @@ void CellSizeSettings(MenuEventArgs* menuEventArgs) {
 
 void RandomPercentageSettings(MenuEventArgs* menuEventArgs) {
     uint8_t i;
-    uint8_t previous;
     Board* mainBoard = menuEventArgs->Menu->Tag;
 
     Menu* menu = CreateMenu(10, "Cell Size");
+    menu->FillColor = mainBoard->DeadColor;
     menu->SelectionType = Single;
 
     menu->Items[0].Name = "10";
@@ -66,8 +67,8 @@ void RandomPercentageSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[5].Name = "60";
     menu->Items[6].Name = "70";
     menu->Items[7].Name = "80";
-    menu->Items[8].Name = "90";;
-    menu->Items[9].Name = BackString;
+    menu->Items[8].Name = "90";
+    menu->Items[9].Name = (char*)BackString;
     menu->Items[9].Function = FUNCTION_BACK;
 
     menu->Items[(mainBoard->RandomChance - 1) / 10].Selected = true;

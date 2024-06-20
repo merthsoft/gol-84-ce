@@ -1,8 +1,5 @@
-/* Keep these headers */
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <tice.h>
+#include <keypadc.h>
+#include <time.h>
 
 #include "include/color_settings.h"
 #include "include/board.h"
@@ -18,23 +15,27 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
     Menu* menu;
 
-    Board* sampleBoard = CreateBoard(5, 5);
-    sampleBoard->OffsetX = 150;
-    sampleBoard->OffsetY = 9;
-    sampleBoard->CellHeight = mainBoard->CellHeight;
-    sampleBoard->CellWidth = mainBoard->CellWidth;
+    Board sampleBoard;
+    InitializeBoard(&sampleBoard, 5, 5);
+    sampleBoard.OffsetX = 150;
+    sampleBoard.OffsetY = 9;
+    sampleBoard.CellHeight = mainBoard->CellHeight;
+    sampleBoard.CellWidth = mainBoard->CellWidth;
     
-    sampleBoard->CursorX = 2;
-    sampleBoard->CursorY = 2;
-    PlaceStamp(sampleBoard, mainBoard->Rules[0].Stamps);
+    sampleBoard.CursorX = 2;
+    sampleBoard.CursorY = 2;
+    RulesList* rulesList = GetRules();
+    PlaceStamp(&sampleBoard, rulesList->List[0].Stamps[0]);
+    sampleBoard.Cells[0][15] = 1;
 
-    sampleBoard->GridColor = mainBoard->GridColor;
-    sampleBoard->DeadColor = mainBoard->DeadColor;
-    sampleBoard->AliveColor = mainBoard->AliveColor;
-    sampleBoard->CursorDeadColor = mainBoard->CursorDeadColor;
-    sampleBoard->CursorAliveColor = mainBoard->CursorAliveColor;
+    sampleBoard.GridColor = mainBoard->GridColor;
+    sampleBoard.DeadColor = mainBoard->DeadColor;
+    sampleBoard.AliveColor = mainBoard->AliveColor;
+    sampleBoard.CursorDeadColor = mainBoard->CursorDeadColor;
+    sampleBoard.CursorAliveColor = mainBoard->CursorAliveColor;
 
     menu = CreateMenu(7, "Colors");
+    menu->FillColor = mainBoard->DeadColor;
     menu->ExtraFunction = DrawSampleBoard;
 
     menu->Items[0].Name = "Grid...";
@@ -44,32 +45,32 @@ void ColorSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[4].Name = "Cursor (Alive)...";
     menu->Items[5].Name = "Save";
     menu->Items[5].Function = SaveColors;
-    menu->Items[5].Tag = sampleBoard;
-    menu->Items[6].Name = BackString;
+    menu->Items[5].Tag = &sampleBoard;
+    menu->Items[6].Name = (char*)BackString;
     menu->Items[6].Function = FUNCTION_BACK;
 
     for (i = 0; i < 5; i++) {
         menu->Items[i].Function = ColorPicker;
-        menu->Items[i].Tag = sampleBoard;
+        menu->Items[i].Tag = &sampleBoard;
     }
 
     menu->Tag = mainBoard;
 
     DisplayMenu(menu);
     DeleteMenu(menu);
-    DeleteBoard(sampleBoard);
+    DeleteBoard(&sampleBoard);
 }
 
-void __drawSampleBoard(Board* sampleBoard) {
+void __drawSampleBoard(Board* board) {
     DrawString("Sample:", 150, 0);
-    DrawGrid(sampleBoard);
-    DrawBoard(sampleBoard, true);
-    sampleBoard->CursorX = 1;
-    sampleBoard->CursorY = 1;
-    DrawCursor(sampleBoard, NULL, false);
-    sampleBoard->CursorX = 2;
-    sampleBoard->CursorY = 1;
-    DrawCursor(sampleBoard, NULL, false);
+    DrawGrid(board);
+    DrawBoard(board, true);
+    board->CursorX = 1;
+    board->CursorY = 1;
+    DrawCursor(board, NULL, false);
+    board->CursorX = 2;
+    board->CursorY = 1;
+    DrawCursor(board, NULL, false);
 }
 
 void DrawSampleBoard(MenuEventArgs* menuEventArgs) {
@@ -79,7 +80,6 @@ void DrawSampleBoard(MenuEventArgs* menuEventArgs) {
 }
 
 void ColorPicker(MenuEventArgs* menuEventArgs) {
-    uint8_t a = 0;
     uint8_t i, j, c = 0;
     uint8_t old_i, old_j;
 
@@ -117,50 +117,79 @@ void ColorPicker(MenuEventArgs* menuEventArgs) {
 
     i = c % 32;
     j = c / 32;
-
+    
+    while(kb_AnyKey());
+    bool keyPressed = false;
+    clock_t clockOffset = 0;
     while (true) {
         DrawRect(10 * i, 10 * j + 99, 10, 10, 0);
 
-        Key_ScanKeys(150);
-
         old_i = i;
         old_j = j;
+        
+        // If no key is pressed, reset timer and variable for keeping track of if a key is held down.
+        if (clockOffset == 0 || (!kb_AnyKey() && keyPressed)) {
+            keyPressed = false;
+            clockOffset = clock();
+        }
 
-        if (Key_IsDown(Key_Up)) { j = j == 0 ? 7 : j - 1; } 
-        else if (Key_IsDown(Key_Down)) { j = j == 7 ? 0 : j + 1; } 
-        else if (Key_IsDown(Key_Left)) { i = i == 0 ? 31 : i - 1; } 
-        else if (Key_IsDown(Key_Right)) { i = i == 31 ? 0 : i + 1; } 
-        else if (Key_JustPressed(Key_2nd) || Key_JustPressed(Key_Enter)) {
-            c = i % 32 + j * 32;
+        // If no key is being held, allow an input
+        // If a key is being held, introduce a small delay between inputs. In this example the delay is
+        // CLOCKS_PER_SEC / 32, but it can be changed to what feels most natural.
+        if (kb_AnyKey() && (!keyPressed || clock() - clockOffset > CLOCKS_PER_SEC / 8)) {
+            clockOffset = clock();
+            if (kb_IsDown(kb_KeyUp)) { j = j == 0 ? 7 : j - 1; } 
+            else if (kb_IsDown(kb_KeyDown)) { j = j == 7 ? 0 : j + 1; } 
+            else if (kb_IsDown(kb_KeyLeft)) { i = i == 0 ? 31 : i - 1; } 
+            else if (kb_IsDown(kb_KeyRight)) { i = i == 31 ? 0 : i + 1; } 
+            else if (kb_IsDown(kb_Key2nd) || kb_IsDown(kb_KeyEnter)) {
+                c = i % 32 + j * 32;
 
-            switch (menuEventArgs->Index) {
-                case 0:
-                    sampleBoard->GridColor = c;
-                    break;
-                case 1:
-                    sampleBoard->DeadColor = c;
-                    break;
-                case 2:
-                    sampleBoard->AliveColor = c;
-                    break;
-                case 3:
-                    sampleBoard->CursorDeadColor = c;
-                    break;
-                case 4:
-                    sampleBoard->CursorAliveColor = c;
-                    break;
+                switch (menuEventArgs->Index) {
+                    case 0:
+                        sampleBoard->GridColor = c;
+                        break;
+                    case 1:
+                        sampleBoard->DeadColor = c;
+                        break;
+                    case 2:
+                        sampleBoard->AliveColor = c;
+                        break;
+                    case 3:
+                        sampleBoard->CursorDeadColor = c;
+                        break;
+                    case 4:
+                        sampleBoard->CursorAliveColor = c;
+                        break;
+                }
+
+                __drawSampleBoard(sampleBoard);
+            } else if (kb_IsDown(kb_KeyDel)) {
+                menuEventArgs->FrameNumber = -1; // Force a re-draw of the sample board
+                return;
+            }
+            
+            // If this is the first instance of an input after a release (the key has not already been held
+            // down for some time), wait for a longer delay to ensure the user wants to continue holding down
+            // the key and creating more inputs. In this example the delay is CLOCKS_PER_SEC / 4, but it can
+            // be changed to what feels most natural.
+            if (!keyPressed) {
+                while (clock() - clockOffset < CLOCKS_PER_SEC / 4 && kb_AnyKey()) {
+                    kb_Scan();
+                }
             }
 
-            __drawSampleBoard(sampleBoard);
-        } else if (Key_JustPressed(Key_Del)) {
-            menuEventArgs->FrameNumber = -1; // Force a re-draw of the sample board
-            return;
-        }
+            // Now we know that the user is holding down a key (If not, we'll reset keyPressed back to false
+            // at the beginning of the loop.
+            keyPressed = true;
 
-        if (i != old_i || j != old_j) {
-            DrawRect(10 * old_i, 10 * old_j + 99, 10, 10, 255);
+            if (i != old_i || j != old_j) {
+                DrawRect(10 * old_i, 10 * old_j + 99, 10, 10, 255);
+            }
         }
     }
+
+    while(kb_AnyKey());
 }
 
 void SaveColors(MenuEventArgs* menuEventArgs) {

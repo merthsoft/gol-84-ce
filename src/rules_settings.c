@@ -6,7 +6,6 @@
 #include <tice.h>
 
 #include "include/menu.h"
-#include "include/key_helper.h"
 #include "include/board.h"
 #include "include/rules_settings.h"
 #include "include/const.h"
@@ -20,13 +19,14 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
     Rules* rulesList = list->List;
 
     Menu* menu = CreateMenu(numRules + 2, "Rules");
+    menu->FillColor = mainBoard->DeadColor;
     menu->SelectionType = Single;
 
     for (i = 0; i < numRules; i++) {
         menu->Items[i].Name = rulesList[i].Name;
         menu->Items[i].Function = SetRuleMenuEvent;
         menu->Items[i].Tag = list;
-        if (rulesList[i].Born == mainBoard->Rules->Born && rulesList[i].Live == mainBoard->Rules->Live) {
+        if (rulesList[i].Born == mainBoard->Rules.Born && rulesList[i].Live == mainBoard->Rules.Live) {
             menu->Items[i].Selected = true;
             foundRule = true;
         }
@@ -36,7 +36,7 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[numRules].Function = CustomRuleSettings;
     menu->Items[numRules].Selected = !foundRule;
 
-    menu->Items[numRules + 1].Name = BackString;
+    menu->Items[numRules + 1].Name = (char*)BackString;
     menu->Items[numRules + 1].Function = FUNCTION_BACK;
 
     menu->Tag = mainBoard;
@@ -48,10 +48,11 @@ void RuleSettings(MenuEventArgs* menuEventArgs) {
 void CustomRuleSettings(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
     Menu* menu = CreateMenu(3, "Custom Rule");
+    menu->FillColor = mainBoard->DeadColor;
 
-    mainBoard->Rules->Name = CustomString;
-    mainBoard->Rules->NumStamps = 0;
-    mainBoard->Rules->Stamps = NULL;
+    mainBoard->Rules.Name = (char*)CustomString;
+    mainBoard->Rules.NumStamps = 0;
+    mainBoard->Rules.Stamps = NULL;
 
     menu->Items[0].Name = malloc(20);
     menu->Items[1].Name = malloc(17);
@@ -61,7 +62,7 @@ void CustomRuleSettings(MenuEventArgs* menuEventArgs) {
     menu->Items[0].Function = SetCustomRule;
     menu->Items[1].Function = SetCustomRule;
 
-    menu->Items[2].Name = BackString;
+    menu->Items[2].Name = (char*)BackString;
     menu->Items[2].Function = FUNCTION_BACK;
 
     menu->Tag = mainBoard;
@@ -70,6 +71,8 @@ void CustomRuleSettings(MenuEventArgs* menuEventArgs) {
 
     free(menu->Items[0].Name);
     free(menu->Items[1].Name);
+
+    DeleteMenu(menu);
 }
 
 void CustomRuleMenuItemStrings(Board* mainBoard, Menu* menu) {
@@ -79,9 +82,9 @@ void CustomRuleMenuItemStrings(Board* mainBoard, Menu* menu) {
     memcpy(menu->Items[1].Name, "Born: \0\0\0\0\0\0\0\0\0\0\0", 17);
 
     i = 9;
-    NumToRuleString(mainBoard->Rules->Live, menu->Items[0].Name, &i);
+    NumToRuleString(mainBoard->Rules.Live, menu->Items[0].Name, &i);
     i = 6;
-    NumToRuleString(mainBoard->Rules->Born, menu->Items[1].Name, &i);
+    NumToRuleString(mainBoard->Rules.Born, menu->Items[1].Name, &i);
 }
 
 void SetCustomRule(MenuEventArgs* menuEventArgs) {
@@ -93,13 +96,14 @@ void SetCustomRule(MenuEventArgs* menuEventArgs) {
     
     if (menuEventArgs->Index == 0) {
         ruleName = "Survive";
-        rule = &(mainBoard->Rules->Live);
+        rule = &(mainBoard->Rules.Live);
     } else {
         ruleName = "Born";
-        rule = &(mainBoard->Rules->Born);
+        rule = &(mainBoard->Rules.Born);
     }
 
     menu = CreateMenu(10, ruleName);
+    menu->FillColor = mainBoard->DeadColor;
     menu->SelectionType = Multiple;
 
     for (i = 0; i < 9; i++) {
@@ -111,7 +115,7 @@ void SetCustomRule(MenuEventArgs* menuEventArgs) {
         menu->Items[i].Function = SetRuleIndex;
     }
 
-    menu->Items[9].Name = BackString;
+    menu->Items[9].Name = (char*)BackString;
     menu->Items[9].Function = FUNCTION_BACK;
 
     menu->Tag = mainBoard;

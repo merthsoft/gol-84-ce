@@ -1,14 +1,7 @@
-/* Keep these headers */
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <tice.h>
-#include <fileioc.h>
 #include <string.h>
-#include <debug.h>
+#include <fileioc.h>
 
 #include "include/menu.h"
-#include "include/key_helper.h"
 #include "include/draw.h"
 
 #include "include/settings.h"
@@ -20,20 +13,15 @@
 
 #include "include/const.h"
 
-const char* GoLMagicString = "GOLV1.2\0";
+const char* GoLMagicString = "GOLV1.4";
 #define     GolMagicStringLength 8
 
-const char* RulesMagicString = "RULES\0";
-#define     RulesMagicStringLength 6
-
-const char* CellsMagicString = "CELLS\0";
+const char* CellsMagicString = "CELLS";
 #define     CellsMagicStringLength 6
-
-const char* EndMagicString = "END\0";
-#define     EndMagicStringLength 6
 
 void Settings(Board* board, RulesList* rulesList) {
     Menu* menu = CreateMenu(6, "Settings");
+    menu->FillColor = board->DeadColor;
 
     menu->Items[0].Name = "Colors...";
     menu->Items[0].Function = ColorSettings;
@@ -51,7 +39,7 @@ void Settings(Board* board, RulesList* rulesList) {
     menu->Items[4].Name = "Random Percentage...";
     menu->Items[4].Function = RandomPercentageSettings;
 
-    menu->Items[5].Name = BackString;
+    menu->Items[5].Name = (char*)BackString;
     menu->Items[5].Function = FUNCTION_BACK;
 
     menu->Tag = board;
@@ -60,71 +48,60 @@ void Settings(Board* board, RulesList* rulesList) {
     DeleteMenu(menu);
 }
 
-void SaveSettings(Board* mainBoard, const char* appVarName) {
-    ti_var_t file;
-    Rules* rules;
-    uint8_t* cells1;
-    uint8_t* cells2;
-    uint8_t i, j;
+typedef struct {
+    uint8_t BoardWidth;
+    uint8_t BoardHeight;
+    uint8_t BoardNumber;
+    WrappingMode WrappingMode;
+    color GridColor;
+    color DeadColor;
+    color AliveColor;
+    color CursorDeadColor;
+    color CursorAliveColor;
+    uint8_t CellWidth;
+    uint8_t CellHeight;
+    uint8_t RandomChance;
+    uint8_t CursorX;
+    uint8_t CursorY;
+    uint8_t OffsetX;
+    uint8_t OffsetY;
+} SerializedBoard;
 
-    ti_CloseAll();
+void SaveSettings(Board* board, const char* appVarName) {
+    ti_var_t file;
 
     file = ti_Open(appVarName, "w");
     if (!file) { return; }
 
-    rules = mainBoard->Rules;
-    cells1 = mainBoard->Cells[mainBoard->BoardNumber];
-    cells2 = mainBoard->Cells[!mainBoard->BoardNumber];
-    mainBoard->BoardNumber = 0;
-
-    mainBoard->Rules = NULL;
-    mainBoard->Cells[0] = NULL;
-    mainBoard->Cells[1] = NULL;
-
     ti_Write(GoLMagicString, GolMagicStringLength, 1, file);
-    ti_Write(mainBoard, sizeof(Board), 1, file);
-    
-    ti_Write(RulesMagicString, RulesMagicStringLength, 1, file);
-    ti_Write(&(rules->Born), sizeof(uint16_t), 1, file);
-    ti_Write(&(rules->Live), sizeof(uint16_t), 1, file);
-    
+    ti_Write(board, sizeof(SerializedBoard), 1, file);
+    ti_Write(&(board->Rules.Born), sizeof(uint16_t), 1, file);
+    ti_Write(&(board->Rules.Live), sizeof(uint16_t), 1, file);
     ti_Write(CellsMagicString, CellsMagicStringLength, 1, file);
     
-    for (i = 0; i <= mainBoard->BoardWidth + 2; i++) {
-        ti_Write(cells1, 1, (mainBoard->BoardHeight + 2)*(mainBoard->BoardWidth + 2), file);
-    }
-    
-    ti_Write(EndMagicString, EndMagicStringLength, 1, file);
-    
+    ti_Write(board->Cells[board->BoardNumber], 1, (board->BoardHeight + 2)*(board->BoardWidth + 2), file);
+
     if (!ti_IsArchived(file)) {
         ti_SetArchiveStatus(true, file);
     }
 
-    ti_CloseAll();
-
-    mainBoard->Rules = rules;
-    mainBoard->Cells[0] = cells1;
-    mainBoard->Cells[1] = cells2;
+    ti_Close(file);
 }
 
-Board* LoadSettings(const char* appVarName, RulesList* rulesList) {
+void LoadSettings(Board* board, const char* appVarName, RulesList* rulesList) {
     ti_var_t file;
+    SerializedBoard serializedBoard;
     bool found;
-    Board* mainBoard;
-    uint8_t i, j;
+    uint8_t i;
 
-    size_t count = 0;
     char magicStringBuffer[10];
 
-    ti_CloseAll();
+    memset(board, 0, sizeof(Board));
     
     file = ti_Open(appVarName, "r+");
     if (!file) { 
-        return NULL;  
+        return;  
     }
-
-    mainBoard = malloc(sizeof(Board));
-    memset(mainBoard, 0, sizeof(Board));
 
     if (ti_Read(&magicStringBuffer, GolMagicStringLength, 1, file) != 1)
         goto load_error;
@@ -132,39 +109,34 @@ Board* LoadSettings(const char* appVarName, RulesList* rulesList) {
     if (strncmp(magicStringBuffer, GoLMagicString, GolMagicStringLength) != 0)
         goto load_error;
 
-    if (ti_Read(mainBoard, sizeof(Board), 1, file) != 1)
+    if (ti_Read(&serializedBoard, sizeof(SerializedBoard), 1, file) != 1)
+        goto load_error;
+
+    InitializeBoard(board, serializedBoard.BoardWidth, serializedBoard.BoardHeight);
+    memcpy(board, &serializedBoard, sizeof(SerializedBoard));
+
+    if (ti_Read(&(board->Rules.Born), sizeof(uint16_t), 1, file) != 1)
         goto load_error;
     
-    mainBoard->Rules = malloc(sizeof(Rules));
-    ResizeBoard(mainBoard, mainBoard->BoardWidth, mainBoard->BoardHeight);
-
-    if (ti_Read(magicStringBuffer, RulesMagicStringLength, 1, file) != 1)
-        goto load_error;
-
-    if (strncmp(magicStringBuffer, RulesMagicString, RulesMagicStringLength) != 0)
-        goto load_error;        
-
-    if (ti_Read(&(mainBoard->Rules->Born), sizeof(uint16_t), 1, file) != 1)
-        goto load_error;
-    
-    if (ti_Read(&(mainBoard->Rules->Live), sizeof(uint16_t), 1, file) != 1)
+    if (ti_Read(&(board->Rules.Live), sizeof(uint16_t), 1, file) != 1)
         goto load_error;
 
     found = false;
     for (i = 0; i < rulesList->NumRules; i++) {
-        if (rulesList->List[i].Born == mainBoard->Rules->Born 
-         && rulesList->List[i].Live == mainBoard->Rules->Live) {
+        if (rulesList->List[i].Born == board->Rules.Born 
+         && rulesList->List[i].Live == board->Rules.Live) {
             found = true;
-            mainBoard->Rules->Name = rulesList->List[i].Name;
-            mainBoard->Rules->NumStamps = rulesList->List[i].NumStamps;
-            mainBoard->Rules->Stamps = rulesList->List[i].Stamps;
+            board->Rules.Name = rulesList->List[i].Name;
+            board->Rules.NumStamps = rulesList->List[i].NumStamps;
+            board->Rules.Stamps = rulesList->List[i].Stamps;
+            break;
          }
     }
 
     if (!found) {
-        mainBoard->Rules->Name = CustomString;
-        mainBoard->Rules->NumStamps = 0;
-        mainBoard->Rules->Stamps = NULL;
+        board->Rules.Name = (char*)CustomString;
+        board->Rules.NumStamps = 0;
+        board->Rules.Stamps = NULL;
     }
 
     if (ti_Read(magicStringBuffer, CellsMagicStringLength, 1, file) != 1)
@@ -173,16 +145,15 @@ Board* LoadSettings(const char* appVarName, RulesList* rulesList) {
     if (strncmp(magicStringBuffer, CellsMagicString, CellsMagicStringLength) != 0)
         goto load_error;
     
-    for (i = 0; i < mainBoard->BoardWidth + 2; i++) {
-        ti_Read(mainBoard->Cells[0], 1, (mainBoard->BoardHeight + 2) * (mainBoard->BoardWidth + 2), file);
-    }
-
-    ti_CloseAll();
+    ti_Read(board->Cells[board->BoardNumber], 1, (board->BoardHeight + 2) * (board->BoardWidth + 2), file);
+    memcpy(board->Cells[!board->BoardNumber], board->Cells[board->BoardNumber], (board->BoardHeight + 2) * (board->BoardWidth + 2));
+    ti_Close(file);
+    board->IsInitialized = true;
     
-    return mainBoard;
+    return;
 
 load_error:
-    DeleteBoard(mainBoard);
-    ti_CloseAll();
-    return NULL;
+    DeleteBoard(board);
+    ti_Close(file);
+    return;
 }

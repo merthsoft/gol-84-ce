@@ -30,7 +30,7 @@ void DrawRect(uint24_t x, uint8_t y, uint24_t width, color height, color color_i
 #define VerticalLine(x, y, l)                   gfx_VertLine(x, y, l);
 #define HorizontalLine(x, y, l)                 gfx_HorizLine(x, y, l);
 
-#define DrawSprite(sprite, x, y)                gfx_Sprite_NoClip(sprite, x, y)
+#define DrawSprite(sprite, x, y)                gfx_TransparentSprite_NoClip(sprite, x, y)
 #define DrawSpriteScaled(sprite, x, y, w, h)    gfx_ScaledSprite_NoClip(sprite, x, y, w, h)
 
 #endif
