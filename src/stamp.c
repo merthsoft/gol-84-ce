@@ -20,6 +20,13 @@ void InitStamp(Stamp* stamp, uint8_t width, uint8_t height) {
     }
 }
 
+void DeleteStamp(Stamp* stamp) {
+    for (uint8_t i = 0; i < stamp->Width; i++) {
+        free(stamp->Cells[i]);
+    }
+    free(stamp->Cells);
+}
+
 // void SetCells(Stamp* stamp, const char* apgcode) {
 //     uint8_t i;
 //     uint16_t len = strnlen(apgcode, MAX_LENGTH);
@@ -65,5 +72,3 @@ void InitStamp(Stamp* stamp, uint8_t width, uint8_t height) {
 
 //     return cells;
 // }
-
-void DeleteStamp(Stamp* stamp);

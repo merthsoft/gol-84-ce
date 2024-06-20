@@ -1,10 +1,12 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "key_helper.h"
+#include <keypadc.h>
 
 #define FUNCTION_BACK (void*)1
 #define FUNCTION_NONE (void*)0
+
+typedef uint8_t color;
 
 typedef struct MenuItem {
     int Index;
@@ -30,6 +32,7 @@ typedef struct Menu {
     kb_lkey_t BackKey;
     char CursorChar;
     void* Tag;
+    color FillColor;
 } Menu;
 
 typedef struct MenuEventArgs {
@@ -40,7 +43,7 @@ typedef struct MenuEventArgs {
     bool Back;
 } MenuEventArgs;
 
-Menu* CreateMenu(uint8_t numItems, const char* title);
+Menu* CreateMenu(uint8_t numItems, char* title);
 void DeleteMenu(Menu* menu);
 int DisplayMenu(Menu* menu);
 

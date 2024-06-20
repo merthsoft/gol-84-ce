@@ -10,7 +10,7 @@
 #define MAX_BOARD_SIZE      80
 #define HELP_TEXT_X         240
 
-typedef enum {
+typedef enum WrappingMode {
     Plane   = 0,
     Ring    = 1,
     Mobius  = 2,
@@ -37,11 +37,12 @@ typedef struct {
     uint8_t CursorY;
     uint8_t OffsetX;
     uint8_t OffsetY;
-    Rules* Rules;
+    Rules Rules;
     uint8_t* Cells[2];
+    bool IsInitialized;
 } Board;
 
-Board* CreateBoard(uint8_t boardWidth, uint8_t boardHeight);
+void InitializeBoard(Board* board, uint8_t boardWidth, uint8_t boardHeight);
 void DeleteBoard(Board* board);
 void ResizeBoard(Board* b, uint8_t boardWidth, uint8_t boardHeight);
 void SquareCells(Board* board, uint8_t cellSize, uint8_t drawSize, uint8_t maxSize);

@@ -5,7 +5,6 @@
 #include <graphx.h>
 
 #include "include/menu.h"
-#include "include/key_helper.h"
 #include "include/board.h"
 #include "include/topo_settings.h"
 #include "include/draw.h"
@@ -18,13 +17,14 @@ void TopologySettings(MenuEventArgs* menuEventArgs) {
     Board* mainBoard = menuEventArgs->Menu->Tag;
 
     Menu* menu = CreateMenu(NUM_WRAPPING_MODES + 1, "Topologies");
+    menu->FillColor = mainBoard->DeadColor;
     menu->SelectionType = Single;
     menu->ExtraFunction = DrawTopoSprite;
 
     for (i = 0; i < NUM_WRAPPING_MODES; i++) {
-        menu->Items[i].Name = WrappingModeNames[i];
+        menu->Items[i].Name = (char*)WrappingModeNames[i];
     }
-    menu->Items[NUM_WRAPPING_MODES].Name = BackString;
+    menu->Items[NUM_WRAPPING_MODES].Name = (char*)BackString;
     menu->Items[NUM_WRAPPING_MODES].Function = FUNCTION_BACK;
 
     menu->Items[mainBoard->WrappingMode].Selected = true;
